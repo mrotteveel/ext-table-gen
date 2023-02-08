@@ -1,0 +1,21 @@
+output/
+out/
+gen/
+build_*.bat
+.idea/
+build-local.properties
+classes/
+*.iml
+*.eml
+*.fdb
+*.FDB
+.settings/
+/junit*.properties
+.project
+.classpath
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build

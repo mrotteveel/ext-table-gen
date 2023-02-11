@@ -10,7 +10,7 @@
 
 == Description
 
-The project `nl.lawinegevaar.fdb:ext-table-gen` -- or "`Firebird External Table Generator`" -- is a commandline tool to generate Firebird external table files from CSV files.
+The project `nl.lawinegevaar.firebird:ext-table-gen` -- or "`Firebird External Table Generator`" -- is a commandline tool to generate Firebird external table files from CSV files.
 
 The tool will initially have the following features and limitations:
 

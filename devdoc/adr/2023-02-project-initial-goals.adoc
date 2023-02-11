@@ -1,0 +1,43 @@
+= 2023-02 Project Initial Goals
+
+== Status
+
+* Published: 2023-02-11
+
+== Type
+
+* Project-Specification
+
+== Description
+
+The project `nl.lawinegevaar.fdb:ext-table-gen` -- or "`Firebird External Table Generator`" -- is a commandline tool to generate Firebird external table files from CSV files.
+
+The tool will initially have the following features and limitations:
+
+* The tool will only import CSV files in the https://www.rfc-editor.org/rfc/rfc4180[RFC 4180 format^], optionally with a header row
+* The external table generated will be fixed-width text (using all `CHAR` columns)
+* The tool will -- optionally -- accept a configuration file with column types, exact format TBD
+* If no column types were specified (see previous item), the tool will create a separate file with column types required for the external table definition, with the same configuration file format as the previous item
+* The tool will only read from and to actual files, so not from the standard in or to the standard out)
+* All conversational output of the tool is written to standard error
+* The tool can -- optionally, but by default -- generate a "`line-break`" column with either LF or CRLF as content
+* Column length overflow results in an error (only applies when column length is determined by configuration)
+* Column count overflow results in an error (column count is determined by first row, or by configuration)
+* Column count underflow results in an error (column count is determined by first row, or by configuration)
+
+== Future Plans
+
+The following are ideas for things to implement in the future.
+These are not guaranteed to arrive, but during implementation it might be helpful to consider these to not paint yourself in a corner.
+
+* Make the project also usable as a library
+* Support more or all data types of the full binary format of external tables
+* Configuration of the CSV format
+* Importing from stdin
+* Exporting to stdout
+* More input format types (e.g. JSON, XML, Excel)
+* Convert an external table `CREATE TABLE` to the configuration file format
+* Convert a configuration file to an (example) `CREATE TABLE` statement
+* Configurable column length overflow handling (e.g. truncate)
+
+However, keep in mind, too much consideration for future plans may lead to an overcomplicated design or things that aren't actually going to be used.

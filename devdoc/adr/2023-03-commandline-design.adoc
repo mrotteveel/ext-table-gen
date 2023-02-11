@@ -1,0 +1,29 @@
+= 2023-03 Commandline Design
+
+== Status
+
+* Draft
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+The "`Firebird External Table Generator`" is intended to be used as a commandline tool, and as such needs a commandline API to function.
+
+== Decision
+
+The primary API will be defined in long-form commandline options, using kebab-case naming (e.g. `--input-file`).
+Naming should be explicit, descriptive, but succinct.
+Initially, no short-form options will be defined (e.g. `-i` or `-in`).
+
+Options should have no overloaded meaning.
+For example, the option to specify a configuration file to read should be separate from the option to specify the configuration file to generate based on the input file.
+
+All parameters will be handled as options, there are no positional arguments or commands.
+
+== Consequences
+
+A suitable commandline parser library (e.g. picocli or commons-cli) will need to be selected to implement the commandline API.
+This document does not specify which library will be used, and it may change when the need arises.

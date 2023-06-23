@@ -1,3 +1,9 @@
+# SPDX-FileCopyrightText: GitHub, Inc
+# SPDX-FileCopyrightText: 2023 Mark Rotteveel
+# SPDX-License-Identifier: MIT
+#
+# NOTE: Above license was guessed based on the license listed on https://github.com/github/codeql
+
 # For most projects, this workflow file will not need changing; you simply need
 # to commit it to your repository.
 #

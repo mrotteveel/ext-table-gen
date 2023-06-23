@@ -53,7 +53,8 @@ class ExtTableGenMainTest {
 
         assertConfigFile(
                 new EtgConfig(
-                        new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME", customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
+                        new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
+                                customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
                                 new OutputConfig(outputFile, false)),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
                         new InputConfig(inputFile, UTF_8, true)),
@@ -70,6 +71,38 @@ class ExtTableGenMainTest {
                 9 C2dE4dEEc489ae0Sheryl  Meyers   Browning-Simon                 Robersonstad     Cyprus                    854-138-4911x5772     +1-448-910-2276x729  mariokhan@ryan-pope.org    2020-01-13https://www.bullock.net/  \s
                 108C2811a503C7c5aMichelleGallagherBeck-Hendrix                   Elaineberg       Timor-Leste               739.218.2516x459      001-054-401-0347x617 mdyer@escobar.net          2021-11-08https://arias.com/        \s
                 """, Files.readString(outputFile, ISO_8859_1));
+    }
+
+    @Test
+    void fromFileToFile_happyPath_noEndColumn() throws Exception {
+        copyResource("/testdata/customers-10.csv", inputFile);
+
+        assertEquals(0,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                        "--config-out=" + outConfigFile, "--end-column=NONE"));
+
+        assertConfigFile(
+                new EtgConfig(
+                        new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
+                                customers10Columns(EndColumn.Type.NONE, FbEncoding.ISO8859_1),
+                                new OutputConfig(outputFile, false)),
+                        TableDerivationConfig.getDefault()
+                                .withEndColumnType(EndColumn.Type.NONE)
+                                .withMode(TableDerivationMode.NEVER),
+                        new InputConfig(inputFile, UTF_8, true)),
+                outConfigFile);
+        assertEquals("""
+                1 DD37Cf93aecA6DcSheryl  Baxter   Rasmussen Group                East Leonard     Chile                     229.077.5154          397.884.0519x718     zunigavanessa@smith.info   2020-08-24http://www.stephenson.com/\s
+                2 1Ef7b82A4CAAD10Preston Lozano   Vega-Gentry                    East JimmychesterDjibouti                  5153435776            686-620-1820x944     vmata@colon.com            2021-04-23http://www.hobbs.com/     \s
+                3 6F94879bDAfE5a6Roy     Berry    Murillo-Perry                  Isabelborough    Antigua and Barbuda       +1-539-402-0259       (496)978-3969x58947  beckycarr@hogan.com        2020-03-25http://www.lawrence.com/  \s
+                4 5Cef8BFA16c5e3cLinda   Olsen    Dominguez, Mcmillan and DonovanBensonview       Dominican Republic        001-808-617-6467x12895+1-813-324-8756      stanleyblackwell@benson.org2020-06-02http://www.good-lyons.com/\s
+                5 053d585Ab6b3159Joanna  Bender   Martin, Lang and Andrade       West Priscilla   Slovakia (Slovak Republic)001-234-203-0635x76146001-199-446-3860x3486colinalvarado@miles.net    2021-04-17https://goodwin-ingram.com/
+                6 2d08FB17EE273F4Aimee   Downs    Steele Group                   Chavezborough    Bosnia and Herzegovina    (283)437-3886x88321   999-728-1637         louis27@gilbert.com        2020-02-25http://www.berger.net/    \s
+                7 EA4d384DfDbBf77Darren  Peck     Lester, Woodard and Mitchell   Lake Ana         Pitcairn Islands          (496)452-6181x3291    +1-247-266-0963x4995 tgates@cantrell.com        2021-08-24https://www.le.com/       \s
+                8 0e04AFde9f225dEBrett   Mullen   Sanford, Davenport and Giles   Kimport          Bulgaria                  001-583-352-7197x297  001-333-145-0369     asnow@colon.com            2021-04-12https://hammond-ramsey.com/
+                9 C2dE4dEEc489ae0Sheryl  Meyers   Browning-Simon                 Robersonstad     Cyprus                    854-138-4911x5772     +1-448-910-2276x729  mariokhan@ryan-pope.org    2020-01-13https://www.bullock.net/  \s
+                108C2811a503C7c5aMichelleGallagherBeck-Hendrix                   Elaineberg       Timor-Leste               739.218.2516x459      001-054-401-0347x617 mdyer@escobar.net          2021-11-08https://arias.com/        \s
+                """.replace("\n", ""), Files.readString(outputFile, ISO_8859_1));
     }
 
     @Test
@@ -90,7 +123,8 @@ class ExtTableGenMainTest {
 
         assertConfigFile(
                 new EtgConfig(
-                        new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME", customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
+                        new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
+                                customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
                                 new OutputConfig(outputFile, false)),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
                         new InputConfig(inputFile, UTF_8, true)),

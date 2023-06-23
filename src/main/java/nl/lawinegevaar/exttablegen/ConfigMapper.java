@@ -94,16 +94,15 @@ class ConfigMapper {
 
     private ColumnListType toXmlColumnListType(List<Column> columnList) {
         ColumnListType columnListType = factory.createColumnListType();
-        int size = columnList != null ? columnList.size() : 0;
-        if (size == 0) {
-            return columnListType;
-        }
-        EndColumn endColumn = columnList.get(--size) instanceof EndColumn end ? end : null;
-        if (endColumn != null) {
+        if (columnList == null || columnList.isEmpty()) return columnListType;
+
+        int size = columnList.size();
+        if (columnList.get(size - 1) instanceof EndColumn endColumn) {
+            columnList = columnList.subList(0, size - 1);
             columnListType.setEndColumn(toXmlEndColumnType(endColumn));
         }
         List<ColumnType> columnTypes = columnListType.getColumns();
-        columnList.stream().limit(size).map(this::toXmlColumnType).forEach(columnTypes::add);
+        columnList.stream().map(this::toXmlColumnType).forEach(columnTypes::add);
         return columnListType;
     }
 

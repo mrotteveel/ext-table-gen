@@ -1,8 +1,11 @@
 = 2023-03 Commandline Design
 
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
 == Status
 
-* Draft
+* Published: 2023-06-23
 
 == Type
 
@@ -15,13 +18,13 @@ The "`Firebird External Table Generator`" is intended to be used as a commandlin
 == Decision
 
 The primary API will be defined in long-form commandline options, using kebab-case naming (e.g. `--input-file`).
-Naming should be explicit, descriptive, but succinct.
+Naming should be explicit and descriptive, but succinct.
 Initially, no short-form options will be defined (e.g. `-i` or `-in`).
 
 Options should have no overloaded meaning.
 For example, the option to specify a configuration file to read should be separate from the option to specify the configuration file to generate based on the input file.
 
-All parameters will be handled as options, there are no positional arguments or commands.
+All parameters will be handled as options, there are no positional arguments or commands (this may be modified in the future).
 
 == Consequences
 

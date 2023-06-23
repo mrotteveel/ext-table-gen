@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+    <externalTable name="DEFAULT_EXTERNAL_TABLE_NAME">
+        <columns>
+            <column name="ID">
+                <char length="1" encoding="ISO8859_1"/>
+            </column>
+            <column name="Lastname">
+                <char length="4" encoding="ISO8859_1"/>
+            </column>
+            <column name="Firstname">
+                <char length="7" encoding="UTF8"/>
+            </column>
+            <column name="Email">
+                <char length="19" encoding="ISO8859_1"/>
+            </column>
+            <endColumn type="LF"/>
+        </columns>
+    </externalTable>
+    <tableDerivationConfig columnEncoding="ISO8859_1" endColumnType="LF"/>
+    <inputConfig path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" hasHeaderRow="true"/>
+    <outputConfig path="C:\FirebirdData\exttables\persons.dat" allowOverwrite="true"/>
+    <informational>
+        <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\FirebirdData\exttables\persons.dat' (
+  "ID" char(1) character set ISO8859_1,
+  "Lastname" char(4) character set ISO8859_1,
+  "Firstname" char(7) character set ISO8859_1,
+  "Email" char(19) character set ISO8859_1,
+  "LF" char(1) character set ASCII default _ASCII x'0a'
+);
+</ddl>
+    </informational>
+</extTableGenConfig>

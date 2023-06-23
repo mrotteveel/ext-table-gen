@@ -1,0 +1,36 @@
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+rootProject.name = 'ext-table-gen'
+
+dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
+
+    versionCatalogs {
+        libs {
+            version('picocli', '4.7.3')
+
+            library('picocli-core', 'info.picocli', 'picocli').versionRef('picocli')
+            library('picocli-codegen', 'info.picocli', 'picocli-codegen').versionRef('picocli')
+            library('opencsv', 'com.opencsv', 'opencsv').version('5.7.1')
+            library('jaxb-api', 'jakarta.xml.bind', 'jakarta.xml.bind-api').version('4.0.0')
+            library('jaxb-runtime', 'org.glassfish.jaxb', 'jaxb-runtime').version('4.0.2')
+
+            bundle('jaxb', ['jaxb-api', 'jaxb-runtime'])
+        }
+
+        testLibs {
+            version('junit', '5.9.3')
+
+            library('junit-bom', 'org.junit', 'junit-bom').versionRef('junit')
+            library('junit-jupiter', 'org.junit.jupiter', 'junit-jupiter').withoutVersion()
+            library('hamcrest', 'org.hamcrest', 'hamcrest').version('2.2')
+            library('hamcrest-optional', 'com.spotify', 'hamcrest-optional').version('1.3.1')
+
+            bundle('junit', ['junit-jupiter'])
+            bundle('hamcrest', ['hamcrest', 'hamcrest-optional'])
+        }
+    }
+}
+

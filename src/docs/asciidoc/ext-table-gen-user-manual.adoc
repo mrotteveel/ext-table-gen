@@ -1,0 +1,33 @@
+= Firebird External Table Generator: User Manual
+Mark Rotteveel
+:doctype: book
+:docinfo:
+:sectanchors:
+:forceinclude: true
+:keywords: firebird, database, external table
+:source-highlighter: prettify
+:toc: left
+:outlinelevels: 6:1
+:icons: font
+:sectnums:
+:link-rfc4180: https://www.rfc-editor.org/rfc/rfc4180
+ifndef::includedir[:includedir: .]
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+Copyright 2023 Mark Rotteveel and all contributing authors under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
+
+toc::[]
+
+include::{includedir}/chapters/_introduction.adoc[leveloffset=1]
+
+include::{includedir}/chapters/_installing.adoc[leveloffset=1]
+
+include::{includedir}/chapters/_usage.adoc[leveloffset=1]
+
+include::{includedir}/chapters/_reference.adoc[leveloffset=1]
+
+= Appendices
+
+include::{includedir}/appendices/_xsd.adoc[leveloffset=1]

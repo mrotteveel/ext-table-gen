@@ -1,8 +1,12 @@
 = 2023-02 Project Initial Goals
 
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
 == Status
 
 * Published: 2023-02-11
+* Updated: 2023-06-23
 
 == Type
 
@@ -10,7 +14,7 @@
 
 == Description
 
-The project `nl.lawinegevaar.firebird:ext-table-gen` -- or "`Firebird External Table Generator`" -- is a commandline tool to generate Firebird external table files from CSV files.
+The project `nl.lawinegevaar:ext-table-gen` -- or "`Firebird External Table Generator`" -- is a commandline tool to generate Firebird external table files from CSV files.
 
 The tool will initially have the following features and limitations:
 
@@ -22,8 +26,8 @@ The tool will initially have the following features and limitations:
 * All conversational output of the tool is written to standard error
 * The tool can -- optionally, but by default -- generate a "`line-break`" column with either LF or CRLF as content
 * Column length overflow results in an error (only applies when column length is determined by configuration)
-* Column count overflow results in an error (column count is determined by first row, or by configuration)
-* Column count underflow results in an error (column count is determined by first row, or by configuration)
+* Column count overflow results in an error (column count is determined by header or first row, or by configuration)
+* Column count underflow results in an error (column count is determined by header or first row, or by configuration)
 
 == Future Plans
 
@@ -39,5 +43,6 @@ These are not guaranteed to arrive, but during implementation it might be helpfu
 * Convert an external table `CREATE TABLE` to the configuration file format
 * Convert a configuration file to an (example) `CREATE TABLE` statement
 * Configurable column length overflow handling (e.g. truncate)
+* Convert an external table file to CSV (or other output format)
 
 However, keep in mind, too much consideration for future plans may lead to an overcomplicated design or things that aren't actually going to be used.

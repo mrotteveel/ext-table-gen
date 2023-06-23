@@ -1,5 +1,8 @@
+# SPDX-FileCopyrightText: 2023 Mark Rotteveel
+# SPDX-License-Identifier: Apache-2.0
 * text=auto
 
+*.csv           text    eol=crlf
 *.css           text
 *.df            text
 *.htm           text
@@ -8,8 +11,10 @@
 *.properties    text
 *.sh            text
 *.txt           text
-*.xml           text
+*.xml           text    eol=lf
 *.bat           text    eol=crlf
+*.adoc          text
+*.gradle        text
 
 *.class         binary
 *.dll           binary
@@ -20,5 +25,6 @@
 *.jpeg          binary
 *.png           binary
 *.so            binary
+*.dat           binary
 
 gradlew         text    eol=lf

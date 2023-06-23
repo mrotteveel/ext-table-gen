@@ -1,8 +1,12 @@
 = 2023-01: Project Architecture Documentation
 
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
 == Status
 
 * Published
+* Updated: 2023-06-23
 
 == Type
 
@@ -23,8 +27,8 @@ This can result in the following problems:
 
 == Decision
 
-Changes should be documented in a _Architecture Decision Record_ (or ADR).
-This is similar to Java's JEP or Python's PEP, and blatantly copied from Jaybird Design Proposal (jdp-2019-01).
+Changes should be documented in an _Architecture Decision Record_ (or _ADR_ for short).
+This is similar to Java's JEP or Python's PEP, and blatantly copied from Jaybird Design Proposal (https://github.com/FirebirdSQL/jaybird/blob/master/devdoc/jdp/jdp-2019-01-jaybird-design-proposal.md[jdp-2019-01^]).
 
 This includes, but is not limited to:
 
@@ -40,7 +44,7 @@ Minor changes do not need to be documented in an ADR.
 === Document structure
 
 The ADR is identified by a number that consists of a 4 digit year, followed by two digits within that year: `yyyy-nn`.
-If we ever produce more than 99 FRDPs within a year (unlikely), this will be increased to three digits.
+If we ever produce more than 99 ADRs within a year (unlikely), this will be increased to three digits *for that year only*.
 
 The document title should consist of the ADR number followed by a descriptive name:
 
@@ -50,7 +54,7 @@ For example
 
     2023-01: Project Architecture Documentation
 
-The document should be in AsciiDoc format, and stored in `devdoc/adr` with a filename consisting of the ADR number, followed by the lowercased, dash-separated descriptive title:
+The document should be in AsciiDoc format, and stored in `devdoc/adr` with a filename consisting of the ADR number, followed by the lowercase, dash-separated descriptive title:
 
     yyyy-nn-descriptive-title.adoc
 
@@ -58,7 +62,7 @@ For example
 
     2023-01-project-architecture-documentation.adoc
 
-A ADR should consist of the following sections.
+An ADR should consist of the following sections.
 The sections _Status_ and _Type_ are required.
 The other sections should be considered the preferred structure.
 Feel free to use a different structure if it makes more sense for a document.
@@ -76,6 +80,11 @@ Possible values:
 * Proposed for: (proposed version to implement this)
 * Deferred indefinitely -- not implemented nor proposed for a version;
 likely the feature described will never be implemented
+* Updated: (date) -- the last date a previously published document was updated
++
+This should be used when updating living documents.
+For other types, it should be used only for textual corrections (i.e. typo fixes), or for (minor) changes which do not affect anything for application versions released after the original publish date.
+Other changes to documents which are not living documents should be performed with a new ADR, and not modify the original ADR except for updating things like `Updated by` and `Replaced by`.
 
 The status section should also reference the ADR(s) it updates or replaces:
 
@@ -92,10 +101,13 @@ Possible values:
 * Project-Specification -- Specification for the project itself (e.g. governance, way of working, etc.)
 * Living document -- indicates the document can undergo fundamental changes without being replaced.
 * Feature-Specification -- Specification of features, architecture and other code related things
+* Experimental -- Feature is experimental and might be modified or dropped in point releases (only for use with _Feature-Specification_)
 * ... (we'll likely find new types to add once we're using this)
 
 A document can have multiple types.
 The types _Project-Specification_ and _Feature-Specification_ are mutually exclusive.
+The type _Experimental_ can only occur with _Feature-Specification_.
+Modifications to _Experimental_ ADRs must be published as separate ADRs.
 
 The _Living document_ type should generally only be used for _Project-Specification_ documents like this document, and not for features.
 

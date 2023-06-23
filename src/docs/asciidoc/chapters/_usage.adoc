@@ -1,0 +1,321 @@
+[#usage]
+= Usage Examples
+// needed to make it render correctly within IntelliJ
+ifeval::["{includedir}" == "."]
+:includedir: ..
+endif::[]
+ifndef::includedir[:includedir: ..]
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+This chapter illustrates how to use _ext-table-gen_ by showing basic usage examples.
+
+[NOTE]
+====
+The author primarily uses Windows, so most examples are based on Windows.
+In most cases, the only relevant differences are file paths.
+
+Examples may use the Windows Command Prompt line continuation `^`.
+For PowerShell, use `++`++`.
+For (Linux) shells, use `++\++`.
+====
+
+[#usage-notes]
+== General notes
+
+_ext-table-gen_ can only read CSV files in {link-rfc4180}[RFC 4180^] format, with or without a header line.
+At this time, _ext-table-gen_ does not support other CSV formats, and it does not offer any way to configure things like quote, escape or separator characters.
+
+CSV files are assumed to be encoded in UTF-8.
+The character set can be explicitly configured using <<#ref-cmd-input-charset,`--input-charset=CHARSET`>>, where `CHARSET` is a Java character set name (e.g. `--input-charset=windows-1252`).
+
+The external table definition derived from a CSV file uses only `CHAR` columnsfootnote:[At this time, `CHAR` is the only supported datatype], and the default character set is `ISO8859_1`.
+This can be overridden by specifying <<ref-cmd-column-encoding,`--column-encoding=ENCODING`>>, where `ENCODING` is a Firebird character set name (e.g. `column-encoding=WIN1252`).
+Alternatively, an existing configuration file can be edited to change the column encoding.
+The configuration file allows you to configure the character set _per column_).
+
+Given the overhead of using `UTF8` columns (e.g. a `CHAR(1000) CHARACTER SET UTF8` column will occupy 4000 bytes in an external table), we recommend to use a single-byte character set where possible, and only define columns as `UTF8` when absolutely necessary.
+
+.Naming external table files
+[NOTE]
+====
+There is no common naming convention for external table files.
+In this manual, we use the `dat` extension, as that is a generally accepted extension for opaque data.
+====
+
+[#usage-basic-csv]
+== Generating an external table from CSV
+
+The following demonstrates how you can use _ext-table-gen_ to derive an external table definition and generate an external table file matching that definition.
+
+This example use a very simple CSV file, shown below.
+
+.Example CSV file, persons.csv
+[listing]
+----
+include::{includedir}/chapters/data/persons.csv[]
+----
+
+The minimum necessary commandline to create an external table file is to use:
+
+[listing]
+----
+ext-table-gen --input-file=persons.csv --output-file=persons.dat
+----
+
+However, this will not show you the external table that was derived from the CSV file, so it is not very useful.
+
+Instead, also specify the <<ref-cmd-config-out,`--config-out`>> option to create a configuration file:
+
+[listing]
+----
+ext-table-gen --input-file=C:\FirebirdData\csv\persons.csv ^
+  --output-file=C:\FirebirdData\exttables\persons.dat ^
+  --config-out=C:\FirebirdData\csv\persons.xml
+----
+
+We're specifying absolute paths so the output of running this command matches the XML file shown below.
+It is possible to use relative paths, but those will also appear as relative paths in the configuration file.
+
+Above command will create the following configuration file:
+
+.persons.xml
+[source,xml]
+----
+include::{includedir}/chapters/data/persons.xml[]
+----
+
+This configuration file shows the definition of the external table and its columns, including length and character set.
+By default, an extra column, `LF`, is added with a linefeed to make the generated external table file somewhat human-readable.
+This can be configured with <<ref-cmd-end-column,`++--end-column={LF|CRLF|NONE}++`>>.
+
+It also shows the DDL necessary to create the external table matching the definition.
+Given we didn't specify an explicit table name (<<ref-cmd-table-name,`--table-name=NAME`>>), the name `DEFAULT_EXTERNAL_TABLE_NAME` is used.
+
+_ext-table-gen_ also created the following `persons.dat`
+
+.persons.dat
+[listing#usage-ex-persons-dat]
+----
+include::{includedir}/chapters/data/persons.dat[]
+----
+
+By default, _ext-table-gen_ will not overwrite existing output or configuration files.
+This needs to be explicitly enabled with <<ref-cmd-overwrite-output,`--overwrite-output`>> and/or <<ref-cmd-overwrite-config,`--overwrite-config`>>.
+
+[#usage-config]
+== Using configuration
+
+Generating an external table file using the instructions of the previous section, <<usage-basic-csv>>, is simple and easy, but has some limitations and downsides:
+
+. The maximum lengths of columns is derived from the CSV data.
+If you want to reuse the external table without dropping and recreating it, with data files derived from CSV files with the same layout, but columns have longer (or shorter!) maximum length, this will not work.
++
+For example, we want to process a `persons.csv` file where the `ID` column has two or more digits, or someone has a lastname `Rotteveel`, or everyone has an email address shorter than 19 characters, then Firebird will read the file incorrectly using the previous definition.
+. All columns will use the same character set.
+For Western Europe and North America, using `ISO8859_1` is generally sufficient, but if you have persons from -- for example -- Eastern Europe or China and their names use characters from their region, those characters will be replaced by a `?`.
+Using `UTF8` would be a catch-all solution, but given its downsides (wider columns, especially if a lot of data is Latin-1 or even plain ASCII), we recommend to only use it if you really need it, and only for those columns that need it.
+
+These limitations can be addressed by modifying the configuration file and using it for subsequent calls to _ext-table-gen_.
+
+We'll demonstrate this for length, and separately for character set.
+
+[#usage-config-length]
+=== Changing column lengths
+
+The length of a column can be modified by editing the `length` attribute of the <<ref-xml-char>> element of a column.
+
+For example, from length 1
+
+[source,xml]
+----
+<column name="ID">
+    <char length="1" encoding="ISO8859_1"/>
+</column>
+----
+
+to length 3
+
+[source,xml]
+----
+<column name="ID">
+    <char length="3" encoding="ISO8859_1"/>
+</column>
+----
+
+Below, we modified the XML generated in section <<usage-basic-csv>>, slightly increasing the lengths of each columnfootnote:[So the external table file will not be too wide for display purposes].
+
+.Modified persons.xml
+[source,xml]
+----
+include::{includedir}/chapters/data/persons-length-modified.xml[]
+----
+
+We also set the attribute `allowOverwrite` to `true` of <<ref-xml-outputconfig>> to simplify the next commandline.
+The <<ref-cmd-overwrite-output,`--overwrite-output`>> option only works if <<ref-cmd-output-file,`--output-file`>> is also specified, it doesn't override the overwrite config for the file specified in the XML.
+We didn't change the DDL, as we'll demonstrate later how to regenerate it.
+
+To use the configuration file, use:
+
+[listing]
+----
+ext-table-gen --config-in=C:\FirebirdData\csv\persons.xml
+----
+
+With the same `persons.csv` as the original input file, the `persons.dat` is now:
+
+.persons.dat with wider columns
+[usage-ex-persons-length-modified-dat,listing]
+----
+include::{includedir}/chapters/data/persons-length-modified.dat[]
+----
+
+Compared to the <<usage-ex-persons-dat,original persons.dat>>, you'll notice that the columns are wider.
+
+[CAUTION]
+====
+Keep in mind that external table files are a _binary_ data format.
+The examples up-to-now use only `CHAR` columns with the same character set, so these examples effectively behave as a fixed width text format.
+
+This changes once we start using multiple character sets, and -- hopefully -- in the future support other data types.
+====
+
+[#usage-config-regen]
+=== Regenerating the configuration file
+
+In the previous section, <<usage-config-length>>, we modified the configuration XML, but didn't touch the DDL.
+We can of course modify the DDL manually, but we can also regenerate the configuration XML using <<ref-cmd-config-out,`--config-out`>>.
+Be aware, the output file specified in the configuration file will also be recreated as part of this command.
+
+For example, building on the previous example:
+
+[listing]
+----
+ext-table-gen --config-in=C:\FirebirdData\csv\persons.xml ^
+  --config-out=C:\FirebirdData\csv\persons.xml --overwrite-config
+----
+
+Here we specify the same file for <<ref-cmd-config-in,`--config-in`>> and <<ref-cmd-config-out,`--config-out`>>, so we need to specify <<ref-cmd-overwrite-config,`--overwrite-config`>>, otherwise the file is not overwritten.
+
+The updated `persons.xml` is now:
+
+[source,xml]
+----
+include::{includedir}/chapters/data/persons-length-modified-regen.xml[]
+----
+
+As you can see the DDL is now updated to match the definition in <<ref-xml-externaltable,`externalTable`>>.
+
+[#usage-config-charset]
+=== Changing column character set
+
+Taking the initial example of <<usage-basic-csv>>, say we also need to import someone with the Czech name Eliškafootnote:[I semi-randomly picked this name from https://en.wikipedia.org/wiki/Czech_name["`Czech name`" on Wikipedia^]]:
+
+.persons.csv with Czech name
+[listing]
+----
+include::{includedir}/chapters/data/persons-charset-modified.csv[]
+----
+
+If we try to generate the external table file with the original configuration:
+
+[listing]
+----
+ext-table-gen --config-in=C:\FirebirdData\csv\persons.xml
+----
+
+We now get:
+
+.persons.dat with replacement character
+[listing]
+----
+include::{includedir}/chapters/data/persons-wrong-charset.dat[]
+----
+
+As you can see, the `š` has been replaced by a `?`, because `š` cannot be encoded in ISO-8859-1.
+To be able to import the right character, we need to use a different encoding.
+In our simplified example, we could change the column to `ISO8859_2` or `WIN1250` (which supports Czech codepoints like `š`), but we'll use `UTF8` to also demonstrate the effects of using a multibyte character set.
+
+In our example, we'll only modify `Firstname` to use `UTF8`:
+
+.persons.xml modified for UTF8
+[source,xml]
+----
+include::{includedir}/chapters/data/persons-charset-modified.xml[]
+----
+
+Running:
+
+[listing]
+----
+ext-table-gen --config-in=C:\FirebirdData\csv\persons.xml
+----
+
+We now get:
+
+.persons.dat
+[listing]
+----
+include::{includedir}/chapters/data/persons-charset-modified.dat[]
+----
+
+As you can see, for the first four rows, the `Firstname` column now seems to occupy 28 characters, while in the fifth row it only seems to occupy 27 characters.
+This is because the external table file is a fixed-width _binary_ format, not a fixed-width _text_ format.
+
+The `Firstname` column is now defined as `<char length="7" encoding="UTF8"/>`, and in UTF-8, `š` is encoded in two bytes.
+UTF-8 encodes characters in 1 to 4 bytes, and Firebird requires the column to be 4 * 7 = 28 bytes (that is, the maximum possible length), and superfluous bytes need to be populated with byte 0x20 (space character).
+
+The effect is that `Jillian` (which is 7 characters and 7 bytes), is followed by 21 spaces (total: 28 bytes), while `Eliška` (6 characters, but 7 bytes) is also followed by 21 spaces (total: 28 bytes).
+
+If you try to trick the server, by manually editing the contents of such a column to have more than 7 characters (upto the length of 28 bytes), it will not work and Firebird will report a truncation error for values longer than 7 characters.
+
+Again, it is important to keep in mind, that by using two different and incompatible character sets in the external table file, it is now truly a _binary_ file.
+In our example it just happens to work OK when shown as text, because all other characters are in ASCII, which is a subset of both ISO-8859-1 and UTF-8.
+If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would have been rendered as Unicode replacement characters (because the AsciiDoctor tool use to create this manual also reads our example data as UTF-8).
+
+[#usage-workflow]
+== Recommended workflow
+
+The previous examples are all that -- we think -- you'll need to create usable external table files.
+
+For one-shot imports, the first example from <<usage-basic-csv>> can be sufficient.
+You may need to use <<ref-cmd-column-encoding,`--column-encoding`>> if you need something other than `ISO8859_1` for the output columns, and <<ref-cmd-input-charset,`--input-charset`>> if the CSV file is not encoded in ASCII or UTF-8.
+
+For repeated imports, or where multiple character sets are needed, we recommend the following steps:
+
+. Generate a config file using <<usage-basic-csv>>,
+. Tweak the configuration file to increase columns lengths to expected maximums (see <<usage-config-length>>),
+. If needed, change the encoding of columns (see <<usage-config-charset>>),
+. Finally, regenerate the config file (see <<usage-config-regen>>) for up-to-date DDL.
+
+Use the DDL from the last step to create the external table, and use the external table file it generated to verify the definition by querying the external table from Firebird.
+
+From that point on, the configuration file can be used to transform a CSV file to an external table file.
+
+For example, assuming the <<ref-xml-outputconfig>> in the configuration has attribute `allowOverwrite` set to `true`, and you always want to read the configured file from <<ref-xml-inputconfig>>:
+
+[listing]
+----
+ext-table-gen --config-in=C:\FirebirdData\csv\persons.xml
+----
+
+[CAUTION]
+====
+If a configuration contains relative paths, they are resolved against the current working directory.
+====
+
+If you need to import CSV files with a different name, you can use:
+
+[listing]
+----
+ext-table-gen --config-in=C:\FirebirdData\csv\persons.xml ^
+  --input-file=C:\FirebirdData\csv\persons-20230622.csv
+----
+
+If a CSV file changes incompatibly (e.g. too wide columns, or different number of columns) or has inconsistent column counts, the import will fail, but the external table file will have been overwritten with valid row data before the failing row.
+
+// needed to make it render correctly within IntelliJ
+ifeval::["{includedir}" == ".."]
+:includedir: .
+endif::[]

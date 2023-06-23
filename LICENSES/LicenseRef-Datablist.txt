@@ -1,0 +1,5 @@
+All datasets are free to download and play with. All the data is random and those files must only be used for testing.
+
+The script used to generate all those CSV files is open source and available on Github (https://github.com/datablist/sample-csv-files).
+
+See also https://www.datablist.com/learn/csv/download-sample-csv-files

@@ -1,0 +1,26 @@
+[appendix#xsd]
+= XML schemas
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+// needed to make it render correctly within IntelliJ
+ifeval::["{includedir}" == "."]
+:includedir: ..
+endif::[]
+ifndef::includedir[:includedir: ..]
+
+The following is the XML schema used by _ext-table-gen_ for its configuration files.
+
+[#ext-table-gen-1-0-xsd]
+== `ext-table-gen-1.0.xsd`
+
+[source,xml]
+----
+include::{includedir}/../../main/resources/ext-table-gen-1.0.xsd[]
+----
+
+// needed to make it render correctly within IntelliJ
+ifeval::["{includedir}" == ".."]
+:includedir: .
+endif::[]

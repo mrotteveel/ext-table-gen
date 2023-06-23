@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2023 Mark Rotteveel -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"
+           xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"
+           elementFormDefault="qualified"
+           xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
+           jaxb:version="3.0">
+
+    <xs:element name="extTableGenConfig">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="externalTable" type="ExternalTableType"/>
+                <xs:element name="tableDerivationConfig" type="TableDerivationConfigType" minOccurs="0"/>
+                <xs:element name="inputConfig" type="InputConfigType" minOccurs="0"/>
+                <xs:element name="outputConfig" type="OutputConfigType" minOccurs="0"/>
+                <xs:element name="informational" type="InformationalType" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="ExternalTableType">
+        <xs:sequence>
+            <xs:element name="columns" type="ColumnListType"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="TableDerivationConfigType">
+        <xs:attribute name="columnEncoding" type="encoding"/>
+        <xs:attribute name="endColumnType" type="EndColumnEnum"/>
+        <!--
+        NOTE: The tableDerivationMode is intentionally not part of this configuration, and will default to NEVER
+        -->
+    </xs:complexType>
+
+    <xs:complexType name="ColumnListType">
+        <xs:sequence>
+            <xs:element name="column" type="ColumnType" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:appinfo>
+                        <jaxb:property name="columns"/>
+                    </xs:appinfo>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="endColumn" type="EndColumnType" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ColumnType">
+        <xs:sequence>
+            <xs:element ref="datatype"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:element name="datatype" type="DatatypeType" abstract="true"/>
+    <xs:element name="char" type="CharType" substitutionGroup="datatype"/>
+
+    <xs:complexType name="DatatypeType" abstract="true"/>
+
+    <xs:complexType name="CharType">
+        <xs:complexContent>
+            <xs:extension base="DatatypeType">
+                <xs:attribute name="length" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:int">
+                            <xs:minInclusive value="1"/>
+                            <xs:maxInclusive value="32767"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+                <xs:attribute name="encoding" type="encoding" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="encoding">
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:typesafeEnumClass map="false"/>
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <!--Not supported-->
+            <!--<xs:enumeration value="NONE"/>-->
+            <!--<xs:enumeration value="OCTETS"/>-->
+            <xs:enumeration value="ASCII"/>
+            <!--We don't want to implement writing only max 3 bytes and correct UNICODE_FSS-->
+            <!--<xs:enumeration value="UNICODE_FSS"/>-->
+            <xs:enumeration value="UTF8"/>
+            <!--TODO Need to know how to handle spaces-->
+            <!--<xs:enumeration value="SJIS_0208"/>-->
+            <!--<xs:enumeration value="EUCJ_0208"/>-->
+            <xs:enumeration value="DOS737"/>
+            <xs:enumeration value="DOS437"/>
+            <xs:enumeration value="DOS850"/>
+            <xs:enumeration value="DOS865"/>
+            <xs:enumeration value="DOS860"/>
+            <xs:enumeration value="DOS863"/>
+            <xs:enumeration value="DOS775"/>
+            <xs:enumeration value="DOS858"/>
+            <xs:enumeration value="DOS862"/>
+            <xs:enumeration value="DOS864"/>
+            <xs:enumeration value="ISO8859_1"/>
+            <xs:enumeration value="ISO8859_2"/>
+            <xs:enumeration value="ISO8859_3"/>
+            <xs:enumeration value="ISO8859_4"/>
+            <xs:enumeration value="ISO8859_5"/>
+            <xs:enumeration value="ISO8859_6"/>
+            <xs:enumeration value="ISO8859_7"/>
+            <xs:enumeration value="ISO8859_8"/>
+            <xs:enumeration value="ISO8859_9"/>
+            <xs:enumeration value="ISO8859_13"/>
+            <!--TODO Need to know how to handle spaces-->
+            <!--<xs:enumeration value="KSC_5601"/>-->
+            <xs:enumeration value="DOS852"/>
+            <xs:enumeration value="DOS857"/>
+            <xs:enumeration value="DOS861"/>
+            <xs:enumeration value="DOS866"/>
+            <xs:enumeration value="DOS869"/>
+            <xs:enumeration value="WIN1250"/>
+            <xs:enumeration value="WIN1251"/>
+            <xs:enumeration value="WIN1252"/>
+            <xs:enumeration value="WIN1253"/>
+            <xs:enumeration value="WIN1254"/>
+            <!--TODO Need to know how to handle spaces-->
+            <!--<xs:enumeration value="BIG_5"/>-->
+            <!--<xs:enumeration value="GB_2312"/>-->
+            <xs:enumeration value="WIN1255"/>
+            <xs:enumeration value="WIN1256"/>
+            <xs:enumeration value="WIN1257"/>
+            <xs:enumeration value="KOI8R"/>
+            <xs:enumeration value="KOI8U"/>
+            <xs:enumeration value="WIN1258"/>
+            <xs:enumeration value="TIS620"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="EndColumnType">
+        <xs:attribute name="type" use="required">
+            <xs:simpleType>
+                <xs:restriction base="EndColumnEnum">
+                    <xs:enumeration value="LF"/>
+                    <xs:enumeration value="CRLF"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:simpleType name="EndColumnEnum">
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:typesafeEnumClass map="false"/>
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="LF"/>
+            <xs:enumeration value="CRLF"/>
+            <xs:enumeration value="NONE"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="OutputConfigType">
+        <xs:attribute name="path" type="xs:string" use="required"/>
+        <xs:attribute name="allowOverwrite" type="xs:boolean" default="false"/>
+    </xs:complexType>
+
+    <xs:complexType name="InputConfigType">
+        <xs:attribute name="path" type="xs:string" use="required"/>
+        <xs:attribute name="charset" type="xs:string" use="required"/>
+        <xs:attribute name="hasHeaderRow" type="xs:boolean" default="true"/>
+    </xs:complexType>
+
+    <xs:complexType name="InformationalType">
+        <xs:sequence>
+            <xs:element name="ddl" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

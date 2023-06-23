@@ -1,0 +1,9 @@
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+= ext-table-gen: Firebird External Table Generator
+
+"`Firebird External Table Generator`" is a tool to convert CSV files to the Firebird external table file format.
+
+At the moment, the project is still in its infancy and not yet ready for use.
+
+SPDX-License-Identifier: Apache-2.0

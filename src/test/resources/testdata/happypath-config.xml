@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+    <externalTable name="DEFAULT_EXTERNAL_TABLE_NAME">
+        <columns>
+            <column name="Index">
+                <char length="2" encoding="ISO8859_1"/>
+            </column>
+            <column name="Customer Id">
+                <char length="15" encoding="ISO8859_1"/>
+            </column>
+            <column name="First Name">
+                <char length="8" encoding="ISO8859_1"/>
+            </column>
+            <column name="Last Name">
+                <char length="9" encoding="ISO8859_1"/>
+            </column>
+            <column name="Company">
+                <char length="31" encoding="ISO8859_1"/>
+            </column>
+            <column name="City">
+                <char length="17" encoding="ISO8859_1"/>
+            </column>
+            <column name="Country">
+                <char length="26" encoding="ISO8859_1"/>
+            </column>
+            <column name="Phone 1">
+                <char length="22" encoding="ISO8859_1"/>
+            </column>
+            <column name="Phone 2">
+                <char length="21" encoding="ISO8859_1"/>
+            </column>
+            <column name="Email">
+                <char length="27" encoding="ISO8859_1"/>
+            </column>
+            <column name="Subscription Date">
+                <char length="10" encoding="ISO8859_1"/>
+            </column>
+            <column name="Website">
+                <char length="27" encoding="ISO8859_1"/>
+            </column>
+            <endColumn type="LF"/>
+        </columns>
+    </externalTable>
+    <tableDerivationConfig columnEncoding="ISO8859_1" endColumnType="LF"/>
+    <inputConfig path="C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\input.csv" charset="UTF-8" hasHeaderRow="true"/>
+    <outputConfig path="C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\output.dat" allowOverwrite="false"/>
+    <informational>
+        <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\output.dat' (
+  "Index" char(2) character set ISO8859_1,
+  "Customer Id" char(15) character set ISO8859_1,
+  "First Name" char(8) character set ISO8859_1,
+  "Last Name" char(9) character set ISO8859_1,
+  "Company" char(31) character set ISO8859_1,
+  "City" char(17) character set ISO8859_1,
+  "Country" char(26) character set ISO8859_1,
+  "Phone 1" char(22) character set ISO8859_1,
+  "Phone 2" char(21) character set ISO8859_1,
+  "Email" char(27) character set ISO8859_1,
+  "Subscription Date" char(10) character set ISO8859_1,
+  "Website" char(27) character set ISO8859_1,
+  "LF" char(1) character set ASCII default _ASCII x'0a'
+);
+</ddl>
+    </informational>
+</extTableGenConfig>

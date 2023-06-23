@@ -1,0 +1,55 @@
+= Firebird External Table Generator: Release notes
+Mark Rotteveel
+:doctype: book
+:docinfo:
+:sectanchors:
+:forceinclude: true
+:keywords: firebird, database, external table
+:source-highlighter: prettify
+:toc: left
+:outlinelevels: 6:1
+:icons: font
+:sectnums:
+:link-rfc4180: https://www.rfc-editor.org/rfc/rfc4180
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+Copyright 2023 Mark Rotteveel and all contributing authors under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
+
+toc::[]
+
+[#intro]
+== Introduction
+
+"`Firebird External Table Generator`" or _ext-table-gen_ is a commandline tool to transform {link-rfc4180}[RFC 4180^] CSV files to Firebird external table files (a binary format for external table data).
+
+External tables are a good way for bulk-loading data into Firebird.
+Unfortunately, external tables use a fixed-width _binary_ formatfootnote:[The format is essentially the in-memory layout of rows which Firebird also uses internally], and not (more) standard formats like CSV.
+It is not always easy to create an appropriate external table file, and this is where _ext-table-gen_ can be used.
+
+At a high level, _ext-table-gen_ provides the following features:
+
+* Derive a `CHAR`-based external table definition (i.e. a `CREATE TABLE` statement and a configuration for _ext-table-gen_) from a CSV file
+* Transform a CSV file to an external table file (either based on the CSV file itself, or based on a configuration file)
+
+The current version only supports `CHAR` columns, which makes the generated file essentially a fixed-width text format.
+Future versions may introduce support for additional column types.
+
+[#about-version]
+== About this version
+
+Firebird External Table Generator version 1.0 is the first release of this application.
+This application is licensed under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
+
+Consult the xref:ext-table-gen-user-manual.adoc[User Manual] for installation, usage examples and reference documentation.
+
+// TODO Add GitHub link for support
+
+[#version-history]
+=== Version history
+
+==== _ext-table-gen_ 1.0
+
+Initial release
+

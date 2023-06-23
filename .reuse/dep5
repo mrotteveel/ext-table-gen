@@ -1,0 +1,32 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Firebird External Table Generator
+Upstream-Contact: Mark Rotteveel <mark@lawinegevaar.nl>
+Source: TODO Replace with repository link once published
+
+# To avoid ambiguity
+
+Files: NOTICE
+Copyright: 2023 Mark Rotteveel
+License: Apache-2.0
+
+# Gradle
+
+Files: gradlew.bat gradlew gradle/wrapper/*
+Copyright: Gradle Inc. and/or "the original authors"
+License: Apache-2.0
+
+# Documentation which cannot contain SPDX information (for format reasons or documentation purposes)
+
+Files: src/docs/asciidoc/chapters/data/*
+Copyright: 2023 Mark Rotteveel
+License: Apache-2.0
+
+# Test files which cannot contain SPDX information (either for format reason or processing reasons)
+
+Files: src/test/resources/testdata/ATTRIBUTION.adoc src/test/resources/testdata/happypath-config.xml
+Copyright: 2023 Mark Rotteveel
+License: Apache-2.0
+
+Files: src/test/resources/testdata/customers-10.csv
+Copyright: Datablist
+License: LicenseRef-Datablist

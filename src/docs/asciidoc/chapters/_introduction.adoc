@@ -1,0 +1,21 @@
+[#intro]
+= Introduction
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+The "`Firebird External Table Generator`" or _ext-table-gen_ is a commandline tool to convert {link-rfc4180}[RFC 4180^] CSV files to Firebird external tables (a binary format for external table data).
+
+External tables are a good way for bulk-loading data into Firebird.
+Unfortunately, external tables use a fixed-width _binary_ formatfootnote:[The format is essentially the in-memory layout of rows which Firebird also uses internally], and not (more) standard formats like CSV.
+It is not always easy to create an appropriate external table file, and this is where _ext-table-gen_ can be used.
+
+At a high level, _ext-table-gen_ provides the following features:
+
+* Derive a `CHAR`-based external table definition (i.e. a `CREATE TABLE` statement and a configuration for _ext-table-gen_) from a CSV file
+* Transform a CSV file to an external table file (either based on the CSV file itself, or based on a configuration file)
+
+The current version only supports `CHAR` columns, which makes the generated file essentially a fixed-width text format.
+Future versions may introduce support for additional column types.
+
+This user manual provides examples of use, and serves as reference documentation for the commandline options and XML format.

@@ -1,0 +1,129 @@
+= 2023-01: Copyright Information
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Published: 2023-06-23
+
+== Type
+
+* Project-Specification
+
+== Context
+
+Recently there have been legislative initiatives in multiple jurisdictions to require vendors of software to provide "`SBOM`" (Software Bill of Materials) information about the provenance of their software.
+(NOTE: I am not a lawyer, and this may be a wholly incorrect or insufficient description of those initiatives).
+
+It is my firm belief that open-source projects, especially those not backed by a for-profit and/or paid employees, which provide the software as-is and without further warranties, should be exempt from such efforts.
+That said, providing the information necessary to generate an SBOM is relatively straightforward.
+
+There are various standards and efforts to standardize production of SBOMs and/or machine-readable copyright information:
+
+* SPDX -- The Software Package Data Exchange (ISO/IEC 5962:2021)
+** https://spdx.dev/
+** https://spdx.dev/ids/#where
+** https://spdx.org/licenses/
+* REUSE (builds on SPDX)
+** https://reuse.software/spec/
+
+The REUSE specification specifies how to handle copyright information in a project, and provides a tool to verify if a project complies, to add SPDX information to files, and to generate an SPDX file.
+
+We will not repeat the relevant information from these specifications here.
+
+== Decision
+
+The Firebird External Table Generator project will follow the REUSE specification to provide license and copyright information.
+
+The project will *not* publish an SPDX file.
+Users in need of an SPDX file will need to generate it themselves using the repository contents (e.g. of a tagged release).
+
+== Consequences
+
+All source files will provide a comment or comments (generally using line comments) with the following information.
+
+// REUSE-IgnoreStart
+[listing]
+----
+SPDX-FileCopyrightText: <first-year> <author-name>
+SPDX-License-Identifier: Apache-2.0
+----
+
+These comments are used instead of a (more detailed) license comment.
+
+For example, in Java files, if contributor "`Mark Rotteveel`" authored or contributed to a file in 2023:
+
+[source]
+----
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+----
+
+or
+
+[listing]
+----
+SPDX-FileCopyrightText: <first-year>-<current-year> <author-name>
+SPDX-License-Identifier: Apache-2.0
+----
+
+For example, in Java files, if contributor "`Jane Doe`" authored or contributed to a file in 2023 and 2025:
+
+[source]
+----
+// SPDX-FileCopyrightText: 2023-2025 Jane Doe
+// SPDX-License-Identifier: Apache-2.0
+----
+
+If a file has multiple authors or contributors, each will add an individual `SPDX-FileCopyrightText` line.
+
+For example, combining the previous two examples:
+
+[source]
+----
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2025 Jane Doe
+// SPDX-License-Identifier: Apache-2.0
+----
+// REUSE-IgnoreEnd
+
+These comments should be placed at the top (e.g. `.java` files), or as soon as syntactically valid (e.g. after the XML preamble).
+If a file has a lot of different contributors -- say four or more -- the line comments may be replaced with block comments.
+
+If a file cannot contain the copyright in itself (e.g. binary files, CSV files), or if adding the comment results in undesirable behaviour (e.g. files which contain expected results for tests, and thus can't contain the comment), the copyright and license should be added to the `.reuse/dep5` file.
+
+Files from third-parties (like Gradle Wrapper) missing the relevant information also have to be added to `.reuse/dep5`.
+Third-party files should not be modified to add the SPDX information.
+
+The REUSE specification also allows registering copyright and license of a file `<something>.<extension>` in `<something>.<extension>.license`.
+The preference of this project is to avoid those files as we think this approach clutters the repository.
+In other words, we only record the information in the file itself, or -- if not possible for any valid reasonfootnote:[The main contributors are the judge of what are valid reasons ;)] -- in `.reuse/dep5`.
+This position can change if there is a good argument/reason to record this in individual `*.license` files.
+
+Compliance with REUSE will be enforced with `reuse --lint` through a GitHub Action.
+
+The JAR files produced by this project will also contain the following information:
+
+// REUSE-IgnoreStart
+* `Bundle-License` with value `Apache-2.0`.
++
+The `Bundle-License` is specified by OSGi, but this is also commonly used by non-OSGI projects to communicate the license of a project
+* `SPDX-License-Identifier` with value `Apache-2.0`.
+* `SPDX-FileCopyrightText` with value `2023-<build-year> Mark Rotteveel` or if `<build-year>` is not 2023, `2023-<build-year> Mark Rotteveel`.
++
+If and when the project has multiple contributors, this should be changed to `2023-<build-year> the individual contributors`.
+In other words, we're not going to enumerate all contributors in the JAR file.
+
+.Example fragment of MANIFEST.MF
+[source]
+----
+Bundle-License: Apache-2.0
+SPDX-License-Identifier: Apache-2.0
+SPDX-FileCopyrightText: 2023 Mark Rotteveel
+----
+// REUSE-IgnoreEnd
+
+At the time of writing, all files produced by this project are licensed under Apache 2.0.
+Only files sourced elsewhere (e.g. the example CSV data) can have a different license.
+This licensing policy can be modified by a future ADR, and in that case the license identifier should match the appropriate license(s) for that file.

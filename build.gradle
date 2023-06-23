@@ -1,0 +1,103 @@
+import java.time.Year
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+plugins {
+    id 'application'
+    id 'com.intershop.gradle.jaxb' version '6.0.0'
+    id 'org.asciidoctor.jvm.convert' version '4.0.0-alpha.1'
+}
+
+group 'nl.lawinegevaar'
+version '1.0-SNAPSHOT'
+
+application {
+    mainClass = 'nl.lawinegevaar.exttablegen.ExtTableGenMain'
+}
+
+java {
+    withSourcesJar()
+}
+
+jaxb {
+    javaGen {
+        extTableGenConfig {
+            schema = file('src/main/resources/ext-table-gen-1.0.xsd')
+            packageName = 'nl.lawinegevaar.exttablegen.xmlconfig'
+        }
+    }
+}
+
+dependencies {
+    implementation libs.picocli.core
+//    annotationProcessor libs.picocli.codegen
+    implementation libs.opencsv
+    implementation libs.bundles.jaxb
+
+    testImplementation platform(testLibs.junit.bom)
+    testImplementation testLibs.bundles.junit
+    testImplementation testLibs.bundles.hamcrest
+}
+
+asciidoctorj {
+    version = '2.5.9'
+}
+
+distributions {
+    main {
+        contents {
+            from(asciidoctor) {
+                into 'docs'
+            }
+        }
+    }
+}
+
+// only generate distribution zip, not distribution tar
+tasks.withType(Tar).configureEach {
+    enabled = false
+}
+
+tasks.named('asciidoctor').configure {
+    attributes 'etg-version': project.version
+    forkOptions {
+        jvmArgs "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"
+    }
+}
+
+tasks.named('test', Test).configure {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    systemProperty 'file.encoding', 'UTF-8'
+}
+
+tasks.withType(Jar).configureEach {
+    // General manifest info
+    manifest {
+        def buildYear = Year.now().toString()
+        attributes(
+                'Created-By': "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                'Bundle-License': 'Apache-2.0',
+                'SPDX-License-Identifier': 'Apache-2.0',
+                'SPDX-FileCopyrightText': "${buildYear == '2023' ? '2023' : "2023-$buildYear"} Mark Rotteveel"
+        )
+    }
+}
+
+tasks.named('jar').configure {
+    // Info specific to main jar
+    manifest {
+        attributes(
+                'Automatic-Module-Name': 'nl.lawinegevaar.exttablegen'
+        )
+    }
+}

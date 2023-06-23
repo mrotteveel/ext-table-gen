@@ -1,0 +1,9 @@
+Example data (customers, people, organizations) obtained from https://www.datablist.com/learn/csv/download-sample-csv-files
+
+No explicit license, site mentions (at 2023-03-03):
+
+> All datasets are free to download and play with. All the data is random and those files must only be used for testing.
+>
+> The script used to generate all those CSV files is open source and available on https://github.com/datablist/sample-csv-files[Github].
+
+NOTE: `customers-10.csv` was derived from `customers-100.csv` by only taking the first 10 rows.

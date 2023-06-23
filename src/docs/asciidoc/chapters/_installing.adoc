@@ -1,0 +1,143 @@
+[#install]
+= Installation
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+[#install-req]
+== Requirements
+
+The "`Firebird External Table Generator`" or _ext-table-gen_ requires Java 17.
+We have not tested it on higher versions, but expect it to work on higher versions as well.
+We will only fix issues reported against Java versions which are in support according to the OpenJDK project, at the time of writing this -- June 2023, that means Java 17 and Java 20.
+
+[#install-dist]
+== Distribution package
+
+The _ext-table-gen_ is distributed in a _zip_:
+
+* `ext-table-gen-{etg-version}.zip` -- for Linux, macOS and Windows
+
+The layout of the archive is as follows:
+
+* `ext-table-gen-{etg-version}` -- root directory with application files
+** `bin` -- contains executable files `ext-table-gen` (`sh` script) and `ext-table-gen.bat` (Windows Batch script)
+** `docs` -- contains documentation, including this manual
+** `lib` -- contains the application code and other Java dependencies
+
+[#install-instruction]
+== Installing
+
+[NOTE]
+====
+We gloss over describing OS-specific configuration like installing Java, configuring the `PATH` or `JAVA_HOME`, etc.
+Improvements are always welcome through pull requests.
+====
+
+[#install-extract]
+=== Extract archive
+
+Use your favourite _zip_ or _unzip_ tool to extract the archive to a user-accessible directory.
+
+.Windows
+When copying or extracting to `C:\Program Files\` or `C:\Program Files (x86)\`, be aware that the archive tool must be run as administrator.
+You can also use Explorer to open ZIP files, and copy or extract the `ext-table-gen-{etg-version}` directory from the zip.
+
+.Linux/macOS
+It may be necessary to make `bin/ext-table-gen` explicitly executable with `chmod +x bin/ext-table-gen`.
+
+[#install-paths]
+=== Setting environment variables
+
+To be able to call _ext-table-gen_, Java 17 or higher must be on the `PATH` (the `bin` directory of the Java installation), or alternatively, you need to set `JAVA_HOME` to point to the Java 17 installation directory (not its `bin` directory, but the directory which contains the `bin` directory).
+
+If you don't have Java installed, install it using your package manager, https://sdkman.io/[sdkman^] (Linux/macOS), or download it, for example from https://adoptium.net/[Eclipse Adoptium^].
+
+If you want to call _ext-table-gen_ without specifying the full path, you need to add its `bin` directory to the `PATH`.
+
+For information on setting environment variables, see https://superuser.com/questions/284342/what-are-path-and-other-environment-variables-and-how-can-i-set-or-use-them[What are PATH and other environment variables, and how can I set or use them?^]
+
+[#install-verify]
+=== Verify installation
+
+To verify if _ext-table-gen_ is installed and can be run, run `ext-table-gen` from the shell terminal or Command Prompt or Powershell.
+If you added _ext-table-gen_ to the `PATH`, you can try from any directory, otherwise go to the `bin` directory of _ext-table-gen_.
+
+[listing]
+----
+> ext-table-gen
+Missing option: --input-file.
+Usage: ext-table-gen ...
+----
+
+Above output of the usage instruction was truncated for brevity.
+
+If you get another error than "`Missing option: ...`", the installation is not correct.
+
+[#install-firebird]
+== Firebird configuration
+
+The default Firebird configuration disallows use of external tables, or more specifically, it doesn't allow Firebird to read or write external table files from any location.
+
+To enable access, you need to configure the `ExternalFileAccess` in `firebird.conf` (globally) or in -- Firebird 3.0 and higher -- `databases.conf` (per database).
+The `ExternalFileAccess` setting accepts `Restrict` followed by a semicolon separated list of paths where Firebird can read and write external table files.
+
+The user running the Firebird database server needs to have read and write access to these directories.
+The user(s) who need to be able to create external table files using _ext-table-gen_ also need read and write access.
+On Linux, there is generally a common group (e.g. `firebird`) which can be assigned these rights, or consider creating a separate group (e.g. `fb_external_tables`) and assign the user running Firebird (e.g. user `firebird`) and the users creating external tables to this group.
+
+.Security risks of external tables
+[sidebar]
+****
+Enabling `ExternalFileAccess` introduces security risks if not managed carefully.
+All files in the directories (and subdirectories) listed in `ExternalFileAccess` which are readable by the Firebird process can be read this way, and files which are writable can be modified (append only), and files can be created in directories which are writable.
+
+If you have a compromised database or Firebird server, it would be possible exfiltrate the contents of those files with a carefully crafted external table (or tables), and risks files that are writable by the Firebird server user to be modified (only by appending), or additional files to be introduced on your filesystem in directories where the server has write access.
+
+To reduce these risks, follow these guidelines
+
+. The directories added to `ExternalFileAccess` should be exclusively used for external tables, and not contain any other files (including database files and backups).
+. Where possible, use database-specific folders, configured in `databases.conf` for that specific database.
+. Do not use a directory which is a subdirectory of any directory listed in `DatabaseAccess`.
++
+Be aware that `DatabaseAccess` defaults to `Full`, and you should restrict it to specific directories, or even `None` to only allow access to databases through aliases defined in `databases.conf`.
+. *Never* configure `ExternalFileAccess` as `Full`, as this can expose all files readable by the Firebird server, modify existing files or create new files anywhere the server user has access (see also above).
+
+For example, set it to
+
+.ExternalFileAccess through firebird.conf
+[listing]
+----
+DatabaseAccess = Restrict C:\FirebirdData\databases
+# or even
+# DatabaseAccess = None
+
+ExternalFileAccess = Restrict C:\FirebirdData\exttables
+----
+
+Or for restricting it per database:
+
+.No ExternalFileAccess through firebird.conf
+[listing]
+----
+DatabaseAccess = Restrict C:\FirebirdData\databases
+# or even
+# DatabaseAccess = None
+
+ExternalFileAccess = None
+----
+
+.ExternalFileAccess through databases.conf, per database
+[listing]
+----
+db_one = C:\FirebirdData\databases\db_one.fdb
+{
+    ExternalFileAccess = Restrict C:\FirebirdData\exttables\db_one
+}
+
+db_two = C:\FirebirdData\databases\db_two.fdb
+{
+    ExternalFileAccess = Restrict C:\FirebirdData\exttables\db_two
+}
+----
+****

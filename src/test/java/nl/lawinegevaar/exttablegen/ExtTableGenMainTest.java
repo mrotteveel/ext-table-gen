@@ -96,7 +96,7 @@ class ExtTableGenMainTest {
                         new InputConfig(inputFile, UTF_8, true)),
                 outConfigFile);
         String newConfigFile = Files.readString(outConfigFile);
-        System.out.println(newConfigFile);
+        //System.out.println(newConfigFile);
         assertEquals(originalConfigFile, newConfigFile);
 
         assertEquals("""

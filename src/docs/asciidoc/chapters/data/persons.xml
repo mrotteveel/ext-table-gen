@@ -18,7 +18,7 @@
         </columns>
         <tableFile path="C:\FirebirdData\exttables\persons.dat" overwrite="false"/>
     </externalTable>
-    <tableDerivationConfig columnEncoding="ISO8859_1" endColumnType="LF"/>
+    <tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/>
     <csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"/>
     <informational>
         <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\FirebirdData\exttables\persons.dat' (

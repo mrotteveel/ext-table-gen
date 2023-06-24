@@ -157,12 +157,12 @@ class ConfigMapperTest {
             // Invalid end column in derivation config
             """
             <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
-                <tableDerivationConfig endColumnType="DOES_NOT_EXIST"/>
+                <tableDerivation endColumnType="DOES_NOT_EXIST"/>
             </extTableGenConfig>""",
             // Invalid encoding name in derivation config
             """
             <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
-                <tableDerivationConfig columnEncoding="DOES_NOT_EXIST"/>
+                <tableDerivation columnEncoding="DOES_NOT_EXIST"/>
             </extTableGenConfig>""",
             // Invalid character set name
             """

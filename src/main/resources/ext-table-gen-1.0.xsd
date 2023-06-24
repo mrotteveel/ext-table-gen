@@ -12,7 +12,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="externalTable" type="ExternalTableType"/>
-                <xs:element name="tableDerivationConfig" type="TableDerivationConfigType" minOccurs="0"/>
+                <xs:element name="tableDerivation" type="TableDerivationType" minOccurs="0"/>
                 <xs:element name="csvFile" type="CsvFileType" minOccurs="0"/>
                 <xs:element name="informational" type="InformationalType" minOccurs="0"/>
             </xs:sequence>
@@ -27,7 +27,7 @@
         <xs:attribute name="name" type="xs:string" use="required"/>
     </xs:complexType>
 
-    <xs:complexType name="TableDerivationConfigType">
+    <xs:complexType name="TableDerivationType">
         <xs:attribute name="columnEncoding" type="encoding"/>
         <xs:attribute name="endColumnType" type="EndColumnEnum"/>
         <!--

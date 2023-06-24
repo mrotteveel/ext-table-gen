@@ -70,7 +70,7 @@ final class ConfigMapper {
         ExtTableGenConfig configType = factory.createExtTableGenConfig();
         TableConfig tableConfig = etgConfig.tableConfig();
         configType.setExternalTable(toXmlExternalTable(tableConfig));
-        configType.setTableDerivationConfig(toXmlTableDerivationConfigType(etgConfig.tableDerivationConfig()));
+        configType.setTableDerivation(toXmlTableDerivationType(etgConfig.tableDerivationConfig()));
         tableConfig.toDdl()
                 .map(ddl -> {
                     InformationalType informationalType = factory.createInformationalType();
@@ -148,11 +148,11 @@ final class ConfigMapper {
         return tableFileType;
     }
 
-    private TableDerivationConfigType toXmlTableDerivationConfigType(TableDerivationConfig tableDerivationConfig) {
-        TableDerivationConfigType tableDerivationConfigType = factory.createTableDerivationConfigType();
-        tableDerivationConfigType.setColumnEncoding(tableDerivationConfig.columnEncoding().firebirdName());
-        tableDerivationConfigType.setEndColumnType(tableDerivationConfig.endColumnType().name());
-        return tableDerivationConfigType;
+    private TableDerivationType toXmlTableDerivationType(TableDerivationConfig tableDerivationConfig) {
+        TableDerivationType tableDerivationType = factory.createTableDerivationType();
+        tableDerivationType.setColumnEncoding(tableDerivationConfig.columnEncoding().firebirdName());
+        tableDerivationType.setEndColumnType(tableDerivationConfig.endColumnType().name());
+        return tableDerivationType;
     }
 
     private CsvFileType toXmlCsvFileType(CsvFileConfig csvFileConfig) {
@@ -166,7 +166,7 @@ final class ConfigMapper {
     private EtgConfig fromXmlExtTableGenConfig(ExtTableGenConfig extTableGenConfig) {
         return new EtgConfig(
                 fromXmlExternalTableType(extTableGenConfig.getExternalTable()),
-                fromXmlTableDerivationConfigType(extTableGenConfig.getTableDerivationConfig()),
+                fromXmlTableDerivationType(extTableGenConfig.getTableDerivation()),
                 fromXmlCsvFileType(extTableGenConfig.getCsvFile()));
     }
 
@@ -229,53 +229,53 @@ final class ConfigMapper {
         }
     }
 
-    private TableDerivationConfig fromXmlTableDerivationConfigType(
-            TableDerivationConfigType tableDerivationConfigType) {
+    private TableDerivationConfig fromXmlTableDerivationType(TableDerivationType tableDerivationType) {
         return new TableDerivationConfig(
-                fromXmlColumnEncoding(tableDerivationConfigType),
-                fromXmlEndColumnTypeName(tableDerivationConfigType),
+                fromXmlColumnEncoding(tableDerivationType),
+                fromXmlEndColumnTypeName(tableDerivationType),
                 TableDerivationMode.NEVER);
     }
 
     /**
-     * Converts {@link TableDerivationConfigType#getColumnEncoding()} to {@link FbEncoding}, falling back to
-     * {@link TableDerivationConfig#DEFAULT_COLUMN_ENCODING} if invalid or if {@code tableDerivationConfigType} is {@code null}.
+     * Converts {@link TableDerivationType#getColumnEncoding()} to {@link FbEncoding}, falling back to
+     * {@link TableDerivationConfig#DEFAULT_COLUMN_ENCODING} if invalid or if {@code tableDerivationType} is
+     * {@code null}.
      *
-     * @param tableDerivationConfigType
+     * @param tableDerivationType
      *         XML table derivation config
      * @return end column type matching {@code endColumnTypeName}, or default encoding if it isn't a valid name or
-     * {@code tableDerivationConfigType} is null
+     * {@code tableDerivationType} is null
      */
-    private FbEncoding fromXmlColumnEncoding(TableDerivationConfigType tableDerivationConfigType) {
+    private FbEncoding fromXmlColumnEncoding(TableDerivationType tableDerivationType) {
         try {
-            if (tableDerivationConfigType != null && tableDerivationConfigType.getColumnEncoding() != null) {
-                return FbEncoding.forName(tableDerivationConfigType.getColumnEncoding());
+            if (tableDerivationType != null && tableDerivationType.getColumnEncoding() != null) {
+                return FbEncoding.forName(tableDerivationType.getColumnEncoding());
             }
         } catch (RuntimeException e) {
             System.getLogger(getClass().getName())
-                    .log(WARNING, "Could not convert from tableDerivationConfigType.getColumnEncoding()", e);
+                    .log(WARNING, "Could not convert from tableDerivationType.getColumnEncoding()", e);
         }
         return DEFAULT_COLUMN_ENCODING;
     }
 
     /**
-     * Converts {@link TableDerivationConfigType#getEndColumnType()} to {@link EndColumn.Type}, falling back to
-     * {@link TableDerivationConfig#DEFAULT_END_COLUMN_TYPE} if invalid or if {@code tableDerivationConfigType} is
+     * Converts {@link TableDerivationType#getEndColumnType()} to {@link EndColumn.Type}, falling back to
+     * {@link TableDerivationConfig#DEFAULT_END_COLUMN_TYPE} if invalid or if {@code tableDerivationType} is
      * {@code null}.
      *
-     * @param tableDerivationConfigType
+     * @param tableDerivationType
      *         XML table derivation config
      * @return end column type matching {@code endColumnTypeName}, or default type if it isn't a valid name or
-     * {@code tableDerivationConfigType} is null
+     * {@code tableDerivationType} is null
      */
-    private EndColumn.Type fromXmlEndColumnTypeName(TableDerivationConfigType tableDerivationConfigType) {
+    private EndColumn.Type fromXmlEndColumnTypeName(TableDerivationType tableDerivationType) {
         try {
-            if (tableDerivationConfigType != null && tableDerivationConfigType.getEndColumnType() != null) {
-                return EndColumn.Type.valueOf(tableDerivationConfigType.getEndColumnType());
+            if (tableDerivationType != null && tableDerivationType.getEndColumnType() != null) {
+                return EndColumn.Type.valueOf(tableDerivationType.getEndColumnType());
             }
         } catch (RuntimeException e) {
             System.getLogger(getClass().getName())
-                    .log(WARNING, "Could not convert from tableDerivationConfigType.getEndColumnType()", e);
+                    .log(WARNING, "Could not convert from tableDerivationType.getEndColumnType()", e);
         }
         return DEFAULT_END_COLUMN_TYPE;
     }

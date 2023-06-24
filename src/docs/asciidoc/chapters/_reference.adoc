@@ -126,7 +126,7 @@ The column encoding option (`--column-encoding=ENCODING`) specifies the column e
 `ENCODING` is the Firebird name of a supported Firebird character set.
 Default value is `ISO8859_1`.
 
-This option can override the XML config of <<ref-xml-tablederivationconfig,`/extTableGenConfig/tableDerivationConfig[@columnEncoding]`>> if explicitly specified.
+This option can override the XML config of <<ref-xml-tablederivation,`/extTableGenConfig/tableDerivation[@columnEncoding]`>> if explicitly specified.
 It does not override the column encoding of existing columns (unless you use an explicit <<ref-cmd-table-derivation-mode>>).
 
 [#ref-unsupported-encoding]
@@ -157,7 +157,7 @@ The default is `LF`.
 An end column is not necessary, but can improve the "`human readability`" of the external table file by starting each row on a new line.
 If this is no concern for you, use `--end-column=NONE` to reduce file size and overhead of writing and reading this column.
 
-This option can override the XML config of <<ref-xml-tablederivationconfig,`/extTableGenConfig/tableDerivationConfig[@endColumnType]`>> if explicitly specified.
+This option can override the XML config of <<ref-xml-tablederivation,`/extTableGenConfig/tableDerivation[@endColumnType]`>> if explicitly specified.
 It does not override the current end-column of `/extTableGenConfig/extTable/columns/endColumn` (unless you use an explicit <<ref-cmd-table-derivation-mode>>).
 
 [#ref-cmd-table-derivation-mode]
@@ -240,7 +240,7 @@ None
 
 .Elements
 * <<ref-xml-externaltable>> -- required
-* <<ref-xml-tablederivationconfig>> -- optional
+* <<ref-xml-tablederivation>> -- optional
 * <<ref-xml-csvfile>> -- optional
 * <<ref-xml-informational>> -- optional
 
@@ -349,10 +349,10 @@ Boolean specifying if _ext-table-gen_ is allowed to overwrite an existing file (
 .Elements
 None
 
-[#ref-xml-tablederivationconfig]
-=== `tableDerivationConfig`
+[#ref-xml-tablederivation]
+=== `tableDerivation`
 
-The element `tableDerivationConfig` stores the configuration used to derive an external table.
+The element `tableDerivation` stores the configuration used to derive an external table.
 This is only used when _ext-table-gen_ is used with <<ref-cmd-table-derivation-mode,`--table-derivation-mode=ALWAYS`>>, or `--table-derivation-mode=INCOMPLETE` and the current configuration is considered incomplete or invalid.
 
 Be aware, it does not necessarily represent the configuration used to derive the current table described by <<#ref-xml-externaltable>>, but instead the last configuration stored using <<ref-cmd-config-out,`--config-out`>>.

@@ -111,7 +111,7 @@ interface InputResource {
      * @see #fromClasspath(Class, String)
      */
     static InputResource fromClasspath(String resource) {
-        return new ClasspathInputResource(InputResource.class, resource);
+        return fromClasspath(InputResource.class, resource);
     }
 
     /**

@@ -28,7 +28,7 @@ _ext-table-gen_ can only read CSV files in {link-rfc4180}[RFC 4180^] format, wit
 At this time, _ext-table-gen_ does not support other CSV formats, and it does not offer any way to configure things like quote, escape or separator characters.
 
 CSV files are assumed to be encoded in UTF-8.
-The character set can be explicitly configured using <<#ref-cmd-input-charset,`--input-charset=CHARSET`>>, where `CHARSET` is a Java character set name (e.g. `--input-charset=windows-1252`).
+The character set can be explicitly configured using <<#ref-cmd-csv-charset,`--csv-charset=CHARSET`>>, where `CHARSET` is a Java character set name (e.g. `--csv-charset=windows-1252`).
 
 The external table definition derived from a CSV file uses only `CHAR` columnsfootnote:[At this time, `CHAR` is the only supported datatype], and the default character set is `ISO8859_1`.
 This can be overridden by specifying <<ref-cmd-column-encoding,`--column-encoding=ENCODING`>>, where `ENCODING` is a Firebird character set name (e.g. `column-encoding=WIN1252`).
@@ -61,7 +61,7 @@ The minimum necessary commandline to create an external table file is to use:
 
 [listing]
 ----
-ext-table-gen --input-file=persons.csv --table-file=persons.dat
+ext-table-gen --csv-file=persons.csv --table-file=persons.dat
 ----
 
 However, this will not show you the external table that was derived from the CSV file, so it is not very useful.
@@ -70,7 +70,7 @@ Instead, also specify the <<ref-cmd-config-out,`--config-out`>> option to create
 
 [listing]
 ----
-ext-table-gen --input-file=C:\FirebirdData\csv\persons.csv ^
+ext-table-gen --csv-file=C:\FirebirdData\csv\persons.csv ^
   --table-file=C:\FirebirdData\exttables\persons.dat ^
   --config-out=C:\FirebirdData\csv\persons.xml
 ----
@@ -163,7 +163,7 @@ To use the configuration file, use:
 ext-table-gen --config-in=C:\FirebirdData\csv\persons.xml
 ----
 
-With the same `persons.csv` as the original input file, the `persons.dat` is now:
+With the same `persons.csv` as the original CSV file, the `persons.dat` is now:
 
 .persons.dat with wider columns
 [usage-ex-persons-length-modified-dat,listing]
@@ -279,8 +279,8 @@ If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would h
 
 The previous examples are all that -- we think -- you'll need to create usable external table files.
 
-For one-shot imports, the first example from <<usage-basic-csv>> can be sufficient.
-You may need to use <<ref-cmd-column-encoding,`--column-encoding`>> if you need something other than `ISO8859_1` for the external table columns, and <<ref-cmd-input-charset,`--input-charset`>> if the CSV file is not encoded in ASCII or UTF-8.
+For one-shot imports, the second example from <<usage-basic-csv>> can be sufficient.
+You may need to use <<ref-cmd-column-encoding,`--column-encoding`>> if you need something other than `ISO8859_1` for the external table columns, and <<ref-cmd-csv-charset,`--csv-charset`>> if the CSV file is not encoded in ASCII or UTF-8.
 
 For repeated imports, or where multiple character sets are needed, we recommend the following steps:
 
@@ -293,7 +293,7 @@ Use the DDL from the last step to create the external table, and use the externa
 
 From that point on, the configuration file can be used to transform a CSV file to an external table file.
 
-For example, assuming the <<ref-xml-tablefile>> in the configuration has attribute `overwrite` set to `true`, and you always want to read the configured file from <<ref-xml-inputconfig>>:
+For example, assuming the <<ref-xml-tablefile>> in the configuration has attribute `overwrite` set to `true`, and you always want to read the configured file from <<ref-xml-csvfile>>:
 
 [listing]
 ----
@@ -310,7 +310,7 @@ If you need to import CSV files with a different name, you can use:
 [listing]
 ----
 ext-table-gen --config-in=C:\FirebirdData\csv\persons.xml ^
-  --input-file=C:\FirebirdData\csv\persons-20230622.csv
+  --csv-file=C:\FirebirdData\csv\persons-20230622.csv
 ----
 
 If a CSV file changes incompatibly (e.g. too wide columns, or different number of columns) or has inconsistent column counts, the import will fail, but the external table file will have been overwritten with valid row data before the failing row.

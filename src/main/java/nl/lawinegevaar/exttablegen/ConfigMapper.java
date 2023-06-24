@@ -78,9 +78,9 @@ final class ConfigMapper {
                     return informationalType;
                 })
                 .ifPresent(configType::setInformational);
-        etgConfig.inputConfig()
-                .map(this::toXmlInputConfigType)
-                .ifPresent(configType::setInputConfig);
+        etgConfig.csvFileConfig()
+                .map(this::toXmlCsvFileType)
+                .ifPresent(configType::setCsvFile);
         return configType;
     }
 
@@ -155,19 +155,19 @@ final class ConfigMapper {
         return tableDerivationConfigType;
     }
 
-    private InputConfigType toXmlInputConfigType(InputConfig inputConfig) {
-        InputConfigType inputConfigType = factory.createInputConfigType();
-        inputConfigType.setPath(inputConfig.path().toString());
-        inputConfigType.setCharset(inputConfig.charset().name());
-        inputConfigType.setHasHeaderRow(inputConfig.hasHeaderRow());
-        return inputConfigType;
+    private CsvFileType toXmlCsvFileType(CsvFileConfig csvFileConfig) {
+        CsvFileType csvFileType = factory.createCsvFileType();
+        csvFileType.setPath(csvFileConfig.path().toString());
+        csvFileType.setCharset(csvFileConfig.charset().name());
+        csvFileType.setHeaderRow(csvFileConfig.headerRow());
+        return csvFileType;
     }
 
     private EtgConfig fromXmlExtTableGenConfig(ExtTableGenConfig extTableGenConfig) {
         return new EtgConfig(
                 fromXmlExternalTableType(extTableGenConfig.getExternalTable()),
                 fromXmlTableDerivationConfigType(extTableGenConfig.getTableDerivationConfig()),
-                fromXmlInputConfigType(extTableGenConfig.getInputConfig()));
+                fromXmlCsvFileType(extTableGenConfig.getCsvFile()));
     }
 
     private TableConfig fromXmlExternalTableType(ExternalTableType externalTableType) {
@@ -280,17 +280,17 @@ final class ConfigMapper {
         return DEFAULT_END_COLUMN_TYPE;
     }
 
-    private Optional<InputConfig> fromXmlInputConfigType(InputConfigType inputConfigType) {
-        if (inputConfigType == null) return Optional.empty();
+    private Optional<CsvFileConfig> fromXmlCsvFileType(CsvFileType csvFileType) {
+        if (csvFileType == null) return Optional.empty();
         try {
             return Optional.of(
-                    new InputConfig(
-                            inputConfigType.getPath(),
-                            inputConfigType.getCharset(),
-                            inputConfigType.isHasHeaderRow()));
+                    new CsvFileConfig(
+                            csvFileType.getPath(),
+                            csvFileType.getCharset(),
+                            csvFileType.isHeaderRow()));
         } catch (RuntimeException e) {
             System.getLogger(getClass().getName())
-                    .log(WARNING, "Could not convert from XML InputConfigType, input config value dropped", e);
+                    .log(WARNING, "Could not convert from XML CsvFileType, CSV file value dropped", e);
             return Optional.empty();
         }
     }

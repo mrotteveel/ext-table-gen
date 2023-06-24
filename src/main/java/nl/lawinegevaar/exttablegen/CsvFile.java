@@ -87,7 +87,7 @@ final class CsvFile {
             long lastExceptionLine = -1;
 
             Row header;
-            if (config.hasHeaderRow) {
+            if (config.headerRow) {
                 try {
                     String[] data = csvReader.readNext();
                     if (data == null) return ProcessingResult.done();
@@ -247,14 +247,14 @@ final class CsvFile {
      *         character set for reading the file
      * @param skipLines
      *         number of lines to skip before reading header or first row (primarily for testing purposes)
-     * @param hasHeaderRow
+     * @param headerRow
      *         {@code true} read the first line after {@code skipLines} as header, {@code false} read the first line
      *         after {@code skipLines} as row data
      * @param builderCustomizer
      *         additional customization of the CSV reader builder
      * @see #Config(Charset, int, boolean)
      */
-    record Config(Charset charset, int skipLines, boolean hasHeaderRow, Consumer<CSVReaderBuilder> builderCustomizer) {
+    record Config(Charset charset, int skipLines, boolean headerRow, Consumer<CSVReaderBuilder> builderCustomizer) {
 
         private static final Consumer<CSVReaderBuilder> VOID_CUSTOMIZER = i -> {
         };
@@ -264,12 +264,12 @@ final class CsvFile {
          *         character set for reading the file
          * @param skipLines
          *         number of lines to skip before reading first header or row (primarily for testing purposes)
-         * @param hasHeaderRow
+         * @param headerRow
          *         {@code true} read the first line after {@code skipLines} as header, {@code false} read the first line
          *         after {@code skipLines} as row data
          */
-        Config(Charset charset, int skipLines, boolean hasHeaderRow) {
-            this(charset, skipLines, hasHeaderRow, VOID_CUSTOMIZER);
+        Config(Charset charset, int skipLines, boolean headerRow) {
+            this(charset, skipLines, headerRow, VOID_CUSTOMIZER);
         }
 
         /**
@@ -284,7 +284,7 @@ final class CsvFile {
          * @return new {@code Config} derived from this instance with {@code builderCustomizer} replaced
          */
         Config withBuilderCustomizer(Consumer<CSVReaderBuilder> builderCustomizer) {
-            return new Config(charset, skipLines, hasHeaderRow, builderCustomizer);
+            return new Config(charset, skipLines, headerRow, builderCustomizer);
         }
 
     }

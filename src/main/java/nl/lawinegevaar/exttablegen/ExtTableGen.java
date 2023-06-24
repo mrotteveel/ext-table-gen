@@ -33,12 +33,13 @@ final class ExtTableGen {
      * @return CsvFile instance
      */
     CsvFile getCsvFile() {
-        return config.inputConfig()
-                .map(inputConfig -> {
-                    log.log(INFO, "Reading CSV input from ''{0}''", inputConfig.path());
-                    return inputConfig.toCsvFile();
+        return config.csvFileConfig()
+                .map(csvFileConfig -> {
+                    log.log(INFO, "Reading CSV input from ''{0}''", csvFileConfig.path());
+                    return csvFileConfig.toCsvFile();
                 })
-                .orElseThrow(() -> new MissingInputResourceException("ExtTableGen config has no input configuration"));
+                .orElseThrow(() ->
+                        new MissingInputResourceException("ExtTableGen config has no CSV file configuration"));
     }
 
     /**
@@ -56,7 +57,7 @@ final class ExtTableGen {
     /**
      * Gets the external table from the current config.
      * <p>
-     * If the current config does not result in a valid external table, the input file is used to derive an external
+     * If the current config does not result in a valid external table, the CSV file is used to derive an external
      * table.
      * </p>
      *
@@ -125,7 +126,7 @@ final class ExtTableGen {
                     // Not really needed when using ExternalTable directly derived from CsvFile
                     b.withRowValidator(DelayedRowValidator
                             .delay(ColumnSizeValidator.of(externalTable))
-                            .untilAfterRow(originalConfig.hasHeaderRow() ? 1 : 0));
+                            .untilAfterRow(originalConfig.headerRow() ? 1 : 0));
                 }));
         try (var tableWriter = new ExternalTableWriter(externalTable)) {
             var multiplexer = new MultiplexRowProcessor(tableWriter,

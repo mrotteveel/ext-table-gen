@@ -13,7 +13,7 @@
             <xs:sequence>
                 <xs:element name="externalTable" type="ExternalTableType"/>
                 <xs:element name="tableDerivationConfig" type="TableDerivationConfigType" minOccurs="0"/>
-                <xs:element name="inputConfig" type="InputConfigType" minOccurs="0"/>
+                <xs:element name="csvFile" type="CsvFileType" minOccurs="0"/>
                 <xs:element name="informational" type="InformationalType" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
@@ -167,10 +167,10 @@
         <xs:attribute name="overwrite" type="xs:boolean" default="false"/>
     </xs:complexType>
 
-    <xs:complexType name="InputConfigType">
+    <xs:complexType name="CsvFileType">
         <xs:attribute name="path" type="xs:string" use="required"/>
         <xs:attribute name="charset" type="xs:string" use="required"/>
-        <xs:attribute name="hasHeaderRow" type="xs:boolean" default="true"/>
+        <xs:attribute name="headerRow" type="xs:boolean" default="true"/>
     </xs:complexType>
 
     <xs:complexType name="InformationalType">

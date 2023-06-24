@@ -33,42 +33,42 @@ In the current version, no version information is displayed.
 The version information is not yet available/implemented, but the option is provided out-of-the-box by the commandline argument parser we use, https://picocli.info/[picocli^], together with the <<ref-cmd-help,`--help`>> option.
 ====
 
-[#ref-cmd-input]
-=== Input configuration
+[#ref-cmd-csv]
+=== CSV file configuration
 
-[#ref-cmd-input-file]
-==== Input file (`--input-file`)
+[#ref-cmd-csv-file]
+==== CSV file (`--csv-file`)
 
-The input file option (`--input-file=FILE`) specifies the path of the CSV file to read for input.
-`FILE` is the absolute or relative path to the file to read.
+The CSV file option (`--csv-file=FILE`) specifies the path of the CSV file.
+`FILE` is the absolute or relative path to the file.
 Relative paths are resolved against the current working directory.
 The file must be in {link-rfc4180}[RFC 4180^] format.
 
 We recommend specifying absolute paths, as the configuration file will store the path as specified, which means that if a relative path is used, and the configuration file is then used from a different location, it may attempt to read a non-existent or wrong file.
 
-This option can override the XML config of <<ref-xml-inputconfig,`/extTableGenConfig/inputConfig[@path]`>>.
+This option can override the XML config of <<ref-xml-csvfile,`/extTableGenConfig/csvFile[@path]`>>.
 
-[#ref-cmd-input-charset]
-==== Input character set (`--input-charset`)
+[#ref-cmd-csv-charset]
+==== CSV character set (`--csv-charset`)
 
-The input character set option (`--input-charset=CHARSET`) specifies the character set of the input file.
+The CSV character set option (`--csv-charset=CHARSET`) specifies the character set of the CSV file.
 `CHARSET` is any valid Java character set name or alias.
 The default is `UTF-8`.
 
-This option can override the XML config of <<ref-xml-inputconfig,`/extTableGenConfig/inputConfig[@charset]`>> if explicitly specified.
+This option can override the XML config of <<ref-xml-csvfile,`/extTableGenConfig/csvFile[@charset]`>> if explicitly specified.
 
-[#ref-cmd-input-header]
-==== Input header (`--[no-]input-header`)
+[#ref-cmd-csv-header]
+==== CSV header (`--[no-]csv-header`)
 
-The input header boolean option (`--[no-]input-header`) specifies if the first row of the CSV file is a header (`--input-header`, the default), or data (`--no-input-header`).
-The default is `--input-header`.
+The CSV header boolean option (`--[no-]csv-header`) specifies if the first row of the CSV file is a header (`--csv-header`, the default), or data (`--no-csv-header`).
+The default is `--csv-header`.
 
 If the first row is a header, and the external table is derived, the values in the first row are used as column names.
 If an existing external table configuration is used, the header row is skipped.
 
 If the first row is not a header, and the external table is derived, columns are assigned a name in the form of `++COLUMN_++__idx__`, where _idx_ is the 1-based index of the column (first is `COLUMN_1`, second is `COLUMN_2`, etc.).
 
-This option can override the XML config of <<ref-xml-inputconfig,`/extTableGenConfig/inputConfig[@hasHeaderRow]`>> if explicitly specified.
+This option can override the XML config of <<ref-xml-csvfile,`/extTableGenConfig/csvFile[@headerRow]`>> if explicitly specified.
 
 [#ref-cmd-output]
 === External table file configuration
@@ -107,7 +107,7 @@ We're not yet sure how we're going to resolve this inconsistency, but likely we'
 
 Table derivation options configure how _ext-table-gen_ derives the external table definition.
 
-Apart from <<ref-cmd-table-name,`--table-name`>>, these options only have effect when a new external table definitions is generated (see also <<ref-cmd-tbl-derive-mode>>).
+Apart from <<ref-cmd-table-name,`--table-name`>>, these options only have effect when a new external table definitions is generated (see also <<ref-cmd-table-derivation-mode>>).
 
 [#ref-cmd-table-name]
 ==== Table name (`--table-name`)
@@ -127,7 +127,7 @@ The column encoding option (`--column-encoding=ENCODING`) specifies the column e
 Default value is `ISO8859_1`.
 
 This option can override the XML config of <<ref-xml-tablederivationconfig,`/extTableGenConfig/tableDerivationConfig[@columnEncoding]`>> if explicitly specified.
-It does not override the column encoding of existing columns (unless you use an explicit <<ref-cmd-tbl-derive-mode>>).
+It does not override the column encoding of existing columns (unless you use an explicit <<ref-cmd-table-derivation-mode>>).
 
 [#ref-unsupported-encoding]
 ===== Unsupported character sets
@@ -158,12 +158,12 @@ An end column is not necessary, but can improve the "`human readability`" of the
 If this is no concern for you, use `--end-column=NONE` to reduce file size and overhead of writing and reading this column.
 
 This option can override the XML config of <<ref-xml-tablederivationconfig,`/extTableGenConfig/tableDerivationConfig[@endColumnType]`>> if explicitly specified.
-It does not override the current end-column of `/extTableGenConfig/extTable/columns/endColumn` (unless you use an explicit <<ref-cmd-tbl-derive-mode>>).
+It does not override the current end-column of `/extTableGenConfig/extTable/columns/endColumn` (unless you use an explicit <<ref-cmd-table-derivation-mode>>).
 
-[#ref-cmd-tbl-derive-mode]
+[#ref-cmd-table-derivation-mode]
 ==== Table derivation mode (`--table-derivation-mode`)
 
-The table derivation mode option (`--table-derivation-mode=MODE`) specifies when an external table definition should be derived from a CSV input file.
+The table derivation mode option (`--table-derivation-mode=MODE`) specifies when an external table definition should be derived from a CSV file.
 `MODE` can have value:
 
 [horizontal]
@@ -216,7 +216,7 @@ When both <<ref-cmd-config-in,`--config-in`>> and `--config-out` are specified w
 
 When both <<ref-cmd-config-in,`--config-in`>> and `--config-out` are specified with other options, the values of those options are reflected in the new configuration file.
 
-Except for the table name (`/extTableGenConfig/externalTable[@name]`), the <<ref-xml-externaltable>> element will not change unless <<ref-cmd-tbl-derive-mode,`--table-derivation-mode=ALWAYS`>> is specified, or the existing configuration is considered invalid or incomplete and `--table-derivation-mode=INCOMPLETE` is specified.
+Except for the table name (`/extTableGenConfig/externalTable[@name]`) and table file (`/extTableGenConfig/externalTable/tableFile`), the <<ref-xml-externaltable>> element will not change unless <<ref-cmd-table-derivation-mode,`--table-derivation-mode=ALWAYS`>> is specified, or the existing configuration is considered invalid or incomplete and `--table-derivation-mode=INCOMPLETE` is specified.
 
 [#ref-cmd-overwrite-config]
 ==== Overwrite configuration (`--[no-]overwrite-config`)
@@ -241,7 +241,7 @@ None
 .Elements
 * <<ref-xml-externaltable>> -- required
 * <<ref-xml-tablederivationconfig>> -- optional
-* <<ref-xml-inputconfig>> -- optional
+* <<ref-xml-csvfile>> -- optional
 * <<ref-xml-informational>> -- optional
 
 [#ref-xml-externaltable]
@@ -254,8 +254,6 @@ The columns it contains are used by _ext-table-gen_ to validate the columns in t
 [horizontal]
 `name`::
 Name of the table (used for the DDL; required)
-
-It contains a sequence of columns.
 
 .Elements
 * <<ref-xml-columns>> -- required
@@ -355,7 +353,7 @@ None
 === `tableDerivationConfig`
 
 The element `tableDerivationConfig` stores the configuration used to derive an external table.
-This is only used when _ext-table-gen_ is used with <<ref-cmd-tbl-derive-mode,`--table-derivation-mode=ALWAYS`>>, or `--table-derivation-mode=INCOMPLETE` and the current configuration is considered incomplete or invalid.
+This is only used when _ext-table-gen_ is used with <<ref-cmd-table-derivation-mode,`--table-derivation-mode=ALWAYS`>>, or `--table-derivation-mode=INCOMPLETE` and the current configuration is considered incomplete or invalid.
 
 Be aware, it does not necessarily represent the configuration used to derive the current table described by <<#ref-xml-externaltable>>, but instead the last configuration stored using <<ref-cmd-config-out,`--config-out`>>.
 
@@ -383,26 +381,26 @@ Absence of the attribute implies `LF`.
 .Elements
 None
 
-The commandline option <<ref-cmd-tbl-derive-mode>> is intentionally not represented in the configuration file.
+The commandline option <<ref-cmd-table-derivation-mode>> is intentionally not represented in the configuration file.
 If a configuration file is specified (using <<ref-cmd-config-in,`--config-in`>>), _ext-table-gen_ defaults to `NEVER`, and needs to be explicitly overridden by the commandline to derive the external table.
 
-[#ref-xml-inputconfig]
-=== `inputConfig`
+[#ref-xml-csvfile]
+=== `csvFile`
 
-The element `inputConfig` specifies the input file to use, and how to read it.
+The element `csvFile` specifies the CSV file to use, and how to read it.
 
 .Attributes
 [horizontal]
 `path`::
-Path of the input file (required). +
+Path of the CSV file (required). +
 If a relative path, it is resolved against the current working directory of _ext-table-gen_.
 It is recommended to use absolute paths.
 `charset`::
-Character set of the input file (required). +
+Character set of the CSV file (required). +
 Expects a Java character set name or alias.
 As available character sets depend on the JVM and its classpath, this is not restricted by the XSD.
-`hasHeaderRow`::
-Boolean specifying if the first row of the input file is a header row or a data row (optional; defaults to `true`)
+`headerRow`::
+Boolean specifying if the first row of the CSV file is a header row or a data row (optional; defaults to `true`)
 
 .Elements
 None

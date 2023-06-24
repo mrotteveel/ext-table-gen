@@ -43,19 +43,19 @@ final class ExtTableGenMain implements Runnable {
 
     // Only default if no configuration file is used
     private static final TableDerivationMode DEFAULT_TABLE_DERIVATION_MODE = TableDerivationMode.INCOMPLETE;
-    private static final Charset DEFAULT_INPUT_CHARSET = StandardCharsets.UTF_8;
+    private static final Charset DEFAULT_CSV_CHARSET = StandardCharsets.UTF_8;
 
-    @CommandLine.Option(names = "--input-file", paramLabel = "CSV",
-            description = "CSV input file (RFC 4180 format)", order = 100)
-    Path inputFile;
+    @CommandLine.Option(names = "--csv-file", paramLabel = "CSV",
+            description = "CSV file (RFC 4180 format)", order = 100)
+    Path csvFile;
 
-    @CommandLine.Option(names = "--input-charset", paramLabel = "CHARSET",
-            description = "Character set of the input file (Java character set name). Default: UTF-8", order = 110)
-    Charset inputCharset;
+    @CommandLine.Option(names = "--csv-charset", paramLabel = "CHARSET",
+            description = "Character set of the CSV file (Java character set name). Default: UTF-8", order = 110)
+    Charset csvCharset;
 
-    @CommandLine.Option(names = "--input-header", negatable = true, fallbackValue = "true",
-            description = "First row of input file is a header. Default: true", order = 120)
-    Boolean inputHeader;
+    @CommandLine.Option(names = "--csv-header", negatable = true, fallbackValue = "true",
+            description = "First row of CSV file is a header. Default: true", order = 120)
+    Boolean csvHeader;
 
     @CommandLine.Option(names = "--table-file", paramLabel = "FILE", description = "External table file", order = 200)
     Path tableFilePath;
@@ -126,11 +126,11 @@ final class ExtTableGenMain implements Runnable {
      *         external-table-gen configuration
      */
     private void validate(EtgConfig etgConfig) {
-        if (etgConfig.inputConfig().map(InputConfig::path).isEmpty()) {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --input-file.");
+        if (etgConfig.csvFileConfig().map(CsvFileConfig::path).isEmpty()) {
+            throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --csv-file.");
         }
-        if (etgConfig.inputConfig().map(InputConfig::charset).isEmpty()) {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --input-charset.");
+        if (etgConfig.csvFileConfig().map(CsvFileConfig::charset).isEmpty()) {
+            throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --csv-charset.");
         }
         if (etgConfig.tableConfig().tableFile().map(TableFile::path).isEmpty()) {
             throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --table-file.");
@@ -177,21 +177,21 @@ final class ExtTableGenMain implements Runnable {
                     });
         }
 
-        config = config.withInputConfig(
+        config = config.withCsvFileConfig(
                 cfg -> {
-                    InputConfig inputConfig = cfg;
-                    if (inputFile != null) {
-                        inputConfig = inputConfig.withPath(inputFile);
+                    CsvFileConfig csvFileConfig = cfg;
+                    if (csvFile != null) {
+                        csvFileConfig = csvFileConfig.withPath(csvFile);
                     }
-                    if (inputCharset != null) {
-                        inputConfig = inputConfig.withCharset(inputCharset);
+                    if (csvCharset != null) {
+                        csvFileConfig = csvFileConfig.withCharset(csvCharset);
                     }
-                    if (inputHeader != null) {
-                        inputConfig = inputConfig.withHasHeaderRow(inputHeader);
+                    if (csvHeader != null) {
+                        csvFileConfig = csvFileConfig.withHeaderRow(csvHeader);
                     }
-                    return inputConfig;
+                    return csvFileConfig;
                 },
-                this::createInputConfig);
+                this::createCsvFileConfig);
 
         return config;
     }
@@ -208,19 +208,19 @@ final class ExtTableGenMain implements Runnable {
                                 .map(file -> new TableFile(file, overwriteTableFileOrDefault()))),
                 new TableDerivationConfig(
                         columnEncodingOrDefault(), endColumnTypeOrDefault(), tableDerivationModeOrDefault()),
-                createInputConfig());
+                createCsvFileConfig());
     }
 
-    private InputConfig createInputConfig() {
-        return inputFile != null ? new InputConfig(inputFile, inputCharsetOrDefault(), inputHeaderOrDefault()) : null;
+    private CsvFileConfig createCsvFileConfig() {
+        return csvFile != null ? new CsvFileConfig(csvFile, csvCharsetOrDefault(), csvHeaderOrDefault()) : null;
     }
 
-    Charset inputCharsetOrDefault() {
-        return requireNonNullElse(inputCharset, DEFAULT_INPUT_CHARSET);
+    Charset csvCharsetOrDefault() {
+        return requireNonNullElse(csvCharset, DEFAULT_CSV_CHARSET);
     }
 
-    boolean inputHeaderOrDefault() {
-        return requireNonNullElse(inputHeader, Boolean.TRUE);
+    boolean csvHeaderOrDefault() {
+        return requireNonNullElse(csvHeader, Boolean.TRUE);
     }
 
     private boolean overwriteTableFileOrDefault() {

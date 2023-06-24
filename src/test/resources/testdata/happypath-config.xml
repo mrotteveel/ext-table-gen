@@ -43,7 +43,7 @@
         <tableFile path="C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\output.dat" overwrite="false"/>
     </externalTable>
     <tableDerivationConfig columnEncoding="ISO8859_1" endColumnType="LF"/>
-    <inputConfig path="C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\input.csv" charset="UTF-8" hasHeaderRow="true"/>
+    <csvFile path="C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\input.csv" charset="UTF-8" headerRow="true"/>
     <informational>
         <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\output.dat' (
   "Index" char(2) character set ISO8859_1,

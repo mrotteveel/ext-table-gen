@@ -17,7 +17,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_1;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_2;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.testEtgConfig;
-import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.emptyInputConfig;
+import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.emptyCavFileConfig;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.emptyTableFile;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.tableColumns;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.tableConfig;
@@ -74,7 +74,7 @@ class ConfigMapperTest {
         assertThat(fromXml, allOf(
                 tableConfig(is(originalTableConfig)),
                 tableDerivationConfig(is(TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER))),
-                emptyInputConfig()));
+                emptyCavFileConfig()));
     }
 
     /**
@@ -115,7 +115,7 @@ class ConfigMapperTest {
                         tableColumns(emptyCollectionOf(Column.class)),
                         emptyTableFile())),
                 tableDerivationConfig(is(TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER))),
-                emptyInputConfig()));
+                emptyCavFileConfig()));
     }
 
     /**
@@ -167,12 +167,12 @@ class ConfigMapperTest {
             // Invalid character set name
             """
             <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
-                <inputConfig path="input.csv" charset="DOES_NOT_EXIST"/>
+                <csvFile path="input.csv" charset="DOES_NOT_EXIST"/>
             </extTableGenConfig>""",
-            // path is required if inputConfig element exists
+            // path is required if csvFile element exists
             """
             <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
-                <inputConfig charset="UTF-8"/>
+                <csvFile charset="UTF-8"/>
             </extTableGenConfig>"""
     })
     void testIncompleteXmlResultingInEmptyConfig(String configString) throws Exception {
@@ -184,7 +184,7 @@ class ConfigMapperTest {
                         tableColumns(emptyCollectionOf(Column.class)),
                         emptyTableFile())),
                 tableDerivationConfig(is(TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER))),
-                emptyInputConfig()));
+                emptyCavFileConfig()));
     }
 
     private EtgConfig roundTripConfig(EtgConfig originalConfig) throws JAXBException {

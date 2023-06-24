@@ -42,12 +42,12 @@ final class EtgConfigMatchers {
         };
     }
 
-    static Matcher<EtgConfig> emptyInputConfig() {
-        return new InputConfigMatcher(emptyOptional());
+    static Matcher<EtgConfig> emptyCavFileConfig() {
+        return new CsvFileConfigMatcher(emptyOptional());
     }
 
-    static Matcher<EtgConfig> inputConfig(Matcher<InputConfig> matcher) {
-        return new InputConfigMatcher(optionalWithValue(matcher));
+    static Matcher<EtgConfig> csvFileConfig(Matcher<CsvFileConfig> matcher) {
+        return new CsvFileConfigMatcher(optionalWithValue(matcher));
     }
 
     static Matcher<TableConfig> tableName(Matcher<String> matcher) {
@@ -121,42 +121,42 @@ final class EtgConfigMatchers {
         };
     }
 
-    static Matcher<InputConfig> inputConfigPath(Matcher<Path> matcher) {
-        return new FeatureMatcher<>(matcher, "input path", "input path") {
+    static Matcher<CsvFileConfig> csvFilePath(Matcher<Path> matcher) {
+        return new FeatureMatcher<>(matcher, "CSV file path", "CSV file path") {
             @Override
-            protected Path featureValueOf(InputConfig actual) {
+            protected Path featureValueOf(CsvFileConfig actual) {
                 return actual.path();
             }
         };
     }
 
-    static Matcher<InputConfig> inputConfigCharset(Matcher<Charset> matcher) {
-        return new FeatureMatcher<>(matcher, "input charset", "input charset") {
+    static Matcher<CsvFileConfig> csvCharset(Matcher<Charset> matcher) {
+        return new FeatureMatcher<>(matcher, "CSV charset", "CSV charset") {
             @Override
-            protected Charset featureValueOf(InputConfig actual) {
+            protected Charset featureValueOf(CsvFileConfig actual) {
                 return actual.charset();
             }
         };
     }
 
-    static Matcher<InputConfig> inputConfigHasHeaderRow(boolean hasHeaderRow) {
-        return new FeatureMatcher<>(is(hasHeaderRow), "input has header row", "input has header row") {
+    static Matcher<CsvFileConfig> csvHeaderRow(boolean headerRow) {
+        return new FeatureMatcher<>(is(headerRow), "CSV header row", "CSV header row") {
             @Override
-            protected Boolean featureValueOf(InputConfig actual) {
-                return actual.hasHeaderRow();
+            protected Boolean featureValueOf(CsvFileConfig actual) {
+                return actual.headerRow();
             }
         };
     }
 
-    private static class InputConfigMatcher extends FeatureMatcher<EtgConfig, Optional<InputConfig>> {
+    private static class CsvFileConfigMatcher extends FeatureMatcher<EtgConfig, Optional<CsvFileConfig>> {
 
-        InputConfigMatcher(Matcher<? super Optional<InputConfig>> subMatcher) {
-            super(subMatcher, "input config", "input config");
+        CsvFileConfigMatcher(Matcher<? super Optional<CsvFileConfig>> subMatcher) {
+            super(subMatcher, "CSV file config", "CSV file config");
         }
 
         @Override
-        protected Optional<InputConfig> featureValueOf(EtgConfig actual) {
-            return actual.inputConfig();
+        protected Optional<CsvFileConfig> featureValueOf(EtgConfig actual) {
+            return actual.csvFileConfig();
         }
 
     }

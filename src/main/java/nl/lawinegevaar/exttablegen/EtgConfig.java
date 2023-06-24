@@ -20,25 +20,25 @@ import static java.util.Objects.requireNonNullElse;
  *         table configuration
  * @param tableDerivationConfig
  *         configuration to be used when deriving a new external table
- * @param inputConfig
- *         optional input configuration
+ * @param csvFileConfig
+ *         optional CSV file configuration
  */
 record EtgConfig(TableConfig tableConfig, TableDerivationConfig tableDerivationConfig,
-        Optional<InputConfig> inputConfig) {
+        Optional<CsvFileConfig> csvFileConfig) {
 
     EtgConfig {
         requireNonNull(tableConfig, "tableConfig");
         requireNonNull(tableDerivationConfig, "tableDerivationConfig");
-        requireNonNull(inputConfig, "inputConfig");
+        requireNonNull(csvFileConfig, "csvFileConfig");
     }
 
-    EtgConfig(TableConfig tableConfig, TableDerivationConfig tableDerivationConfig, InputConfig inputConfig) {
-        this(tableConfig, tableDerivationConfig, Optional.ofNullable(inputConfig));
+    EtgConfig(TableConfig tableConfig, TableDerivationConfig tableDerivationConfig, CsvFileConfig csvFileConfig) {
+        this(tableConfig, tableDerivationConfig, Optional.ofNullable(csvFileConfig));
     }
 
     EtgConfig withTableConfig(TableConfig tableConfig) {
         if (this.tableConfig.equals(tableConfig)) return this;
-        return new EtgConfig(tableConfig, tableDerivationConfig, inputConfig);
+        return new EtgConfig(tableConfig, tableDerivationConfig, csvFileConfig);
     }
 
     EtgConfig withTableConfig(UnaryOperator<TableConfig> tableConfigGenerator) {
@@ -47,60 +47,60 @@ record EtgConfig(TableConfig tableConfig, TableDerivationConfig tableDerivationC
 
     EtgConfig withTableDerivationConfig(TableDerivationConfig tableDerivationConfig) {
         if (this.tableDerivationConfig.equals(tableDerivationConfig)) return this;
-        return new EtgConfig(tableConfig, tableDerivationConfig, inputConfig);
+        return new EtgConfig(tableConfig, tableDerivationConfig, csvFileConfig);
     }
 
     EtgConfig withTableDerivationConfig(UnaryOperator<TableDerivationConfig> tableDerivationConfigGenerator) {
         return withTableDerivationConfig(tableDerivationConfigGenerator.apply(tableDerivationConfig));
     }
 
-    EtgConfig withInputConfig(InputConfig inputConfig) {
-        if (Objects.equals(this.inputConfig.orElse(null), inputConfig)) return this;
-        return new EtgConfig(tableConfig, tableDerivationConfig, inputConfig);
+    EtgConfig withCsvFileConfig(CsvFileConfig csvFileConfig) {
+        if (Objects.equals(this.csvFileConfig.orElse(null), csvFileConfig)) return this;
+        return new EtgConfig(tableConfig, tableDerivationConfig, csvFileConfig);
     }
 
     /**
-     * Create a new {@code EtgConfig} with an updated {@code inputConfig}.
+     * Create a new {@code EtgConfig} with an updated {@code csvFileConfig}.
      *
-     * @param inputConfigGenerator
-     *         function to convert the existing input config to a new input config (NOTE: if the returned value is
-     *         {@code null}, the {@code inputConfigCreator} will be called)
-     * @param inputConfigCreator
-     *         function to create a new input config (called if there is no current input config, or if
-     *         {@code inputConfigGenerator} returned {@code null}). This function can return {@code null} to set an
-     *         empty input config
-     * @return new {@code EtgConfig} with its {@code inputConfig} replaced
+     * @param csvFileConfigGenerator
+     *         function to convert the existing CSV file config to a new CSV file config (NOTE: if the returned value is
+     *         {@code null}, the {@code csvFileConfigCreator} will be called)
+     * @param csvFileConfigCreator
+     *         function to create a new CSV file config (called if there is no current CSV file config, or if
+     *         {@code csvFileConfigGenerator} returned {@code null}). This function can return {@code null} to set an
+     *         empty CSV file config
+     * @return new {@code EtgConfig} with its {@code csvFileConfig} replaced
      */
-    EtgConfig withInputConfig(
-            UnaryOperator<InputConfig> inputConfigGenerator, Supplier<InputConfig> inputConfigCreator) {
-        return withInputConfig(inputConfig.map(inputConfigGenerator).orElseGet(inputConfigCreator));
+    EtgConfig withCsvFileConfig(
+            UnaryOperator<CsvFileConfig> csvFileConfigGenerator, Supplier<CsvFileConfig> csvFileConfigCreator) {
+        return withCsvFileConfig(csvFileConfig.map(csvFileConfigGenerator).orElseGet(csvFileConfigCreator));
     }
 
 }
 
 /**
- * Input file configuration.
+ * CSV file configuration.
  *
  * @param path
- *         path of the input file
+ *         path of the CSV file
  * @param charset
- *         character set of the input file
- * @param hasHeaderRow
- *         input file has a header row
+ *         character set of the CSV file
+ * @param headerRow
+ *         CSV file has a header row
  */
-record InputConfig(Path path, Charset charset, boolean hasHeaderRow) {
+record CsvFileConfig(Path path, Charset charset, boolean headerRow) {
 
-    InputConfig {
+    CsvFileConfig {
         requireNonNull(path);
         requireNonNull(charset);
     }
 
-    InputConfig(String path, String charset, boolean hasHeaderRow) {
-        this(Path.of(path), Charset.forName(charset), hasHeaderRow);
+    CsvFileConfig(String path, String charset, boolean headerRow) {
+        this(Path.of(path), Charset.forName(charset), headerRow);
     }
 
     /**
-     * Converts this input config to an {@link InputResource}.
+     * Converts this CSV file config to an {@link InputResource}.
      *
      * @return input resource
      */
@@ -109,27 +109,27 @@ record InputConfig(Path path, Charset charset, boolean hasHeaderRow) {
     }
 
     /**
-     * Converts this input config to a {@link CsvFile}.
+     * Converts this CSV file config to a {@link CsvFile}.
      *
      * @return csv file instance
      */
     CsvFile toCsvFile() {
-        return new CsvFile(toInputResource(), new CsvFile.Config(charset, 0, hasHeaderRow));
+        return new CsvFile(toInputResource(), new CsvFile.Config(charset, 0, headerRow));
     }
 
-    InputConfig withPath(Path path) {
+    CsvFileConfig withPath(Path path) {
         if (this.path.equals(path)) return this;
-        return new InputConfig(path, charset, hasHeaderRow);
+        return new CsvFileConfig(path, charset, headerRow);
     }
 
-    InputConfig withCharset(Charset charset) {
+    CsvFileConfig withCharset(Charset charset) {
         if (this.charset.equals(charset)) return this;
-        return new InputConfig(path, charset, hasHeaderRow);
+        return new CsvFileConfig(path, charset, headerRow);
     }
 
-    InputConfig withHasHeaderRow(boolean hasHeaderRow) {
-        if (this.hasHeaderRow == hasHeaderRow) return this;
-        return new InputConfig(path, charset, hasHeaderRow);
+    CsvFileConfig withHeaderRow(boolean headerRow) {
+        if (this.headerRow == headerRow) return this;
+        return new CsvFileConfig(path, charset, headerRow);
     }
 
 }

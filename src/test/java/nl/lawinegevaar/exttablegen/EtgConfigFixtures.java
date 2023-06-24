@@ -15,9 +15,9 @@ final class EtgConfigFixtures {
     static final Column COLUMN_2 = col("FIXTURE_COLUMN_2", 15, FbEncoding.UTF8);
     static final Column END_COLUMN = EndColumn.require(EndColumn.Type.CRLF);
     static final Path TABLE_FILE_PATH = Path.of("fixture-output.dat");
-    static final Path INPUT_PATH = Path.of("fixture-input.csv");
+    static final Path CSV_FILE_PATH = Path.of("fixture-input.csv");
     static final boolean OVERWRITE_TABLE_FILE = true;
-    static final boolean INPUT_HAS_HEADER = false;
+    static final boolean CSV_FILE_HEADER = false;
     static final EndColumn.Type DERIVATION_COLUMN_TYPE = EndColumn.Type.CRLF;
     static final FbEncoding DERIVATION_ENCODING = FbEncoding.ASCII;
     static final TableDerivationMode DERIVATION_MODE = TableDerivationMode.NEVER;
@@ -27,7 +27,7 @@ final class EtgConfigFixtures {
     }
 
     static EtgConfig testEtgConfig() {
-        return new EtgConfig(testTableConfig(), testDerivationConfig(), testInputConfig());
+        return new EtgConfig(testTableConfig(), testDerivationConfig(), testCsvFileConfig());
     }
 
     static TableConfig testTableConfig() {
@@ -49,8 +49,8 @@ final class EtgConfigFixtures {
         return new TableDerivationConfig(DERIVATION_ENCODING, DERIVATION_COLUMN_TYPE, DERIVATION_MODE);
     }
 
-    static InputConfig testInputConfig() {
-        return new InputConfig(INPUT_PATH, US_ASCII, INPUT_HAS_HEADER);
+    static CsvFileConfig testCsvFileConfig() {
+        return new CsvFileConfig(CSV_FILE_PATH, US_ASCII, CSV_FILE_HEADER);
     }
 
 }

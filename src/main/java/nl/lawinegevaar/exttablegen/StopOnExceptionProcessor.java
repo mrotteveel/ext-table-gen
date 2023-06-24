@@ -6,7 +6,7 @@ package nl.lawinegevaar.exttablegen;
  * Processor which signals stop when the exception received by {@link #onException(Exception)} has a specified type (or
  * one of its subclasses).
  */
-class StopOnExceptionProcessor extends AbstractRowProcessor {
+final class StopOnExceptionProcessor extends AbstractRowProcessor {
 
     private final Class<? extends Exception> rootException;
 

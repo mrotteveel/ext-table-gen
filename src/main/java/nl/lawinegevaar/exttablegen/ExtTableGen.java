@@ -12,7 +12,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Core of ext-table-gen which provides the necessary action of deriving and generating external tables.
  */
-class ExtTableGen {
+final class ExtTableGen {
 
     private static final System.Logger log = System.getLogger(ExtTableGen.class.getName());
 

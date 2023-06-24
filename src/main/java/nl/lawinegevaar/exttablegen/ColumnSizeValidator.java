@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 /**
  * Validates the column sizes of a row.
  */
-class ColumnSizeValidator implements RowValidator {
+final class ColumnSizeValidator implements RowValidator {
 
     private final int[] sizes;
 

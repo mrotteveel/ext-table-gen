@@ -20,7 +20,7 @@ class ExtTableGenException extends RuntimeException {
 /**
  * Signals an exception which is considered fatal when reading or writing files.
  */
-class FatalRowProcessingException extends ExtTableGenException {
+final class FatalRowProcessingException extends ExtTableGenException {
 
     FatalRowProcessingException(String message, Throwable cause) {
         super(message, cause);
@@ -28,7 +28,7 @@ class FatalRowProcessingException extends ExtTableGenException {
 
 }
 
-class InvalidConfigurationException extends ExtTableGenException {
+final class InvalidConfigurationException extends ExtTableGenException {
 
     InvalidConfigurationException(String message, Throwable cause) {
         super(message, cause);
@@ -39,7 +39,7 @@ class InvalidConfigurationException extends ExtTableGenException {
 /**
  * Thrown if an external table definition cannot be read, or for problems writing the external table data.
  */
-class InvalidTableException extends ExtTableGenException {
+final class InvalidTableException extends ExtTableGenException {
 
     InvalidTableException(String message, Throwable cause) {
         super(message, cause);
@@ -50,7 +50,7 @@ class InvalidTableException extends ExtTableGenException {
 /**
  * Thrown to signal that there is no input resource when one is required.
  */
-class MissingInputResourceException extends ExtTableGenException {
+final class MissingInputResourceException extends ExtTableGenException {
 
     MissingInputResourceException(String message) {
         super(message);

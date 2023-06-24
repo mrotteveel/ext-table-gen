@@ -11,7 +11,7 @@ import com.opencsv.exceptions.CsvValidationException;
  * length, and the value is too short.
  * </p>
  */
-class InvalidCsvColumnSizeException extends CsvValidationException {
+final class InvalidCsvColumnSizeException extends CsvValidationException {
 
     InvalidCsvColumnSizeException(String message) {
         super(message);

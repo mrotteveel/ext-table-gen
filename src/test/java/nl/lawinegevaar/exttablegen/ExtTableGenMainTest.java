@@ -6,17 +6,32 @@ import jakarta.xml.bind.JAXBException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNullElse;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.col;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.customers10Columns;
+import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.*;
+import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.*;
 import static nl.lawinegevaar.exttablegen.ResourceHelper.copyResource;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -395,6 +410,112 @@ class ExtTableGenMainTest {
         assertFalse(Files.exists(outputFile), "Expected output file to not exist");
     }
 
+    @Test
+    void mergeConfig_noOptionsSpecified() {
+        var main = new ExtTableGenMain();
+        EtgConfig originalConfig = testEtgConfig();
+
+        assertEquals(originalConfig, PrivateAccess.invokeMergeConfig(main, originalConfig));
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(booleans = { true, false })
+    void mergeConfig_outputFile(Boolean outputOverwrite) {
+        var main = new ExtTableGenMain();
+        EtgConfig originalConfig = testEtgConfig();
+
+        Path differentOutputFile = Path.of("different_output.dat");
+        main.outputFile = differentOutputFile;
+        main.outputOverwrite = outputOverwrite;
+
+        assertThat(PrivateAccess.invokeMergeConfig(main, originalConfig), allOf(
+                tableConfig(allOf(
+                        tableName(is(TABLE_NAME)),
+                        tableColumns(is(testColumns())),
+                        tableOutputConfig(allOf(
+                                outputConfigPath(is(differentOutputFile)),
+                                // TODO Value is currently inherited from original config if not specified, we may need to revise that
+                                outputConfigAllowOverwrite(
+                                        requireNonNullElse(outputOverwrite, OUTPUT_ALLOW_OVERWRITE)))))),
+                tableDerivationConfig(is(testDerivationConfig())),
+                inputConfig(is(testInputConfig()))));
+    }
+
+    @Test
+    void mergeConfig_tableName() {
+        var main = new ExtTableGenMain();
+        EtgConfig originalConfig = testEtgConfig();
+
+        String differentTableName = "DIFFERENT_TABLE_NAME";
+        main.tableName = differentTableName;
+
+        assertThat(PrivateAccess.invokeMergeConfig(main, originalConfig), allOf(
+                tableConfig(allOf(
+                        tableName(is(differentTableName)),
+                        tableColumns(is(testColumns())),
+                        tableOutputConfig(is(testOutputConfig())))),
+                tableDerivationConfig(is(testDerivationConfig())),
+                inputConfig(is(testInputConfig()))));
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock = """
+            COLUMN_ENCODING, END_COLUMN_TYPE, TABLE_DERIVATION_MODE
+            UTF8, ,
+            ,     NONE,
+            ,     ,     ALWAYS
+            UTF8, NONE,
+            ,     NONE, ALWAYS
+            UTF8, ,     INCOMPLETE
+            UTF8, NONE, INCOMPLETE
+            """)
+    void mergeConfig_tableDerivation(FbEncoding columnEncoding, EndColumn.Type endColumnType,
+            TableDerivationMode tableDerivationMode) {
+        var main = new ExtTableGenMain();
+        EtgConfig originalConfig = testEtgConfig();
+
+        main.columnEncoding = columnEncoding;
+        main.endColumnType = endColumnType;
+        main.tableDerivationMode = tableDerivationMode;
+
+        assertThat(PrivateAccess.invokeMergeConfig(main, originalConfig), allOf(
+                tableConfig(is(testTableConfig())),
+                tableDerivationConfig(allOf(
+                        tableDerivationColumnEncoding(is(requireNonNullElse(columnEncoding, DERIVATION_ENCODING))),
+                        tableDerivationEndColumnType(is(requireNonNullElse(endColumnType, DERIVATION_COLUMN_TYPE))),
+                        tableDerivationMode(is(requireNonNullElse(tableDerivationMode, DERIVATION_MODE))))),
+                inputConfig(is(testInputConfig()))));
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock = """
+            INPUT_FILE, INPUT_CHARSET, INPUT_HEADER
+            other.dat, ,
+            ,          ISO-8859-1,
+            ,          ,           true
+            other.dat, ISO-8859-1,
+            ,          ISO-8859-1, true
+            other.dat, ,           true
+            other.dat, ISO-8859-1, true
+            """)
+    void mergeConfig_inputConfig(Path inputFile, Charset inputCharset, Boolean inputHeader) {
+        var main = new ExtTableGenMain();
+        EtgConfig originalConfig = testEtgConfig();
+
+        main.inputFile = inputFile;
+        main.inputCharset = inputCharset;
+        main.inputHeader = inputHeader;
+
+        assertThat(PrivateAccess.invokeMergeConfig(main, originalConfig), allOf(
+                tableConfig(is(testTableConfig())),
+                tableDerivationConfig(is(testDerivationConfig())),
+                inputConfig(allOf(
+                        inputConfigPath(is(requireNonNullElse(inputFile, INPUT_PATH))),
+                        inputConfigCharset(is(requireNonNullElse(inputCharset, US_ASCII))),
+                        inputConfigHasHeaderRow(requireNonNullElse(inputHeader, INPUT_HAS_HEADER))))));
+    }
+
     static EtgConfig readConfig(Path configFile) throws IOException, JAXBException {
         try (var in = Files.newInputStream(configFile)) {
             return configMapper.read(in);
@@ -422,6 +543,35 @@ class ExtTableGenMainTest {
         EtgConfig configFromFile = readConfig(configFile);
 
         assertEquals(expectedConfig, configFromFile, "Configuration does not match");
+    }
+
+    /**
+     * Gives private access to parts of {@link ExtTableGenMain} which we want to test directly, but don't want to
+     * relax access level from private.
+     */
+    private static class PrivateAccess {
+
+        private static final MethodHandle mergeConfigHandle;
+        static {
+            try {
+                Method mergeConfigMethod = ExtTableGenMain.class.getDeclaredMethod("mergeConfig", EtgConfig.class);
+                mergeConfigMethod.setAccessible(true);
+                mergeConfigHandle = MethodHandles.lookup().unreflect(mergeConfigMethod);
+            } catch (ReflectiveOperationException e) {
+                throw new ExceptionInInitializerError(e);
+            }
+        }
+
+        static EtgConfig invokeMergeConfig(ExtTableGenMain instance, EtgConfig config) {
+            try {
+                return (EtgConfig) mergeConfigHandle.invoke(instance, config);
+            } catch (RuntimeException | Error e) {
+                throw e;
+            } catch (Throwable t) {
+                throw new RuntimeException("Wrapped throwable", t);
+            }
+        }
+
     }
 
 }

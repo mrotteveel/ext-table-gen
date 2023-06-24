@@ -245,12 +245,16 @@ record TableConfig(String name, List<Column> columns, Optional<OutputConfig> out
  */
 record TableDerivationConfig(FbEncoding columnEncoding, EndColumn.Type endColumnType, TableDerivationMode mode) {
 
+    static final FbEncoding DEFAULT_COLUMN_ENCODING = FbEncoding.ISO8859_1;
+    static final EndColumn.Type DEFAULT_END_COLUMN_TYPE = EndColumn.Type.LF;
+    // NOTE: Not defining a constant for default TableDerivationMode, as it is context specific
+
     private static final TableDerivationConfig DEFAULT_CONFIG =
-            new TableDerivationConfig(FbEncoding.ISO8859_1, EndColumn.Type.LF, TableDerivationMode.INCOMPLETE);
+            new TableDerivationConfig(DEFAULT_COLUMN_ENCODING, DEFAULT_END_COLUMN_TYPE, TableDerivationMode.INCOMPLETE);
 
     TableDerivationConfig {
-        columnEncoding = requireNonNullElse(columnEncoding, FbEncoding.ISO8859_1);
-        endColumnType = requireNonNullElse(endColumnType, EndColumn.Type.LF);
+        columnEncoding = requireNonNullElse(columnEncoding, DEFAULT_COLUMN_ENCODING);
+        endColumnType = requireNonNullElse(endColumnType, DEFAULT_END_COLUMN_TYPE);
         mode = requireNonNullElse(mode, TableDerivationMode.INCOMPLETE);
     }
 

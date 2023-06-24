@@ -20,12 +20,14 @@ import static java.lang.System.Logger.Level.ERROR;
 import static java.lang.System.Logger.Level.INFO;
 import static java.lang.System.Logger.Level.WARNING;
 import static java.util.Objects.requireNonNullElse;
+import static nl.lawinegevaar.exttablegen.TableDerivationConfig.DEFAULT_COLUMN_ENCODING;
+import static nl.lawinegevaar.exttablegen.TableDerivationConfig.DEFAULT_END_COLUMN_TYPE;
 
 /**
  * Main class for running ext-table-gen from the command line.
  */
 @CommandLine.Command(name= "ext-table-gen", mixinStandardHelpOptions = true, sortOptions = false)
-class ExtTableGenMain implements Runnable {
+final class ExtTableGenMain implements Runnable {
 
     private static final Logger log;
     static {
@@ -39,8 +41,7 @@ class ExtTableGenMain implements Runnable {
         log = System.getLogger(ExtTableGenMain.class.getName());
     }
 
-    private static final FbEncoding DEFAULT_COLUMN_ENCODING = FbEncoding.ISO8859_1;
-    private static final EndColumn.Type DEFAULT_END_COLUMN_TYPE = EndColumn.Type.LF;
+    // Only default if no configuration file is used
     private static final TableDerivationMode DEFAULT_TABLE_DERIVATION_MODE = TableDerivationMode.INCOMPLETE;
     private static final Charset DEFAULT_INPUT_CHARSET = StandardCharsets.UTF_8;
 

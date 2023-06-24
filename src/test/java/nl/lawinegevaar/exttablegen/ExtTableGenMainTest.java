@@ -48,13 +48,13 @@ class ExtTableGenMainTest {
     private Path tempDir;
 
     private Path inputFile;
-    private Path outputFile;
+    private Path tableFilePath;
     private Path outConfigFile;
 
     @BeforeEach
     void initFilePaths() {
         inputFile = tempDir.resolve("input.csv");
-        outputFile = tempDir.resolve("output.dat");
+        tableFilePath = tempDir.resolve("output.dat");
         outConfigFile = tempDir.resolve("config.xml");
     }
 
@@ -63,14 +63,14 @@ class ExtTableGenMainTest {
         copyResource("/testdata/customers-10.csv", inputFile);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--config-out=" + outConfigFile));
 
         assertConfigFile(
                 new EtgConfig(
                         new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
                                 customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
-                                new OutputConfig(outputFile, false)),
+                                new TableFile(tableFilePath, false)),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
                         new InputConfig(inputFile, UTF_8, true)),
                 outConfigFile);
@@ -85,7 +85,7 @@ class ExtTableGenMainTest {
                 8 0e04AFde9f225dEBrett   Mullen   Sanford, Davenport and Giles   Kimport          Bulgaria                  001-583-352-7197x297  001-333-145-0369     asnow@colon.com            2021-04-12https://hammond-ramsey.com/
                 9 C2dE4dEEc489ae0Sheryl  Meyers   Browning-Simon                 Robersonstad     Cyprus                    854-138-4911x5772     +1-448-910-2276x729  mariokhan@ryan-pope.org    2020-01-13https://www.bullock.net/  \s
                 108C2811a503C7c5aMichelleGallagherBeck-Hendrix                   Elaineberg       Timor-Leste               739.218.2516x459      001-054-401-0347x617 mdyer@escobar.net          2021-11-08https://arias.com/        \s
-                """, Files.readString(outputFile, ISO_8859_1));
+                """, Files.readString(tableFilePath, ISO_8859_1));
     }
 
     @Test
@@ -93,14 +93,14 @@ class ExtTableGenMainTest {
         copyResource("/testdata/customers-10.csv", inputFile);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--config-out=" + outConfigFile, "--end-column=NONE"));
 
         assertConfigFile(
                 new EtgConfig(
                         new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
                                 customers10Columns(EndColumn.Type.NONE, FbEncoding.ISO8859_1),
-                                new OutputConfig(outputFile, false)),
+                                new TableFile(tableFilePath, false)),
                         TableDerivationConfig.getDefault()
                                 .withEndColumnType(EndColumn.Type.NONE)
                                 .withMode(TableDerivationMode.NEVER),
@@ -117,7 +117,7 @@ class ExtTableGenMainTest {
                 8 0e04AFde9f225dEBrett   Mullen   Sanford, Davenport and Giles   Kimport          Bulgaria                  001-583-352-7197x297  001-333-145-0369     asnow@colon.com            2021-04-12https://hammond-ramsey.com/
                 9 C2dE4dEEc489ae0Sheryl  Meyers   Browning-Simon                 Robersonstad     Cyprus                    854-138-4911x5772     +1-448-910-2276x729  mariokhan@ryan-pope.org    2020-01-13https://www.bullock.net/  \s
                 108C2811a503C7c5aMichelleGallagherBeck-Hendrix                   Elaineberg       Timor-Leste               739.218.2516x459      001-054-401-0347x617 mdyer@escobar.net          2021-11-08https://arias.com/        \s
-                """.replace("\n", ""), Files.readString(outputFile, ISO_8859_1));
+                """.replace("\n", ""), Files.readString(tableFilePath, ISO_8859_1));
     }
 
     @Test
@@ -125,10 +125,10 @@ class ExtTableGenMainTest {
         copyResource("/testdata/customers-10.csv", inputFile);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--config-out=" + outConfigFile));
 
-        Files.delete(outputFile);
+        Files.delete(tableFilePath);
         Path configFile = outConfigFile;
         String originalConfigFile = Files.readString(configFile);
         var outConfigFile = tempDir.resolve("newconfig.xml");
@@ -140,7 +140,7 @@ class ExtTableGenMainTest {
                 new EtgConfig(
                         new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
                                 customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
-                                new OutputConfig(outputFile, false)),
+                                new TableFile(tableFilePath, false)),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
                         new InputConfig(inputFile, UTF_8, true)),
                 outConfigFile);
@@ -159,20 +159,20 @@ class ExtTableGenMainTest {
                 8 0e04AFde9f225dEBrett   Mullen   Sanford, Davenport and Giles   Kimport          Bulgaria                  001-583-352-7197x297  001-333-145-0369     asnow@colon.com            2021-04-12https://hammond-ramsey.com/
                 9 C2dE4dEEc489ae0Sheryl  Meyers   Browning-Simon                 Robersonstad     Cyprus                    854-138-4911x5772     +1-448-910-2276x729  mariokhan@ryan-pope.org    2020-01-13https://www.bullock.net/  \s
                 108C2811a503C7c5aMichelleGallagherBeck-Hendrix                   Elaineberg       Timor-Leste               739.218.2516x459      001-054-401-0347x617 mdyer@escobar.net          2021-11-08https://arias.com/        \s
-                """, Files.readString(outputFile, ISO_8859_1));
+                """, Files.readString(tableFilePath, ISO_8859_1));
     }
 
     @Test
-    void defaultDisallowsOverwriteOfOutput() throws Exception {
+    void defaultDisallowsOverwriteOfTableFile() throws Exception {
         Files.writeString(inputFile, """
                 column1,column2
                 ab,cd
                 efg,h
                 """);
-        Files.writeString(outputFile, DUMMY);
+        Files.writeString(tableFilePath, DUMMY);
 
         assertEquals(1,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--config-out=" + outConfigFile));
 
         assertConfigFile(
@@ -180,30 +180,31 @@ class ExtTableGenMainTest {
                         new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
                                 List.of(col("column1", 3), col("column2", 2),
                                         EndColumn.Type.LF.getEndColumn().orElseThrow()),
-                                new OutputConfig(outputFile, false)),
+                                new TableFile(tableFilePath, false)),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
                         new InputConfig(inputFile, UTF_8, true)),
                 outConfigFile);
-        assertEquals(DUMMY, Files.readString(outputFile, ISO_8859_1), "Expected output file not overwritten");
+        assertEquals(DUMMY, Files.readString(tableFilePath, ISO_8859_1),
+                "Expected external table file not overwritten");
     }
 
     @Test
-    void allowsOverwriteOfOutput() throws Exception {
+    void allowsOverwriteOfTableFile() throws Exception {
         Files.writeString(inputFile, """
                 column1,column2
                 ab,cd
                 efg,h
                 """);
-        Files.writeString(outputFile, DUMMY);
+        Files.writeString(tableFilePath, DUMMY);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
-                        "--overwrite-output"));
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
+                        "--overwrite-table-file"));
 
         assertEquals("""
                 ab cd
                 efgh\s
-                """, Files.readString(outputFile, ISO_8859_1));
+                """, Files.readString(tableFilePath, ISO_8859_1));
     }
 
     @Test
@@ -216,14 +217,14 @@ class ExtTableGenMainTest {
         Files.writeString(outConfigFile, DUMMY);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--config-out=" + outConfigFile));
 
         assertEquals(DUMMY, Files.readString(outConfigFile), "Expected config file not overwritten");
         assertEquals("""
                 ab cd
                 efgh\s
-                """, Files.readString(outputFile, ISO_8859_1), "Expected output file to have been written");
+                """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
     }
 
     @Test
@@ -236,14 +237,14 @@ class ExtTableGenMainTest {
         Files.writeString(outConfigFile, DUMMY);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--config-out=" + outConfigFile, "--overwrite-config"));
 
         assertNotEquals(DUMMY, Files.readString(outConfigFile), "Expected config file overwritten");
         assertEquals("""
                 ab cd
                 efgh\s
-                """, Files.readString(outputFile, ISO_8859_1), "Expected output file to have been written");
+                """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
     }
 
     @Test
@@ -255,13 +256,13 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--end-column=LF"));
 
         assertEquals("""
                 ab cd
                 efgh\s
-                """, Files.readString(outputFile, ISO_8859_1), "Expected output file to have been written");
+                """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
     }
 
     @Test
@@ -273,13 +274,13 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--end-column=CRLF"));
 
         assertEquals("""
                 ab cd\r
                 efgh \r
-                """, Files.readString(outputFile, ISO_8859_1), "Expected output file to have been written");
+                """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
     }
 
     @Test
@@ -291,11 +292,11 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--end-column=NONE"));
 
-        assertEquals("ab cdefgh ", Files.readString(outputFile, ISO_8859_1),
-                "Expected output file to have been written");
+        assertEquals("ab cdefgh ", Files.readString(tableFilePath, ISO_8859_1),
+                "Expected external table file to have been written");
     }
 
     @Test
@@ -306,13 +307,13 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--no-input-header"));
 
         assertEquals("""
                 ab cd
                 efgh\s
-                """, Files.readString(outputFile, ISO_8859_1), "Expected output file to have been written");
+                """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
     }
 
     @Test
@@ -324,13 +325,13 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--input-header"));
 
         assertEquals("""
                 ab cd
                 efgh\s
-                """, Files.readString(outputFile, ISO_8859_1), "Expected output file to have been written");
+                """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
     }
 
     @Test
@@ -342,13 +343,13 @@ class ExtTableGenMainTest {
                 """, ISO_8859_1);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--input-charset=iso-8859-1"));
 
         assertEquals("""
                 ab cd
                 éfgh\s
-                """, Files.readString(outputFile, ISO_8859_1), "Expected output file to have been written");
+                """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
     }
 
     @Test
@@ -360,13 +361,13 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--table-name=TABLE1", "--column-encoding=UTF8", "--config-out=" + outConfigFile));
 
         assertEquals("""
                 ab          cd     \s
                 éfg        h      \s
-                """, Files.readString(outputFile, UTF_8), "Expected output file to have been written");
+                """, Files.readString(tableFilePath, UTF_8), "Expected external table file to have been written");
         assertConfigFile(
                 new EtgConfig(
                         new TableConfig("TABLE1",
@@ -374,7 +375,7 @@ class ExtTableGenMainTest {
                                         col("column1", 3, FbEncoding.UTF8),
                                         col("column2", 2, FbEncoding.UTF8),
                                         EndColumn.require(EndColumn.Type.LF)),
-                                new OutputConfig(outputFile, false)),
+                                new TableFile(tableFilePath, false)),
                         new TableDerivationConfig(FbEncoding.UTF8, EndColumn.Type.LF, TableDerivationMode.NEVER),
                         new InputConfig(inputFile, UTF_8, true)),
                 outConfigFile);
@@ -389,10 +390,10 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(1,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--column-encoding=UTF8"));
 
-        assertFalse(Files.exists(outputFile), "Expected output file to not exist");
+        assertFalse(Files.exists(tableFilePath), "Expected external table file to not exist");
     }
 
     @Test
@@ -404,10 +405,10 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(1,
-                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--output-file=" + outputFile,
+                ExtTableGenMain.parseAndExecute("--input-file=" + inputFile, "--table-file=" + tableFilePath,
                         "--column-encoding=UTF8"));
 
-        assertFalse(Files.exists(outputFile), "Expected output file to not exist");
+        assertFalse(Files.exists(tableFilePath), "Expected external table file to not exist");
     }
 
     @Test
@@ -421,23 +422,23 @@ class ExtTableGenMainTest {
     @ParameterizedTest
     @NullSource
     @ValueSource(booleans = { true, false })
-    void mergeConfig_outputFile(Boolean outputOverwrite) {
+    void mergeConfig_tableFile(Boolean overwriteTableFile) {
         var main = new ExtTableGenMain();
         EtgConfig originalConfig = testEtgConfig();
 
-        Path differentOutputFile = Path.of("different_output.dat");
-        main.outputFile = differentOutputFile;
-        main.outputOverwrite = outputOverwrite;
+        Path differentTableFile = Path.of("different_output.dat");
+        main.tableFilePath = differentTableFile;
+        main.overwriteTableFile = overwriteTableFile;
 
         assertThat(PrivateAccess.invokeMergeConfig(main, originalConfig), allOf(
                 tableConfig(allOf(
                         tableName(is(TABLE_NAME)),
                         tableColumns(is(testColumns())),
-                        tableOutputConfig(allOf(
-                                outputConfigPath(is(differentOutputFile)),
+                        tableFile(allOf(
+                                tableFilePath(is(differentTableFile)),
                                 // TODO Value is currently inherited from original config if not specified, we may need to revise that
-                                outputConfigAllowOverwrite(
-                                        requireNonNullElse(outputOverwrite, OUTPUT_ALLOW_OVERWRITE)))))),
+                                tableFileOverwrite(
+                                        requireNonNullElse(overwriteTableFile, OVERWRITE_TABLE_FILE)))))),
                 tableDerivationConfig(is(testDerivationConfig())),
                 inputConfig(is(testInputConfig()))));
     }
@@ -454,7 +455,7 @@ class ExtTableGenMainTest {
                 tableConfig(allOf(
                         tableName(is(differentTableName)),
                         tableColumns(is(testColumns())),
-                        tableOutputConfig(is(testOutputConfig())))),
+                        tableFile(is(testTableFile())))),
                 tableDerivationConfig(is(testDerivationConfig())),
                 inputConfig(is(testInputConfig()))));
     }

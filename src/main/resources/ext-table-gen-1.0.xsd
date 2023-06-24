@@ -14,7 +14,6 @@
                 <xs:element name="externalTable" type="ExternalTableType"/>
                 <xs:element name="tableDerivationConfig" type="TableDerivationConfigType" minOccurs="0"/>
                 <xs:element name="inputConfig" type="InputConfigType" minOccurs="0"/>
-                <xs:element name="outputConfig" type="OutputConfigType" minOccurs="0"/>
                 <xs:element name="informational" type="InformationalType" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
@@ -23,6 +22,7 @@
     <xs:complexType name="ExternalTableType">
         <xs:sequence>
             <xs:element name="columns" type="ColumnListType"/>
+            <xs:element name="tableFile" type="TableFileType" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string" use="required"/>
     </xs:complexType>
@@ -162,9 +162,9 @@
         </xs:restriction>
     </xs:simpleType>
 
-    <xs:complexType name="OutputConfigType">
+    <xs:complexType name="TableFileType">
         <xs:attribute name="path" type="xs:string" use="required"/>
-        <xs:attribute name="allowOverwrite" type="xs:boolean" default="false"/>
+        <xs:attribute name="overwrite" type="xs:boolean" default="false"/>
     </xs:complexType>
 
     <xs:complexType name="InputConfigType">

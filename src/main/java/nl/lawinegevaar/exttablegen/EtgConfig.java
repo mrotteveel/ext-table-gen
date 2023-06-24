@@ -135,24 +135,26 @@ record InputConfig(Path path, Charset charset, boolean hasHeaderRow) {
 }
 
 /**
- * Output file configuration.
+ * External table file.
  *
  * @param path
- *         path of the external table output file
+ *         path of the external table file
+ * @param overwrite
+ *         {@code true} ext-table-gen can overwrite file if it already exists
  */
-record OutputConfig(Path path, boolean allowOverwrite) {
+record TableFile(Path path, boolean overwrite) {
 
-    OutputConfig(String path, boolean allowOverwrite) {
-        this(Path.of(path), allowOverwrite);
+    TableFile(String path, boolean overwrite) {
+        this(Path.of(path), overwrite);
     }
 
     /**
-     * Converts this output config to an {@link OutputResource}.
+     * Converts this table file to an {@link OutputResource}.
      *
      * @return output resource
      */
     OutputResource toOutputResource() {
-        return OutputResource.of(path, allowOverwrite);
+        return OutputResource.of(path, overwrite);
     }
 
 }
@@ -164,17 +166,28 @@ record OutputConfig(Path path, boolean allowOverwrite) {
  *         name of the table (can be {@code null})
  * @param columns
  *         list of columns (can be empty, {@code null} will be replaced with empty list)
- * @param outputConfig
- *         (optional) output config
+ * @param tableFile
+ *         (optional) table file
  */
-record TableConfig(String name, List<Column> columns, Optional<OutputConfig> outputConfig) {
+record TableConfig(String name, List<Column> columns, Optional<TableFile> tableFile) {
+
+    private static final TableConfig EMPTY = new TableConfig(null, null, Optional.empty());
 
     TableConfig {
         columns = columns != null ? List.copyOf(columns) : List.of();
     }
 
-    TableConfig(String name, List<Column> columns, OutputConfig outputConfig) {
-        this(name, columns, Optional.ofNullable(outputConfig));
+    TableConfig(String name, List<Column> columns, TableFile tableFile) {
+        this(name, columns, Optional.ofNullable(tableFile));
+    }
+
+    /**
+     * Returns an empty table config (no name, no column, no table file).
+     *
+     * @return empty table config
+     */
+    static TableConfig empty() {
+        return EMPTY;
     }
 
     /**
@@ -185,7 +198,7 @@ record TableConfig(String name, List<Column> columns, Optional<OutputConfig> out
      *         if this configuration is incomplete or invalid for an external table
      */
     ExternalTable toExternalTable() {
-        return new ExternalTable(name(), columns(), outputConfig.map(OutputConfig::toOutputResource).orElse(null));
+        return new ExternalTable(name(), columns(), tableFile.map(TableFile::toOutputResource).orElse(null));
     }
 
     Optional<String> toDdl() {
@@ -197,35 +210,35 @@ record TableConfig(String name, List<Column> columns, Optional<OutputConfig> out
     }
 
     /**
-     * @return value of {@link OutputConfig#allowOverwrite()} or {@code false} if {@code outputConfig} is empty
+     * @return value of {@link TableFile#overwrite()} or {@code false} if {@code tableFile} is empty
      */
-    boolean allowOutputConfigOverwrite() {
-        return outputConfig.map(OutputConfig::allowOverwrite).orElse(Boolean.FALSE);
+    boolean allowTableFileOverwrite() {
+        return tableFile.map(TableFile::overwrite).orElse(Boolean.FALSE);
     }
 
     TableConfig withName(String name) {
         if (Objects.equals(this.name, name)) return this;
-        return new TableConfig(name, columns, outputConfig);
+        return new TableConfig(name, columns, tableFile);
     }
 
     TableConfig withColumns(List<Column> columns) {
         if (this.columns.equals(columns) || this.columns.isEmpty() && columns == null) return this;
-        return new TableConfig(name, columns, outputConfig);
+        return new TableConfig(name, columns, tableFile);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    TableConfig withOutputConfig(Optional<OutputConfig> outputConfig) {
-        return withOutputConfig(outputConfig.orElse(null));
+    TableConfig withTableFile(Optional<TableFile> tableFile) {
+        return withTableFile(tableFile.orElse(null));
     }
 
-    TableConfig withOutputConfig(OutputConfig outputConfig) {
-        if (Objects.equals(this.outputConfig.orElse(null), outputConfig)) return this;
-        return new TableConfig(name, columns, outputConfig);
+    TableConfig withTableFile(TableFile tableFile) {
+        if (Objects.equals(this.tableFile.orElse(null), tableFile)) return this;
+        return new TableConfig(name, columns, tableFile);
     }
 
     static TableConfig of(ExternalTable externalTable) {
         return new TableConfig(externalTable.name(), externalTable.columns(),
-                externalTable.outputResource().path().map(path -> new OutputConfig(path, false)));
+                externalTable.outputResource().path().map(path -> new TableFile(path, false)));
     }
 
 }

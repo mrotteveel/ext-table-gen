@@ -70,9 +70,6 @@ final class ConfigMapper {
         ExtTableGenConfig configType = factory.createExtTableGenConfig();
         TableConfig tableConfig = etgConfig.tableConfig();
         configType.setExternalTable(toXmlExternalTable(tableConfig));
-        tableConfig.outputConfig()
-                .map(this::toXmlOutputConfigType)
-                .ifPresent(configType::setOutputConfig);
         configType.setTableDerivationConfig(toXmlTableDerivationConfigType(etgConfig.tableDerivationConfig()));
         tableConfig.toDdl()
                 .map(ddl -> {
@@ -91,6 +88,9 @@ final class ConfigMapper {
         ExternalTableType externalTableType = factory.createExternalTableType();
         externalTableType.setName(tableConfig.name());
         externalTableType.setColumns(toXmlColumnListType(tableConfig.columns()));
+        tableConfig.tableFile()
+                .map(this::toXmlTableFileType)
+                .ifPresent(externalTableType::setTableFile);
         return externalTableType;
     }
 
@@ -141,11 +141,11 @@ final class ConfigMapper {
         return endColumnType;
     }
 
-    private OutputConfigType toXmlOutputConfigType(OutputConfig outputConfig) {
-        OutputConfigType outputConfigType = factory.createOutputConfigType();
-        outputConfigType.setPath(outputConfig.path().toString());
-        outputConfigType.setAllowOverwrite(outputConfig.allowOverwrite());
-        return outputConfigType;
+    private TableFileType toXmlTableFileType(TableFile tableFile) {
+        TableFileType tableFileType = factory.createTableFileType();
+        tableFileType.setPath(tableFile.path().toString());
+        tableFileType.setOverwrite(tableFile.overwrite());
+        return tableFileType;
     }
 
     private TableDerivationConfigType toXmlTableDerivationConfigType(TableDerivationConfig tableDerivationConfig) {
@@ -165,17 +165,19 @@ final class ConfigMapper {
 
     private EtgConfig fromXmlExtTableGenConfig(ExtTableGenConfig extTableGenConfig) {
         return new EtgConfig(
-                fromXmlExternalTableType(extTableGenConfig.getExternalTable())
-                        .withOutputConfig(fromXmlOutputConfigType(extTableGenConfig.getOutputConfig())),
+                fromXmlExternalTableType(extTableGenConfig.getExternalTable()),
                 fromXmlTableDerivationConfigType(extTableGenConfig.getTableDerivationConfig()),
                 fromXmlInputConfigType(extTableGenConfig.getInputConfig()));
     }
 
     private TableConfig fromXmlExternalTableType(ExternalTableType externalTableType) {
+        if (externalTableType == null) {
+            return TableConfig.empty();
+        }
         return new TableConfig(
-                externalTableType != null ? externalTableType.getName() : null,
-                externalTableType != null ? fromXmlColumnListType(externalTableType.getColumns()) : null,
-                Optional.empty());
+                externalTableType.getName(),
+                fromXmlColumnListType(externalTableType.getColumns()),
+                fromXmlTableFileType(externalTableType.getTableFile()));
     }
 
     private List<Column> fromXmlColumnListType(ColumnListType columnListType) {
@@ -213,16 +215,16 @@ final class ConfigMapper {
         return EndColumn.require(EndColumn.Type.valueOf(endColumnType.getType()));
     }
 
-    private Optional<OutputConfig> fromXmlOutputConfigType(OutputConfigType outputConfigType) {
-        if (outputConfigType == null) return Optional.empty();
+    private Optional<TableFile> fromXmlTableFileType(TableFileType tableFileType) {
+        if (tableFileType == null) return Optional.empty();
         try {
             return Optional.of(
-                    new OutputConfig(
-                            outputConfigType.getPath(),
-                            outputConfigType.isAllowOverwrite()));
+                    new TableFile(
+                            tableFileType.getPath(),
+                            tableFileType.isOverwrite()));
         } catch (RuntimeException e) {
             System.getLogger(getClass().getName())
-                    .log(WARNING, "Could not convert from XML OutputConfigType, output config value dropped", e);
+                    .log(WARNING, "Could not convert from XML TableFileType, table file value dropped", e);
             return Optional.empty();
         }
     }

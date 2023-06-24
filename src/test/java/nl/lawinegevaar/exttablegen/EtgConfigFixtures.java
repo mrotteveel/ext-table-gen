@@ -14,9 +14,9 @@ final class EtgConfigFixtures {
     static final Column COLUMN_1 = col("FIXTURE_COLUMN_1", 10);
     static final Column COLUMN_2 = col("FIXTURE_COLUMN_2", 15, FbEncoding.UTF8);
     static final Column END_COLUMN = EndColumn.require(EndColumn.Type.CRLF);
-    static final Path OUTPUT_PATH = Path.of("fixture-output.dat");
+    static final Path TABLE_FILE_PATH = Path.of("fixture-output.dat");
     static final Path INPUT_PATH = Path.of("fixture-input.csv");
-    static final boolean OUTPUT_ALLOW_OVERWRITE = true;
+    static final boolean OVERWRITE_TABLE_FILE = true;
     static final boolean INPUT_HAS_HEADER = false;
     static final EndColumn.Type DERIVATION_COLUMN_TYPE = EndColumn.Type.CRLF;
     static final FbEncoding DERIVATION_ENCODING = FbEncoding.ASCII;
@@ -34,15 +34,15 @@ final class EtgConfigFixtures {
         return new TableConfig(
                 TABLE_NAME,
                 testColumns(),
-                testOutputConfig());
+                testTableFile());
     }
 
     static List<Column> testColumns() {
         return List.of(COLUMN_1, COLUMN_2, END_COLUMN);
     }
 
-    static OutputConfig testOutputConfig() {
-        return new OutputConfig(OUTPUT_PATH, OUTPUT_ALLOW_OVERWRITE);
+    static TableFile testTableFile() {
+        return new TableFile(TABLE_FILE_PATH, OVERWRITE_TABLE_FILE);
     }
 
     static TableDerivationConfig testDerivationConfig() {

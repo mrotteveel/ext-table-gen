@@ -71,35 +71,35 @@ If the first row is not a header, and the external table is derived, columns are
 This option can override the XML config of <<ref-xml-inputconfig,`/extTableGenConfig/inputConfig[@hasHeaderRow]`>> if explicitly specified.
 
 [#ref-cmd-output]
-=== Output configuration
+=== External table file configuration
 
-[#ref-cmd-output-file]
-==== Output file (`--output-file`)
+[#ref-cmd-table-file]
+==== Table file path (`--table-file`)
 
-The output file option (`--output-file=FILE`) path of the external table file to write for output.
-`FILE` is the absolute or relative path to the file to write.
+The table file path option (`--table-file=FILE`) specifies the path of the external table file.
+`FILE` is the absolute or relative path to the file.
 Relative paths are resolved against the current working directory.
 
 We recommend specifying absolute paths, as the configuration file will store the path as specified, which means that if a relative path is used, and the configuration file is then used from a different location, it may attempt to write to the wrong location or file.
 
-This option can override the XML config of <<ref-xml-outputconfig,`/extTableGenConfig/outputConfig[@path]`>>.
+This option can override the XML config of <<ref-xml-tablefile,`/extTableGenConfig/externalTable/tableFile[@path]`>>.
 
-[#ref-cmd-overwrite-output]
-==== Overwrite output file (`--[no-]overwrite-output`)
+[#ref-cmd-overwrite-table-file]
+==== Overwrite table file (`--[no-]overwrite-table-file`)
 
-The overwrite output boolean option (`--[no-]overwrite-output`) specifies if an existing output file can be overwritten (`--overwrite-output`) or not overwritten (`--no-overwrite-output`, the default).
-The default is `--no-overwrite-output`.
+The overwrite table file boolean option (`--[no-]overwrite-table-file`) specifies if an existing external table file can be overwritten (`--overwrite-table-file`) or not overwritten (`--no-overwrite-table-file`, the default).
+The default is `--no-overwrite-table-file`.
 
-This option is ignored if <<ref-cmd-output-file,`--output-file`>> is not specified.
-On other words, it does not override the XML config.
+This option is ignored if <<ref-cmd-table-file,`--table-file`>> is not specified.
+In other words, it does not override the XML config.
 
 [CAUTION]
 ====
-We only allow this override if also specifying the output file, so you're aware what file you're going to overwrite.
-However, currently we handle this inconsistently, because in the other direction, specifying <<ref-cmd-config-in,`--config-in`>> and <<ref-cmd-output-file,`--output-file`>> without specifying `--[no-]overwrite-output` will inherit the value from <<ref-xml-outputconfig,`/extTableGenConfig/outputConfig[@allowOverwrite]`>> from the XML config.
+We only allow this override if also specifying the external table file, so you're aware what file you're going to overwrite.
+However, currently we handle this inconsistently, because in the other direction, specifying <<ref-cmd-config-in,`--config-in`>> and <<ref-cmd-table-file,`--table-file`>> without specifying `--[no-]overwrite-table-file` will inherit the value from <<ref-xml-tablefile,`/extTableGenConfig/externalTable/tableFile[@overwrite]`>> from the XML config.
 This could lead to unintended overwrites.
 
-We're not yet sure how we're going to resolve this inconsistency, but likely we'll remove the inheritance from the XML file if <<ref-cmd-output-file,`--output-file`>> is specified without `--[no-]overwrite-output`.
+We're not yet sure how we're going to resolve this inconsistency, but likely we'll remove the inheritance from the XML file if <<ref-cmd-table-file,`--table-file`>> is specified without `--[no-]overwrite-table-file`.
 ====
 
 [#ref-cmd-tbl-derive]
@@ -127,12 +127,13 @@ The column encoding option (`--column-encoding=ENCODING`) specifies the column e
 Default value is `ISO8859_1`.
 
 This option can override the XML config of <<ref-xml-tablederivationconfig,`/extTableGenConfig/tableDerivationConfig[@columnEncoding]`>> if explicitly specified.
+It does not override the column encoding of existing columns (unless you use an explicit <<ref-cmd-tbl-derive-mode>>).
 
 [#ref-unsupported-encoding]
 ===== Unsupported character sets
 
 Not all Firebird character sets are supported.
-`OCTETS` and `NONE` are not supported, as we need to know which character set to use to encode string data when writing the output file, so we require that a "`real`" character set is specified as the column encoding.
+`OCTETS` and `NONE` are not supported, as we need to know which character set to use to encode string data when writing the external table file, so we require that a "`real`" character set is specified as the column encoding.
 The character set `UNICODE_FSS` is not supported, as we can't support this variant of UTF-8 with the standard Java character sets.
 Other multibyte character sets (`SJIS_0208`, `EUCJ_0208`, `KSC_5601`, `BIG_5`, `GB_2312`, `GBK`, `CP943C`, `GB18030`) are not supported as we're not sure how to handle padding for these character sets (support may be added in the future after we've experimented with this).
 Character sets which have no equivalent Java character set are also not supported (e.g. `NEXT`, `CYRL`).
@@ -157,6 +158,7 @@ An end column is not necessary, but can improve the "`human readability`" of the
 If this is no concern for you, use `--end-column=NONE` to reduce file size and overhead of writing and reading this column.
 
 This option can override the XML config of <<ref-xml-tablederivationconfig,`/extTableGenConfig/tableDerivationConfig[@endColumnType]`>> if explicitly specified.
+It does not override the current end-column of `/extTableGenConfig/extTable/columns/endColumn` (unless you use an explicit <<ref-cmd-tbl-derive-mode>>).
 
 [#ref-cmd-tbl-derive-mode]
 ==== Table derivation mode (`--table-derivation-mode`)
@@ -240,13 +242,12 @@ None
 * <<ref-xml-externaltable>> -- required
 * <<ref-xml-tablederivationconfig>> -- optional
 * <<ref-xml-inputconfig>> -- optional
-* <<ref-xml-outputconfig>> -- optional
 * <<ref-xml-informational>> -- optional
 
 [#ref-xml-externaltable]
 === `externalTable`
 
-The `externalTable` element defines the name and columns of the external table.
+The `externalTable` element defines the name, columns and table file of the external table.
 The columns it contains are used by _ext-table-gen_ to validate the columns in the input CSV file (e.g. number of columns, length of column values), and format the output of the external table file, and generate the DDL of the table.
 
 .Attributes
@@ -258,6 +259,7 @@ It contains a sequence of columns.
 
 .Elements
 * <<ref-xml-columns>> -- required
+* <<ref-xml-tablefile>> -- optional
 
 [#ref-xml-columns]
 ==== `columns`
@@ -332,6 +334,23 @@ Instead, that is represented by absence of the `endColumn` element.
 .Elements
 None
 
+[#ref-xml-tablefile]
+==== `tableFile`
+
+The element `tableFile` specifies the external table file.
+
+.Attributes
+[horizontal]
+`path`::
+Path of the external table file (required). +
+If a relative path, it is resolved against the current working directory of _ext-table-gen_.
+It is recommended to use absolute paths.
+`overwrite`::
+Boolean specifying if _ext-table-gen_ is allowed to overwrite an existing file (optional; defaults to `false`)
+
+.Elements
+None
+
 [#ref-xml-tablederivationconfig]
 === `tableDerivationConfig`
 
@@ -365,7 +384,7 @@ Absence of the attribute implies `LF`.
 None
 
 The commandline option <<ref-cmd-tbl-derive-mode>> is intentionally not represented in the configuration file.
-If a configuration file is specified (using <<ref-cmd-config-in,`--config-in`>>), _ext-table-gen_ defaults to `NEVER`, unless explicitly overridden by the commandline.
+If a configuration file is specified (using <<ref-cmd-config-in,`--config-in`>>), _ext-table-gen_ defaults to `NEVER`, and needs to be explicitly overridden by the commandline to derive the external table.
 
 [#ref-xml-inputconfig]
 === `inputConfig`
@@ -384,23 +403,6 @@ Expects a Java character set name or alias.
 As available character sets depend on the JVM and its classpath, this is not restricted by the XSD.
 `hasHeaderRow`::
 Boolean specifying if the first row of the input file is a header row or a data row (optional; defaults to `true`)
-
-.Elements
-None
-
-[#ref-xml-outputconfig]
-=== `outputConfig`
-
-The element `outputConfig` specifies the external table file (output file).
-
-.Attributes
-[horizontal]
-`path`::
-Path of the output file (required). +
-If a relative path, it is resolved against the current working directory of _ext-table-gen_.
-It is recommended to use absolute paths.
-`allowOverwrite`::
-Boolean specifying if an existing file is allowed to be overwritten (option; defaults to `false`)
 
 .Elements
 None

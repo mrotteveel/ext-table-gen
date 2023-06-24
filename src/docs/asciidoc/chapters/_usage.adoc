@@ -61,7 +61,7 @@ The minimum necessary commandline to create an external table file is to use:
 
 [listing]
 ----
-ext-table-gen --input-file=persons.csv --output-file=persons.dat
+ext-table-gen --input-file=persons.csv --table-file=persons.dat
 ----
 
 However, this will not show you the external table that was derived from the CSV file, so it is not very useful.
@@ -71,7 +71,7 @@ Instead, also specify the <<ref-cmd-config-out,`--config-out`>> option to create
 [listing]
 ----
 ext-table-gen --input-file=C:\FirebirdData\csv\persons.csv ^
-  --output-file=C:\FirebirdData\exttables\persons.dat ^
+  --table-file=C:\FirebirdData\exttables\persons.dat ^
   --config-out=C:\FirebirdData\csv\persons.xml
 ----
 
@@ -101,8 +101,8 @@ _ext-table-gen_ also created the following `persons.dat`
 include::{includedir}/chapters/data/persons.dat[]
 ----
 
-By default, _ext-table-gen_ will not overwrite existing output or configuration files.
-This needs to be explicitly enabled with <<ref-cmd-overwrite-output,`--overwrite-output`>> and/or <<ref-cmd-overwrite-config,`--overwrite-config`>>.
+By default, _ext-table-gen_ will not overwrite existing external table files or configuration files.
+This needs to be explicitly enabled with <<ref-cmd-overwrite-table-file,`--overwrite-table-file`>> and/or <<ref-cmd-overwrite-config,`--overwrite-config`>>.
 
 [#usage-config]
 == Using configuration
@@ -152,8 +152,8 @@ Below, we modified the XML generated in section <<usage-basic-csv>>, slightly in
 include::{includedir}/chapters/data/persons-length-modified.xml[]
 ----
 
-We also set the attribute `allowOverwrite` to `true` of <<ref-xml-outputconfig>> to simplify the next commandline.
-The <<ref-cmd-overwrite-output,`--overwrite-output`>> option only works if <<ref-cmd-output-file,`--output-file`>> is also specified, it doesn't override the overwrite config for the file specified in the XML.
+We also set the attribute `overwrite` to `true` of <<ref-xml-tablefile>> to simplify the next commandline.
+The <<ref-cmd-overwrite-table-file,`--overwrite-table-file`>> option only works if <<ref-cmd-table-file,`--table-file`>> is also specified, it doesn't override the overwrite config for the file specified in the XML.
 We didn't change the DDL, as we'll demonstrate later how to regenerate it.
 
 To use the configuration file, use:
@@ -186,7 +186,7 @@ This changes once we start using multiple character sets, and -- hopefully -- in
 
 In the previous section, <<usage-config-length>>, we modified the configuration XML, but didn't touch the DDL.
 We can of course modify the DDL manually, but we can also regenerate the configuration XML using <<ref-cmd-config-out,`--config-out`>>.
-Be aware, the output file specified in the configuration file will also be recreated as part of this command.
+Be aware, the external table file specified in the configuration file will also be recreated as part of this command.
 
 For example, building on the previous example:
 
@@ -233,7 +233,7 @@ We now get:
 include::{includedir}/chapters/data/persons-wrong-charset.dat[]
 ----
 
-As you can see, the `š` has been replaced by a `?`, because `š` cannot be encoded in ISO-8859-1.
+As you can see, the `š` has been replaced by a `?`footnote:[This is default behaviour of Java when encoding characters which don't exist in an encoding], because `š` cannot be encoded in ISO-8859-1.
 To be able to import the right character, we need to use a different encoding.
 In our simplified example, we could change the column to `ISO8859_2` or `WIN1250` (which supports Czech codepoints like `š`), but we'll use `UTF8` to also demonstrate the effects of using a multibyte character set.
 
@@ -272,7 +272,7 @@ If you try to trick the server, by manually editing the contents of such a colum
 
 Again, it is important to keep in mind, that by using two different and incompatible character sets in the external table file, it is now truly a _binary_ file.
 In our example it just happens to work OK when shown as text, because all other characters are in ASCII, which is a subset of both ISO-8859-1 and UTF-8.
-If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would have been rendered as Unicode replacement characters (because the AsciiDoctor tool use to create this manual also reads our example data as UTF-8).
+If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would have been rendered as Unicode replacement characters (because the AsciiDoctor tool used to create this manual also reads our example data as UTF-8).
 
 [#usage-workflow]
 == Recommended workflow
@@ -280,7 +280,7 @@ If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would h
 The previous examples are all that -- we think -- you'll need to create usable external table files.
 
 For one-shot imports, the first example from <<usage-basic-csv>> can be sufficient.
-You may need to use <<ref-cmd-column-encoding,`--column-encoding`>> if you need something other than `ISO8859_1` for the output columns, and <<ref-cmd-input-charset,`--input-charset`>> if the CSV file is not encoded in ASCII or UTF-8.
+You may need to use <<ref-cmd-column-encoding,`--column-encoding`>> if you need something other than `ISO8859_1` for the external table columns, and <<ref-cmd-input-charset,`--input-charset`>> if the CSV file is not encoded in ASCII or UTF-8.
 
 For repeated imports, or where multiple character sets are needed, we recommend the following steps:
 
@@ -293,7 +293,7 @@ Use the DDL from the last step to create the external table, and use the externa
 
 From that point on, the configuration file can be used to transform a CSV file to an external table file.
 
-For example, assuming the <<ref-xml-outputconfig>> in the configuration has attribute `allowOverwrite` set to `true`, and you always want to read the configured file from <<ref-xml-inputconfig>>:
+For example, assuming the <<ref-xml-tablefile>> in the configuration has attribute `overwrite` set to `true`, and you always want to read the configured file from <<ref-xml-inputconfig>>:
 
 [listing]
 ----

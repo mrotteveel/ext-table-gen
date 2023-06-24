@@ -18,7 +18,7 @@ import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_1;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_2;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.testEtgConfig;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.emptyInputConfig;
-import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.emptyTableOutputConfig;
+import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.emptyTableFile;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.tableColumns;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.tableConfig;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.tableDerivationConfig;
@@ -63,7 +63,7 @@ class ConfigMapperTest {
 
     @Test
     void incompleteConfig() throws Exception {
-        var originalTableConfig = new TableConfig(null, List.of(), Optional.empty());
+        var originalTableConfig = TableConfig.empty();
         var originalConfig = new EtgConfig(
                 originalTableConfig,
                 TableDerivationConfig.getDefault(),
@@ -113,7 +113,7 @@ class ConfigMapperTest {
                 tableConfig(allOf(
                         tableName(is(DEFAULT_TABLE_NAME)),
                         tableColumns(emptyCollectionOf(Column.class)),
-                        emptyTableOutputConfig())),
+                        emptyTableFile())),
                 tableDerivationConfig(is(TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER))),
                 emptyInputConfig()));
     }
@@ -182,7 +182,7 @@ class ConfigMapperTest {
                 tableConfig(allOf(
                         tableName(is(nullValue(String.class))),
                         tableColumns(emptyCollectionOf(Column.class)),
-                        emptyTableOutputConfig())),
+                        emptyTableFile())),
                 tableDerivationConfig(is(TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER))),
                 emptyInputConfig()));
     }

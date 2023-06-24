@@ -57,20 +57,19 @@ final class ExtTableGenMain implements Runnable {
             description = "First row of input file is a header. Default: true", order = 120)
     Boolean inputHeader;
 
-    @CommandLine.Option(names = "--output-file", paramLabel = "FILE", description = "External table output file",
-            order = 200)
-    Path outputFile;
+    @CommandLine.Option(names = "--table-file", paramLabel = "FILE", description = "External table file", order = 200)
+    Path tableFilePath;
 
-    @CommandLine.Option(names = "--overwrite-output", negatable = true, fallbackValue = "true",
-            description = "Overwrite the output file if it already exists. Default: false", order = 210)
-    Boolean outputOverwrite;
+    @CommandLine.Option(names = "--overwrite-table-file", negatable = true, fallbackValue = "true",
+            description = "Overwrite the table file if it already exists. Default: false", order = 210)
+    Boolean overwriteTableFile;
 
     @CommandLine.Option(names = "--table-name", paramLabel = "TABLE",
             description = "Name of the external table", order = 300)
     String tableName;
 
     @CommandLine.Option(names = "--column-encoding", paramLabel = "ENCODING", converter = FbEncodingConverter.class,
-            description = "Name of the character set of output columns (Firebird character set name). Default: "
+            description = "Name of the character set of external table columns (Firebird character set name). Default: "
                           + "ISO8859_1", order = 310)
     FbEncoding columnEncoding;
 
@@ -133,8 +132,8 @@ final class ExtTableGenMain implements Runnable {
         if (etgConfig.inputConfig().map(InputConfig::charset).isEmpty()) {
             throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --input-charset.");
         }
-        if (etgConfig.tableConfig().outputConfig().map(OutputConfig::path).isEmpty()) {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --output-file.");
+        if (etgConfig.tableConfig().tableFile().map(TableFile::path).isEmpty()) {
+            throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --table-file.");
         }
     }
 
@@ -151,10 +150,10 @@ final class ExtTableGenMain implements Runnable {
      * @return the external-table-gen configuration after merging (can be {@code config} if there was nothing to merge)
      */
     private EtgConfig mergeConfig(EtgConfig config) {
-        if (outputFile != null) {
+        if (tableFilePath != null) {
             config = config.withTableConfig(
-                    cfg -> cfg.withOutputConfig(new OutputConfig(
-                            outputFile, requireNonNullElse(outputOverwrite, cfg.allowOutputConfigOverwrite()))));
+                    cfg -> cfg.withTableFile(new TableFile(
+                            tableFilePath, requireNonNullElse(overwriteTableFile, cfg.allowTableFileOverwrite()))));
         }
 
         if (tableName != null) {
@@ -205,8 +204,8 @@ final class ExtTableGenMain implements Runnable {
     private EtgConfig createConfig() {
         return new EtgConfig(
                 new TableConfig(tableName, List.of(),
-                        Optional.ofNullable(outputFile)
-                                .map(file -> new OutputConfig(file, outputOverwriteOrDefault()))),
+                        Optional.ofNullable(tableFilePath)
+                                .map(file -> new TableFile(file, overwriteTableFileOrDefault()))),
                 new TableDerivationConfig(
                         columnEncodingOrDefault(), endColumnTypeOrDefault(), tableDerivationModeOrDefault()),
                 createInputConfig());
@@ -224,8 +223,8 @@ final class ExtTableGenMain implements Runnable {
         return requireNonNullElse(inputHeader, Boolean.TRUE);
     }
 
-    private boolean outputOverwriteOrDefault() {
-        return requireNonNullElse(outputOverwrite, Boolean.FALSE);
+    private boolean overwriteTableFileOrDefault() {
+        return requireNonNullElse(overwriteTableFile, Boolean.FALSE);
     }
 
     private FbEncoding columnEncodingOrDefault() {

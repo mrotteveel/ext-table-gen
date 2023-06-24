@@ -94,19 +94,19 @@ final class ExtTableGen {
                         tableDerivationConfig.columnEncoding(), tableDerivationConfig.endColumnType()),
                 new StopOnExceptionProcessor(CsvValidationException.class));
 
-        config = config.withTableConfig(cfg -> TableConfig.of(externalTable).withOutputConfig(cfg.outputConfig()));
+        config = config.withTableConfig(cfg -> TableConfig.of(externalTable).withTableFile(cfg.tableFile()));
         
         return this.externalTable = externalTable;
     }
 
     /**
-     * Creates an output resource for the external table data from the <i>output</i> options.
+     * Creates an output resource for the external table data from the <i>table file</i> options.
      *
      * @return output resource for writing external table data
      */
     private OutputResource createExternalTableOutputResource() {
-        return config.tableConfig().outputConfig()
-                .map(OutputConfig::toOutputResource)
+        return config.tableConfig().tableFile()
+                .map(TableFile::toOutputResource)
                 .orElseGet(OutputResource::nullOutputResource);
     }
 

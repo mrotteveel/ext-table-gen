@@ -68,28 +68,28 @@ final class EtgConfigMatchers {
         };
     }
 
-    static Matcher<TableConfig> emptyTableOutputConfig() {
-        return new OutputConfigMatcher(emptyOptional());
+    static Matcher<TableConfig> emptyTableFile() {
+        return new TableFileMatcher(emptyOptional());
     }
 
-    static Matcher<TableConfig> tableOutputConfig(Matcher<OutputConfig> matcher) {
-        return new OutputConfigMatcher(optionalWithValue(matcher));
+    static Matcher<TableConfig> tableFile(Matcher<TableFile> matcher) {
+        return new TableFileMatcher(optionalWithValue(matcher));
     }
 
-    static Matcher<OutputConfig> outputConfigPath(Matcher<Path> matcher) {
-        return new FeatureMatcher<>(matcher, "output path", "output path") {
+    static Matcher<TableFile> tableFilePath(Matcher<Path> matcher) {
+        return new FeatureMatcher<>(matcher, "table file path", "table file path") {
             @Override
-            protected Path featureValueOf(OutputConfig actual) {
+            protected Path featureValueOf(TableFile actual) {
                 return actual.path();
             }
         };
     }
 
-    static Matcher<OutputConfig> outputConfigAllowOverwrite(boolean allowOverwrite) {
-        return new FeatureMatcher<>(is(allowOverwrite), "allow output overwrite", "allow output overwrite") {
+    static Matcher<TableFile> tableFileOverwrite(boolean overwrite) {
+        return new FeatureMatcher<>(is(overwrite), "table file overwrite", "table file overwrite") {
             @Override
-            protected Boolean featureValueOf(OutputConfig actual) {
-                return actual.allowOverwrite();
+            protected Boolean featureValueOf(TableFile actual) {
+                return actual.overwrite();
             }
         };
     }
@@ -161,15 +161,15 @@ final class EtgConfigMatchers {
 
     }
 
-    private static class OutputConfigMatcher extends FeatureMatcher<TableConfig, Optional<OutputConfig>> {
+    private static class TableFileMatcher extends FeatureMatcher<TableConfig, Optional<TableFile>> {
 
-        public OutputConfigMatcher(Matcher<? super Optional<OutputConfig>> subMatcher) {
-            super(subMatcher, "output config", "output config");
+        public TableFileMatcher(Matcher<? super Optional<TableFile>> subMatcher) {
+            super(subMatcher, "table file", "table file");
         }
 
         @Override
-        protected Optional<OutputConfig> featureValueOf(TableConfig actual) {
-            return actual.outputConfig();
+        protected Optional<TableFile> featureValueOf(TableConfig actual) {
+            return actual.tableFile();
         }
     }
 }

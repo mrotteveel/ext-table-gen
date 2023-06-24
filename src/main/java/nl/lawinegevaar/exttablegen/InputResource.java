@@ -14,7 +14,6 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.UnaryOperator;
 
 import static java.util.Objects.requireNonNull;
 
@@ -126,34 +125,6 @@ interface InputResource {
      */
     static InputResource fromClasspath(Class<?> locatorClass, String resource) {
         return new ClasspathInputResource(locatorClass, resource);
-    }
-
-    /**
-     * Returns an input resource which decorates the input stream returned by {@code original} using {@code decorator}.
-     *
-     * @param original
-     *         original input resource
-     * @param decorator
-     *         decorator to wrap or otherwise modify the input stream returned from {@code original.newInputStream()}
-     * @return input resource applying {@code decorator}
-     */
-    static InputResource decorate(InputResource original, UnaryOperator<InputStream> decorator) {
-        record DecoratingInputResource(InputResource original,
-                UnaryOperator<InputStream> decorator) implements InputResource {
-
-            DecoratingInputResource {
-                requireNonNull(original, "original");
-                requireNonNull(decorator, "decorator");
-            }
-
-            @Override
-            public InputStream newInputStream() throws IOException {
-                return decorator.apply(original.newInputStream());
-            }
-
-        }
-
-        return new DecoratingInputResource(original, decorator);
     }
 
 }

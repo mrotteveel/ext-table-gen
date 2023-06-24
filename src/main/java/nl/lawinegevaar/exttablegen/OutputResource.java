@@ -2,7 +2,6 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -116,35 +115,7 @@ interface OutputResource {
      * @return single-use output resource wrapping {@code out}
      */
     static OutputResource of(OutputStream out) {
-        return new OutputStreamResource(out, true);
-    }
-
-    /**
-     * Creates a single-use output resource wrapping {@code out}.
-     * <p>
-     * The close of the output stream returned by {@link #newOutputStream()} is not propagated to {@code out}.
-     * </p>
-     *
-     * @param out
-     *         output stream
-     * @return single-use output resource wrapping {@code out}
-     * @see #of(OutputStream)
-     */
-    static OutputResource ofNotCloseable(OutputStream out) {
-        return new OutputStreamResource(out, false);
-    }
-
-    /**
-     * Creates a single-use output resource to the current {@code System.out} (at invocation time of this method).
-     * <p>
-     * Equivalent to {@code OutputResource.ofNotCloseable(System.out)}.
-     * </p>
-     *
-     * @return output resource to {@code System.out}
-     * @see #ofNotCloseable(OutputStream)
-     */
-    static OutputResource ofSystemOut() {
-        return ofNotCloseable(System.out);
+        return new OutputStreamResource(out);
     }
 
     /**
@@ -288,12 +259,9 @@ final class OutputStreamResource implements OutputResource {
      *
      * @param out
      *         the stream to wrap
-     * @param allowClose
-     *         {@code false}, do not propagate {@link OutputStream#close()}; this is ensured by wrapping {@code out} in a
-     *         stream which ignores {@code close()}
      */
-    OutputStreamResource(OutputStream out, boolean allowClose) {
-        this.out = allowClose ? out : new CloseShieldOutputStream(out);
+    OutputStreamResource(OutputStream out) {
+        this.out = out;
     }
 
     @Override
@@ -305,22 +273,6 @@ final class OutputStreamResource implements OutputResource {
         }
         this.out = null;
         return out;
-    }
-
-    /**
-     * Output stream which does not propagate {@link #close()} to its wrapped output stream.
-     */
-    private static final class CloseShieldOutputStream extends FilterOutputStream {
-
-        CloseShieldOutputStream(OutputStream out) {
-            super(out);
-        }
-
-        @Override
-        public void close() throws IOException {
-            flush();
-        }
-
     }
 
 }

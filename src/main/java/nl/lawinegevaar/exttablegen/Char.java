@@ -55,7 +55,7 @@ final class Char implements Datatype {
         if (value == null || value.isEmpty()) {
             writeEmpty(out);
         } else {
-            byte[] bytes = encoding.getBytes(value, 0, getMaxLength(value));
+            byte[] bytes = encoding.getBytes(value, getMaxLength(value));
             out.write(bytes);
             writePaddingFor(bytes.length, out);
         }

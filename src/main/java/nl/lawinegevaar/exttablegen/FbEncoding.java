@@ -77,14 +77,12 @@ final class FbEncoding {
      *
      * @param value
      *         value to convert to bytes (not {@code null})
-     * @param offset
-     *         offset to start
      * @param length
-     *         length in {@code char}
+     *         length in {@code char} to encode (starting with the first character of the string)
      * @return string as bytes in this encoding
      */
-    byte[] getBytes(String value, int offset, int length) {
-        return value.substring(offset, offset + length).getBytes(charset);
+    byte[] getBytes(String value, int length) {
+        return value.substring(0, length).getBytes(charset);
     }
 
     @Override

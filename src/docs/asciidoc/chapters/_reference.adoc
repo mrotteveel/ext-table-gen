@@ -27,12 +27,6 @@ The general usage summary is also printed for command-line errors.
 
 The version option (`-V` or `--version`) prints version information and then exits.
 
-[NOTE]
-====
-In the current version, no version information is displayed.
-The version information is not yet available/implemented, but the option is provided out-of-the-box by the commandline argument parser we use, https://picocli.info/[picocli^], together with the <<ref-cmd-help,`--help`>> option.
-====
-
 [#ref-cmd-csv]
 === CSV file configuration
 

@@ -1,7 +1,10 @@
-import java.time.Year
-
 // SPDX-FileCopyrightText: 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
+import java.time.Year
+
+import org.asciidoctor.gradle.jvm.AsciidoctorTask
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
     id 'application'
     id 'com.intershop.gradle.jaxb' version '6.0.0'
@@ -58,7 +61,7 @@ tasks.withType(Tar).configureEach {
     enabled = false
 }
 
-tasks.named('asciidoctor').configure {
+tasks.named('asciidoctor', AsciidoctorTask).configure {
     attributes 'etg-version': project.version
     forkOptions {
         jvmArgs "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"
@@ -76,8 +79,14 @@ tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
-tasks.named('compileJava').configure {
+tasks.named('compileJava', JavaCompile).configure {
     options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
+}
+
+tasks.named('processResources', ProcessResources).configure {
+    filter ReplaceTokens, tokens: [
+            'VERSION': project.version
+    ]
 }
 
 tasks.withType(Test).configureEach {
@@ -97,10 +106,12 @@ tasks.withType(Jar).configureEach {
     }
 }
 
-tasks.named('jar').configure {
+tasks.named('jar', Jar).configure {
     // Info specific to main jar
     manifest {
         attributes(
+                'Implementation-Title': 'ext-table-gen',
+                'Implementation-Version': project.version,
                 'Automatic-Module-Name': 'nl.lawinegevaar.exttablegen'
         )
     }

@@ -6,6 +6,7 @@ import jakarta.xml.bind.JAXBException;
 import picocli.CommandLine;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.System.Logger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -15,6 +16,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.logging.LogManager;
 
 import static java.lang.System.Logger.Level.ERROR;
@@ -27,7 +29,8 @@ import static nl.lawinegevaar.exttablegen.TableDerivationConfig.DEFAULT_END_COLU
 /**
  * Main class for running ext-table-gen from the command line.
  */
-@CommandLine.Command(name= "ext-table-gen", mixinStandardHelpOptions = true, sortOptions = false)
+@CommandLine.Command(name= "ext-table-gen", mixinStandardHelpOptions = true, sortOptions = false,
+        versionProvider = ExtTableGenMain.VersionProvider.class)
 final class ExtTableGenMain implements Runnable {
 
     private static final Logger log;
@@ -349,6 +352,34 @@ final class ExtTableGenMain implements Runnable {
             return FbEncoding.forName(value);
         }
 
+    }
+
+    static final class VersionProvider implements CommandLine.IVersionProvider {
+
+        private static final String version;
+        static {
+            String tempVersion = "unknown version";
+            try (InputStream in = VersionProvider.class.getResourceAsStream("version.properties")) {
+                if (in != null) {
+                    Properties props = new Properties();
+                    props.load(in);
+                    tempVersion = props.getProperty("ext-table-gen.version");
+                }
+            } catch (IOException e) {
+                throw new ExceptionInInitializerError(e);
+            } finally {
+                version = tempVersion;
+            }
+        }
+
+        @Override
+        public String[] getVersion() {
+            return new String[] {
+                    "ext-table-gen %s - Firebird External Table Generator".formatted(version),
+                    "Copyright 2023 Mark Rotteveel",
+                    "Licensed under Apache 2.0, see https://www.apache.org/licenses/LICENSE-2.0 for full license"
+            };
+        }
     }
 
 }

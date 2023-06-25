@@ -19,3 +19,5 @@ The current version only supports `CHAR` columns, which makes the generated file
 Future versions may introduce support for additional column types.
 
 This user manual provides examples of use, and serves as reference documentation for the commandline options and XML format.
+
+The project itself is hosted on GitHub: https://github.com/mrotteveel/ext-table-gen[^].

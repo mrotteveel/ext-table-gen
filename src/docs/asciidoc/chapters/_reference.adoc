@@ -83,6 +83,7 @@ Relative paths are resolved against the current working directory.
 We recommend specifying absolute paths, as the configuration file will store the path as specified, which means that if a relative path is used, and the configuration file is then used from a different location, it may attempt to write to the wrong location or file.
 
 This option can override the XML config of <<ref-xml-tablefile,`/extTableGenConfig/externalTable/tableFile[@path]`>>.
+If specified, the XML config of `/extTableGenConfig/externalTable/tableFile[@overwrite]` is ignored, and defaults to `false` if <<ref-cmd-overwrite-table-file,`--overwrite-table-file`>> is not specified.
 
 [#ref-cmd-overwrite-table-file]
 ==== Overwrite table file (`--[no-]overwrite-table-file`)
@@ -90,16 +91,12 @@ This option can override the XML config of <<ref-xml-tablefile,`/extTableGenConf
 The overwrite table file boolean option (`--[no-]overwrite-table-file`) specifies if an existing external table file can be overwritten (`--overwrite-table-file`) or not overwritten (`--no-overwrite-table-file`, the default).
 The default is `--no-overwrite-table-file`.
 
-This option is ignored if <<ref-cmd-table-file,`--table-file`>> is not specified.
+This option can only be specified if <<ref-cmd-table-file,`--table-file`>> is specified.
 In other words, it does not override the XML config.
 
 [CAUTION]
 ====
 We only allow this override if also specifying the external table file, so you're aware what file you're going to overwrite.
-However, currently we handle this inconsistently, because in the other direction, specifying <<ref-cmd-config-in,`--config-in`>> and <<ref-cmd-table-file,`--table-file`>> without specifying `--[no-]overwrite-table-file` will inherit the value from <<ref-xml-tablefile,`/extTableGenConfig/externalTable/tableFile[@overwrite]`>> from the XML config.
-This could lead to unintended overwrites.
-
-We're not yet sure how we're going to resolve this inconsistency, but likely we'll remove the inheritance from the XML file if <<ref-cmd-table-file,`--table-file`>> is specified without `--[no-]overwrite-table-file`.
 ====
 
 [#ref-cmd-tbl-derive]
@@ -223,6 +220,8 @@ Except for the table name (`/extTableGenConfig/externalTable[@name]`) and table 
 
 The overwrite configuration boolean option (`--[no-]overwrite-config`) specifies whether the configuration output (<<ref-cmd-config-out,`--config-out`>>) can be overwritten if it exists (`--overwrite-config`) or not overwritten (`--no-overwrite-config`, the default).
 The default is `--no-overwrite-config`.
+
+This option can only be specified if <<ref-cmd-config-out,`--config-out`>> is specified.
 
 The option `--no-overwrite-config` is technically unnecessary, but can be specified for explicitness (and exists for consistency with other boolean options).
 

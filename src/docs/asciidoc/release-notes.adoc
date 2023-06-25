@@ -44,7 +44,7 @@ This application is licensed under the https://www.apache.org/licenses/LICENSE-2
 
 Consult the xref:ext-table-gen-user-manual.adoc[User Manual] for installation, usage examples and reference documentation.
 
-// TODO Add GitHub link for support
+For more information, or to report issues or submit pull request, go to https://github.com/mrotteveel/ext-table-gen[^]
 
 [#version-history]
 === Version history

@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.LogManager;
@@ -57,12 +58,18 @@ final class ExtTableGenMain implements Runnable {
             description = "First row of CSV file is a header. Default: true", order = 120)
     Boolean csvHeader;
 
-    @CommandLine.Option(names = "--table-file", paramLabel = "FILE", description = "External table file", order = 200)
-    Path tableFilePath;
+    @CommandLine.ArgGroup(exclusive = false)
+    TableFileOptions tableFileOptions;
 
-    @CommandLine.Option(names = "--overwrite-table-file", negatable = true, fallbackValue = "true",
-            description = "Overwrite the table file if it already exists. Default: false", order = 210)
-    Boolean overwriteTableFile;
+    static class TableFileOptions {
+        @CommandLine.Option(names = "--table-file", required = true, paramLabel = "FILE",
+                description = "External table file", order = 200)
+        Path tableFilePath;
+
+        @CommandLine.Option(names = "--overwrite-table-file", negatable = true, fallbackValue = "true",
+                description = "Overwrite the table file if it already exists. Default: false", order = 210)
+        Boolean overwriteTableFile;
+    }
 
     @CommandLine.Option(names = "--table-name", paramLabel = "TABLE",
             description = "Name of the external table", order = 300)
@@ -86,13 +93,19 @@ final class ExtTableGenMain implements Runnable {
             description = "Configuration file to read (command-line options take precedence)", order = 400)
     Path configIn;
 
-    @CommandLine.Option(names = "--config-out", paramLabel = "FILE",
-            description = "Configuration file to write", order = 410)
-    Path configOut;
+    @CommandLine.ArgGroup(exclusive = false)
+    ConfigOutOptions configOutOptions;
 
-    @CommandLine.Option(names = "--overwrite-config", negatable = true, fallbackValue = "true",
-            description = "Overwrite the config file (--config-out) if it already exists. Default: false", order = 420)
-    Boolean configOverwrite;
+    static class ConfigOutOptions {
+        @CommandLine.Option(names = "--config-out", required = true, paramLabel = "FILE",
+                description = "Configuration file to write", order = 410)
+        Path configOut;
+
+        @CommandLine.Option(names = "--overwrite-config", negatable = true, fallbackValue = "true",
+                description = "Overwrite the config file (--config-out) if it already exists. Default: false",
+                order = 420)
+        Boolean configOverwrite;
+    }
 
     @CommandLine.Spec
     CommandLine.Model.CommandSpec spec;
@@ -126,14 +139,29 @@ final class ExtTableGenMain implements Runnable {
      *         external-table-gen configuration
      */
     private void validate(EtgConfig etgConfig) {
-        if (etgConfig.csvFileConfig().map(CsvFileConfig::path).isEmpty()) {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --csv-file.");
+        var missingOptions = new ArrayList<String>(3);
+        boolean missingCsvFile = etgConfig.csvFileConfig().map(CsvFileConfig::path).isEmpty();
+        if (missingCsvFile) {
+            missingOptions.add("--csv-file=CSV");
+        } else if (etgConfig.csvFileConfig().map(CsvFileConfig::charset).isEmpty()) {
+            // csv-charset is also empty if --csv-file wasn't specified and the config doesn't have <csvFile>;
+            // this condition itself shouldn't happen in practice, unless there is some bug preventing fallback to the
+            // default of UTF-8
+            missingOptions.add("--csv-charset=CHARSET");
         }
-        if (etgConfig.csvFileConfig().map(CsvFileConfig::charset).isEmpty()) {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --csv-charset.");
+
+        boolean missingTableFile = etgConfig.tableConfig().tableFile().map(TableFile::path).isEmpty();
+        if (missingTableFile) {
+            missingOptions.add("--table-file=FILE");
         }
-        if (etgConfig.tableConfig().tableFile().map(TableFile::path).isEmpty()) {
-            throw new CommandLine.ParameterException(spec.commandLine(), "Missing option: --table-file.");
+
+        if (missingCsvFile || missingTableFile) {
+            missingOptions.add("or --config-in=FILE");
+        }
+        
+        if (!missingOptions.isEmpty()) {
+            throw new CommandLine.ParameterException(spec.commandLine(),
+                    "Missing option(s): " + String.join(", ", missingOptions));
         }
     }
 
@@ -150,10 +178,10 @@ final class ExtTableGenMain implements Runnable {
      * @return the external-table-gen configuration after merging (can be {@code config} if there was nothing to merge)
      */
     private EtgConfig mergeConfig(EtgConfig config) {
-        if (tableFilePath != null) {
+        if (tableFileOptions != null && tableFileOptions.tableFilePath != null) {
             config = config.withTableConfig(
                     cfg -> cfg.withTableFile(new TableFile(
-                            tableFilePath, requireNonNullElse(overwriteTableFile, cfg.allowTableFileOverwrite()))));
+                            tableFileOptions.tableFilePath, overwriteTableFileOrDefault())));
         }
 
         if (tableName != null) {
@@ -204,7 +232,8 @@ final class ExtTableGenMain implements Runnable {
     private EtgConfig createConfig() {
         return new EtgConfig(
                 new TableConfig(tableName, List.of(),
-                        Optional.ofNullable(tableFilePath)
+                        Optional.ofNullable(tableFileOptions)
+                                .map(opt -> tableFileOptions.tableFilePath)
                                 .map(file -> new TableFile(file, overwriteTableFileOrDefault()))),
                 new TableDerivationConfig(
                         columnEncodingOrDefault(), endColumnTypeOrDefault(), tableDerivationModeOrDefault()),
@@ -215,7 +244,7 @@ final class ExtTableGenMain implements Runnable {
         return csvFile != null ? new CsvFileConfig(csvFile, csvCharsetOrDefault(), csvHeaderOrDefault()) : null;
     }
 
-    Charset csvCharsetOrDefault() {
+    private Charset csvCharsetOrDefault() {
         return requireNonNullElse(csvCharset, DEFAULT_CSV_CHARSET);
     }
 
@@ -223,8 +252,14 @@ final class ExtTableGenMain implements Runnable {
         return requireNonNullElse(csvHeader, Boolean.TRUE);
     }
 
+    private Optional<TableFileOptions> tableFileOptions() {
+        return Optional.ofNullable(tableFileOptions);
+    }
+
     private boolean overwriteTableFileOrDefault() {
-        return requireNonNullElse(overwriteTableFile, Boolean.FALSE);
+        return tableFileOptions()
+                .map(opt -> opt.overwriteTableFile)
+                .orElse(Boolean.FALSE);
     }
 
     private FbEncoding columnEncodingOrDefault() {
@@ -239,8 +274,12 @@ final class ExtTableGenMain implements Runnable {
         return requireNonNullElse(tableDerivationMode, DEFAULT_TABLE_DERIVATION_MODE);
     }
 
+    private Optional<ConfigOutOptions> configOutOptions() {
+        return Optional.ofNullable(configOutOptions);
+    }
+
     boolean configOverwriteOrDefault() {
-        return requireNonNullElse(configOverwrite, Boolean.FALSE);
+        return configOutOptions().map(opt -> opt.configOverwrite).orElse(Boolean.FALSE);
     }
 
     /**
@@ -249,7 +288,7 @@ final class ExtTableGenMain implements Runnable {
      * @return output resource for writing a configuration file
      */
     private OutputResource createConfigurationOutputResource() {
-        return OutputResource.of(configOut, configOverwriteOrDefault());
+        return OutputResource.of(configOutOptions().map(opt -> opt.configOut).orElseThrow(), configOverwriteOrDefault());
     }
 
     /**
@@ -262,6 +301,7 @@ final class ExtTableGenMain implements Runnable {
      *         external table configuration
      */
     private void writeConfigFile(EtgConfig etgConfig) {
+        Path configOut = configOutOptions().map(opt -> opt.configOut).orElse(null);
         if (configOut != null) {
             log.log(INFO, "Writing configuration file ''{0}''", configOut);
             OutputResource outputResource = createConfigurationOutputResource();

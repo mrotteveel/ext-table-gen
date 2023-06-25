@@ -30,7 +30,7 @@ jaxb {
 
 dependencies {
     implementation libs.picocli.core
-//    annotationProcessor libs.picocli.codegen
+    annotationProcessor libs.picocli.codegen
     implementation libs.opencsv
     implementation libs.bundles.jaxb
 
@@ -74,6 +74,10 @@ tasks.named('test', Test).configure {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
+}
+
+tasks.named('compileJava').configure {
+    options.compilerArgs += ["-Aproject=${project.group}/${project.name}"]
 }
 
 tasks.withType(Test).configureEach {

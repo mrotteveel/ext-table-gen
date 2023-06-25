@@ -427,8 +427,9 @@ class ExtTableGenMainTest {
         EtgConfig originalConfig = testEtgConfig();
 
         Path differentTableFile = Path.of("different_output.dat");
-        main.tableFilePath = differentTableFile;
-        main.overwriteTableFile = overwriteTableFile;
+        main.tableFileOptions = new ExtTableGenMain.TableFileOptions();
+        main.tableFileOptions.tableFilePath = differentTableFile;
+        main.tableFileOptions.overwriteTableFile = overwriteTableFile;
 
         assertThat(PrivateAccess.invokeMergeConfig(main, originalConfig), allOf(
                 tableConfig(allOf(
@@ -436,9 +437,9 @@ class ExtTableGenMainTest {
                         tableColumns(is(testColumns())),
                         tableFile(allOf(
                                 tableFilePath(is(differentTableFile)),
-                                // TODO Value is currently inherited from original config if not specified, we may need to revise that
+                                // NOTE Value is intentionally not inherited from original config if not specified
                                 tableFileOverwrite(
-                                        requireNonNullElse(overwriteTableFile, OVERWRITE_TABLE_FILE)))))),
+                                        requireNonNullElse(overwriteTableFile, Boolean.FALSE)))))),
                 tableDerivationConfig(is(testDerivationConfig())),
                 csvFileConfig(is(testCsvFileConfig()))));
     }

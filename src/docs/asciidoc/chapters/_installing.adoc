@@ -66,13 +66,13 @@ If you added _ext-table-gen_ to the `PATH`, you can try from any directory, othe
 [listing]
 ----
 > ext-table-gen
-Missing option: --csv-file.
+Missing option(s): --csv-file=CSV, --table-file=FILE, or --config-in=FILE
 Usage: ext-table-gen ...
 ----
 
 Above output of the usage instruction was truncated for brevity.
 
-If you get another error than "`Missing option: ...`", the installation is not correct.
+If you get another error than "`Missing option(s): ...`", the installation is not correct.
 
 [#install-firebird]
 == Firebird configuration

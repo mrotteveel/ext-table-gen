@@ -233,7 +233,7 @@ We now get:
 include::{includedir}/chapters/data/persons-wrong-charset.dat[]
 ----
 
-As you can see, the `š` has been replaced by a `?`footnote:[This is default behaviour of Java when encoding characters which don't exist in an encoding], because `š` cannot be encoded in ISO-8859-1.
+As you can see, the `š` has been replaced by a ``?``footnote:[This is default behaviour of Java when encoding characters which don't exist in an encoding], because `š` cannot be encoded in ISO-8859-1.
 To be able to import the right character, we need to use a different encoding.
 In our simplified example, we could change the column to `ISO8859_2` or `WIN1250` (which supports Czech codepoints like `š`), but we'll use `UTF8` to also demonstrate the effects of using a multibyte character set.
 

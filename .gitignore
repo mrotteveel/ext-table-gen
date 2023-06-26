@@ -5,7 +5,6 @@ out/
 gen/
 build_*.bat
 .idea/
-build-local.properties
 classes/
 *.iml
 *.eml
@@ -15,6 +14,8 @@ classes/
 /junit*.properties
 .project
 .classpath
+
+/integration-test-local.properties
 
 # Ignore Gradle project-specific cache directory
 .gradle

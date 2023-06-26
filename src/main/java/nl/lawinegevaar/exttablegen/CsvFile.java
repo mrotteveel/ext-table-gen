@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static java.lang.System.Logger.Level.TRACE;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Reads rows from a CSV file, and pushes the rows to a {@link RowProcessor} for further processing.
@@ -38,8 +39,8 @@ final class CsvFile {
      *         configuration for the CSV file
      */
     CsvFile(InputResource inputResource, Config config) {
-        this.inputResource = inputResource;
-        this.config = config;
+        this.inputResource = requireNonNull(inputResource, "inputResource");
+        this.config = requireNonNull(config, "config");
     }
 
     /**

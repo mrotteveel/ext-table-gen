@@ -61,9 +61,23 @@ final class ConfigMapper {
      *         for errors reading or parsing the XML
      */
     EtgConfig read(InputStream in) throws JAXBException {
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-        ExtTableGenConfig extTableGenConfig = (ExtTableGenConfig) unmarshaller.unmarshal(in);
+        ExtTableGenConfig extTableGenConfig = readAsExtTableGenConfig(in);
         return fromXmlExtTableGenConfig(extTableGenConfig);
+    }
+
+    /**
+     * Reads the external-table-gen configuration from {@code in} as an instance of {@link ExtTableGenConfig}.
+     *
+     * @param in
+     *         input stream
+     * @return XML configuration object
+     * @throws JAXBException
+     *         for errors reading or parsing the XML
+     */
+    // package-private access for tests
+    ExtTableGenConfig readAsExtTableGenConfig(InputStream in) throws JAXBException {
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        return (ExtTableGenConfig) unmarshaller.unmarshal(in);
     }
 
     private ExtTableGenConfig toXmlExtTableGenConfig(EtgConfig etgConfig) {

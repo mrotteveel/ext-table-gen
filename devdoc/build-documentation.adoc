@@ -1,0 +1,50 @@
+= ext-table-gen build documentation
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+[NOTE]
+====
+This document doesn't all aspects of the build.
+If you miss something, please contribute using a pull request, or create an issue asking for the information.
+====
+
+== Running the build
+
+To produce the _ext-table-gen_ application, use
+
+[listing]
+----
+> ./gradlew assemble
+----
+
+To run all tests (including integration tests), use:
+
+[listing]
+----
+> ./gradlew check
+----
+
+=== Integration test configuration
+
+The integration tests require some additional configuration.
+First of all, it needs a localhost Firebird server.
+
+Create a file called `integration-test-local.properties` in the root of the project (i.e. containing `gradlew`) with content like:
+
+[listing]
+----
+test.db.host=localhost
+test.db.port=3050
+test.db.user=sysdba
+test.db.password=masterkey
+test.db.root-path=E:\\DB\\test-db
+test.db.ext-table-dir=E:\\DB\\exttables\\test-data
+----
+
+The `test.db.user` must have the `CREATE DATABASE` privilege.
+Firebird server must be able to create database in the path of `test.db.root-path`.
+The `ExternalFileAccess` setting of Firebird server must allow access to the path of `test.db.ext-table-dir`.
+
+In theory, a remote Firebird server could also work, but due to the configuration of _ext-table-gen_ and the tests, this would require the `test.db.ext-table-dir` to be a local path which maps to the remote file system, while for the Firebird server, that path is the same value locally.
+In practice, we think it will be simpler to just use a local Firebird server.

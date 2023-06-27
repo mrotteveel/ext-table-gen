@@ -49,7 +49,9 @@ class ExtTableIntegrationTests {
     private final ConfigMapper configMapper = new ConfigMapper();
 
     @TempDir
-    static Path tempDir;
+    static Path forAllTempDir;
+    @TempDir
+    Path forEachTempDir;
     private static Path customers1000CsvFile;
     private final List<Path> filesToDelete = new ArrayList<>();
 
@@ -66,7 +68,7 @@ class ExtTableIntegrationTests {
     static void copyTestDataFromResources() throws Exception {
         try (InputStream in = ExtTableIntegrationTests.class.getResourceAsStream(CUSTOMERS_1000_RESOURCE)) {
             if (in == null) throw new FileNotFoundException("Could not find resource " + CUSTOMERS_1000_RESOURCE);
-            customers1000CsvFile = tempDir.resolve(CUSTOMERS_1000_CSV);
+            customers1000CsvFile = forAllTempDir.resolve(CUSTOMERS_1000_CSV);
             Files.copy(in, customers1000CsvFile);
         }
     }
@@ -108,7 +110,7 @@ class ExtTableIntegrationTests {
     @EnumSource(EndColumn.Type.class)
     void compareOriginalDataWithDataFromFirebird(EndColumn.Type endColumnType) throws Exception {
         Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
-        Path configFile = tempDir.resolve(CUSTOMERS_1000_XML);
+        Path configFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
         createExternalTableFile(CUSTOMERS_TABLE_NAME, customers1000CsvFile, tableFile, endColumnType, configFile);
         String ddl = getDdl(configFile).replaceFirst("(?i)^\\s*create table", "recreate table");
 

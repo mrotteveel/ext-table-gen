@@ -23,7 +23,6 @@ import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.tableColumns;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.tableConfig;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.tableDerivationConfig;
 import static nl.lawinegevaar.exttablegen.EtgConfigMatchers.tableName;
-import static nl.lawinegevaar.exttablegen.ExternalTable.DEFAULT_TABLE_NAME;
 import static nl.lawinegevaar.exttablegen.ResourceHelper.getResourceString;
 import static nl.lawinegevaar.exttablegen.ResourceHelper.requireResourceStream;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,6 +31,7 @@ import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ConfigMapperTest {
 
@@ -91,7 +91,7 @@ class ConfigMapperTest {
     }
 
     @Test
-    void columnWithInvalidEncoding_returnEmptyColumns() throws Exception {
+    void columnWithInvalidEncoding_throwsInvalidConfigurationException() {
         String configString =
                 """
                 <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
@@ -107,15 +107,8 @@ class ConfigMapperTest {
                     </externalTable>
                 </extTableGenConfig>""";
 
-        EtgConfig fromXml = configMapper.read(new ByteArrayInputStream(configString.getBytes(UTF_8)));
-
-        assertThat(fromXml, allOf(
-                tableConfig(allOf(
-                        tableName(is(DEFAULT_TABLE_NAME)),
-                        tableColumns(emptyCollectionOf(Column.class)),
-                        emptyTableFile())),
-                tableDerivationConfig(is(TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER))),
-                emptyCavFileConfig()));
+        assertThrows(InvalidConfigurationException.class, () ->
+                configMapper.read(new ByteArrayInputStream(configString.getBytes(UTF_8))));
     }
 
     /**
@@ -141,7 +134,29 @@ class ConfigMapperTest {
                 <externalTable>
                     <columns/>
                 </externalTable>
-            </extTableGenConfig>""",
+            </extTableGenConfig>"""
+    })
+    void testIncompleteXmlResultingInEmptyConfig(String configString) throws Exception {
+        EtgConfig fromXml = configMapper.read(new ByteArrayInputStream(configString.getBytes(UTF_8)));
+
+        assertThat(fromXml, allOf(
+                tableConfig(allOf(
+                        tableName(is(nullValue(String.class))),
+                        tableColumns(emptyCollectionOf(Column.class)),
+                        emptyTableFile())),
+                tableDerivationConfig(is(TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER))),
+                emptyCavFileConfig()));
+    }
+
+    /**
+     * Tests XML that should resolve to an {@link InvalidConfigurationException}.
+     * <p>
+     * NOTE: We're also testing combinations which are technically invalid in the XSD (e.g. absence of
+     * {@code externalTable}) to see if we're robust against incomplete or invalid configuration.
+     * </p>
+     */
+    @ParameterizedTest
+    @ValueSource(strings = {
             // Invalid end column type in columns
             """
             <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
@@ -175,17 +190,11 @@ class ConfigMapperTest {
                 <csvFile charset="UTF-8"/>
             </extTableGenConfig>"""
     })
-    void testIncompleteXmlResultingInEmptyConfig(String configString) throws Exception {
-        EtgConfig fromXml = configMapper.read(new ByteArrayInputStream(configString.getBytes(UTF_8)));
-
-        assertThat(fromXml, allOf(
-                tableConfig(allOf(
-                        tableName(is(nullValue(String.class))),
-                        tableColumns(emptyCollectionOf(Column.class)),
-                        emptyTableFile())),
-                tableDerivationConfig(is(TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER))),
-                emptyCavFileConfig()));
+    void testInvalidXml_throwsInvalidConfigurationException(String configString) {
+        assertThrows(InvalidConfigurationException.class, () ->
+                configMapper.read(new ByteArrayInputStream(configString.getBytes(UTF_8))));
     }
+
 
     private EtgConfig roundTripConfig(EtgConfig originalConfig) throws JAXBException {
         // 3KiB rounded up from testdata/happypath-config.xml size

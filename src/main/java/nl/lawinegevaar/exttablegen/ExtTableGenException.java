@@ -30,6 +30,10 @@ final class FatalRowProcessingException extends ExtTableGenException {
 
 final class InvalidConfigurationException extends ExtTableGenException {
 
+    InvalidConfigurationException(String message) {
+        super(message);
+    }
+
     InvalidConfigurationException(String message, Throwable cause) {
         super(message, cause);
     }

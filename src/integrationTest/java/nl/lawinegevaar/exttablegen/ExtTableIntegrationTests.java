@@ -8,9 +8,10 @@ import org.firebirdsql.management.FBManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.opentest4j.AssertionFailedError;
 
 import java.io.FileNotFoundException;
@@ -103,12 +104,13 @@ class ExtTableIntegrationTests {
         return path;
     }
 
-    @Test
-    void compareOriginalDataWithDataFromFirebird() throws Exception {
+    @ParameterizedTest
+    @EnumSource(EndColumn.Type.class)
+    void compareOriginalDataWithDataFromFirebird(EndColumn.Type endColumnType) throws Exception {
         Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
         Path configFile = tempDir.resolve(CUSTOMERS_1000_XML);
-        createExternalTableFile(CUSTOMERS_TABLE_NAME, customers1000CsvFile, tableFile, configFile);
-        String ddl = getDdl(configFile).replaceFirst("(?i)$\\s*create table", "recreate table");
+        createExternalTableFile(CUSTOMERS_TABLE_NAME, customers1000CsvFile, tableFile, endColumnType, configFile);
+        String ddl = getDdl(configFile).replaceFirst("(?i)^\\s*create table", "recreate table");
 
         try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
              var statement = connection.createStatement()) {
@@ -116,17 +118,21 @@ class ExtTableIntegrationTests {
 
             try (var rs = statement.executeQuery(
                     "select * from " + statement.enquoteIdentifier(CUSTOMERS_TABLE_NAME, true))) {
-                assertResultSet(customers1000CsvFile, rs, EndColumn.Type.LF);
+                assertResultSet(customers1000CsvFile, 1000, rs, endColumnType);
             }
         }
     }
 
-    private static void createExternalTableFile(String tableName, Path csvFile, Path tableFile, Path configOut) {
+    private static void createExternalTableFile(String tableName, Path csvFile, Path tableFile,
+            EndColumn.Type endColumnType, Path configOut) {
         int exitCode = ExtTableGenMain.parseAndExecute(
                 "--csv-file", csvFile.toString(),
                 "--table-name", tableName,
                 "--table-file", tableFile.toString(),
-                "--config-out", configOut.toString());
+                "--overwrite-table-file",
+                "--end-column", endColumnType.name(),
+                "--config-out", configOut.toString(),
+                "--overwrite-config");
         assertEquals(0, exitCode, "expected zero exit-code for successful execution");
     }
 
@@ -138,10 +144,11 @@ class ExtTableIntegrationTests {
         }
     }
 
-    private void assertResultSet(Path csvFile, ResultSet rs, EndColumn.Type endColumnType) throws Exception {
-        int rsColumnCount = rs.getMetaData().getColumnCount();
-        int expectedCsvColumnCount = rsColumnCount - (endColumnType != EndColumn.Type.NONE ? 1 : 0);
-        String expectedEndColumnValue = switch (endColumnType) {
+    private void assertResultSet(Path csvFile, int expectedRowCount, ResultSet rs, EndColumn.Type endColumnType)
+            throws Exception {
+        final int rsColumnCount = rs.getMetaData().getColumnCount();
+        final int expectedCsvColumnCount = endColumnType == EndColumn.Type.NONE ? rsColumnCount : rsColumnCount - 1;
+        final String expectedEndColumnValue = switch (endColumnType) {
             case LF -> "\n";
             case CRLF -> "\r\n";
             case NONE -> null;
@@ -149,9 +156,13 @@ class ExtTableIntegrationTests {
 
         var csvFileDriver = new CsvFile(InputResource.of(csvFile), new CsvFile.Config(StandardCharsets.UTF_8, 0, true));
         try {
-            ProcessingResult processingResult = csvFileDriver.readFile(new AbstractRowProcessor() {
+            var resultSetVsCsvValidator = new AbstractRowProcessor() {
+
+                int count = 0;
+
                 @Override
                 public ProcessingResult onRow(Row row) {
+                    count++;
                     try {
                         assertTrue(rs.next(), "expected a result set row for received CSV file row " + row.line());
                         assertEquals(expectedCsvColumnCount, row.size(),
@@ -171,9 +182,11 @@ class ExtTableIntegrationTests {
                         throw new AssertionFailedError("Unexpected SQLException", e);
                     }
                 }
-            });
+            };
+            ProcessingResult processingResult = csvFileDriver.readFile(resultSetVsCsvValidator);
             assertInstanceOf(ProcessingResult.Done.class, processingResult, "Unexpected processing result");
             assertFalse(rs.next(), "Result set has more rows than CSV file");
+            assertEquals(expectedRowCount, resultSetVsCsvValidator.count, "Unexpected CSV row count");
         } catch (FatalRowProcessingException e) {
             if (e.getCause() instanceof AssertionFailedError afe) {
                 throw afe;

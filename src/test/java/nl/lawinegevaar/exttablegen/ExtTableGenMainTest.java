@@ -63,8 +63,10 @@ class ExtTableGenMainTest {
         copyResource("/testdata/customers-10.csv", csvFilePath);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
-                        "--config-out=" + outConfigFile));
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file",  tableFilePath.toString(),
+                        "--config-out", outConfigFile.toString()));
 
         assertConfigFile(
                 new EtgConfig(
@@ -93,8 +95,11 @@ class ExtTableGenMainTest {
         copyResource("/testdata/customers-10.csv", csvFilePath);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
-                        "--config-out=" + outConfigFile, "--end-column=NONE"));
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
+                        "--config-out", outConfigFile.toString(),
+                        "--end-column", "NONE"));
 
         assertConfigFile(
                 new EtgConfig(
@@ -125,8 +130,10 @@ class ExtTableGenMainTest {
         copyResource("/testdata/customers-10.csv", csvFilePath);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
-                        "--config-out=" + outConfigFile));
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
+                        "--config-out", outConfigFile.toString()));
 
         Files.delete(tableFilePath);
         Path configFile = outConfigFile;
@@ -134,7 +141,9 @@ class ExtTableGenMainTest {
         var outConfigFile = tempDir.resolve("newconfig.xml");
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--config-in=" + configFile, "--config-out=" + outConfigFile));
+                ExtTableGenMain.parseAndExecute(
+                        "--config-in", configFile.toString(),
+                        "--config-out", outConfigFile.toString()));
 
         assertConfigFile(
                 new EtgConfig(
@@ -172,8 +181,10 @@ class ExtTableGenMainTest {
         Files.writeString(tableFilePath, DUMMY);
 
         assertEquals(1,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
-                        "--config-out=" + outConfigFile));
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
+                        "--config-out", outConfigFile.toString()));
 
         assertConfigFile(
                 new EtgConfig(
@@ -198,7 +209,9 @@ class ExtTableGenMainTest {
         Files.writeString(tableFilePath, DUMMY);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
                         "--overwrite-table-file"));
 
         assertEquals("""
@@ -217,8 +230,10 @@ class ExtTableGenMainTest {
         Files.writeString(outConfigFile, DUMMY);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
-                        "--config-out=" + outConfigFile));
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
+                        "--config-out", outConfigFile.toString()));
 
         assertEquals(DUMMY, Files.readString(outConfigFile), "Expected config file not overwritten");
         assertEquals("""
@@ -237,8 +252,11 @@ class ExtTableGenMainTest {
         Files.writeString(outConfigFile, DUMMY);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
-                        "--config-out=" + outConfigFile, "--overwrite-config"));
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
+                        "--config-out", outConfigFile.toString(),
+                        "--overwrite-config"));
 
         assertNotEquals(DUMMY, Files.readString(outConfigFile), "Expected config file overwritten");
         assertEquals("""
@@ -256,7 +274,9 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
                         "--end-column=LF"));
 
         assertEquals("""
@@ -274,7 +294,9 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
                         "--end-column=CRLF"));
 
         assertEquals("""
@@ -292,7 +314,9 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
                         "--end-column=NONE"));
 
         assertEquals("ab cdefgh ", Files.readString(tableFilePath, ISO_8859_1),
@@ -307,7 +331,9 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
                         "--no-csv-header"));
 
         assertEquals("""
@@ -325,7 +351,9 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
                         "--csv-header"));
 
         assertEquals("""
@@ -343,7 +371,9 @@ class ExtTableGenMainTest {
                 """, ISO_8859_1);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
                         "--csv-charset=iso-8859-1"));
 
         assertEquals("""
@@ -361,8 +391,12 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(0,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
-                        "--table-name=TABLE1", "--column-encoding=UTF8", "--config-out=" + outConfigFile));
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
+                        "--table-name", "TABLE1",
+                        "--column-encoding", "UTF8",
+                        "--config-out", outConfigFile.toString()));
 
         assertEquals("""
                 ab          cd     \s
@@ -390,8 +424,10 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(1,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
-                        "--column-encoding=UTF8"));
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
+                        "--column-encoding", "UTF8"));
 
         assertFalse(Files.exists(tableFilePath), "Expected external table file to not exist");
     }
@@ -405,8 +441,10 @@ class ExtTableGenMainTest {
                 """);
 
         assertEquals(1,
-                ExtTableGenMain.parseAndExecute("--csv-file=" + csvFilePath, "--table-file=" + tableFilePath,
-                        "--column-encoding=UTF8"));
+                ExtTableGenMain.parseAndExecute(
+                        "--csv-file", csvFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
+                        "--column-encoding", "UTF8"));
 
         assertFalse(Files.exists(tableFilePath), "Expected external table file to not exist");
     }

@@ -39,12 +39,20 @@ final class InvalidConfigurationException extends ExtTableGenException {
 /**
  * Thrown if an external table definition cannot be read, or for problems writing the external table data.
  */
-final class InvalidTableException extends ExtTableGenException {
+sealed class InvalidTableException extends ExtTableGenException permits TableFileAlreadyExistsException {
 
     InvalidTableException(String message, Throwable cause) {
         super(message, cause);
     }
 
+}
+
+final class TableFileAlreadyExistsException extends InvalidTableException {
+
+    TableFileAlreadyExistsException(String message, Throwable cause) {
+        super(message, cause);
+    }
+    
 }
 
 /**

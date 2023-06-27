@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.logging.LogManager;
 
+import static java.lang.System.Logger.Level.DEBUG;
 import static java.lang.System.Logger.Level.ERROR;
 import static java.lang.System.Logger.Level.INFO;
 import static java.lang.System.Logger.Level.WARNING;
@@ -121,7 +122,9 @@ final class ExtTableGenMain implements Runnable {
     }
 
     static int parseAndExecute(String... args) {
-        return new CommandLine(new ExtTableGenMain()).execute(args);
+        return new CommandLine(new ExtTableGenMain())
+                .setExecutionExceptionHandler(new LogExceptionMessageHandler())
+                .execute(args);
     }
 
     @Override
@@ -382,4 +385,17 @@ final class ExtTableGenMain implements Runnable {
         }
     }
 
+    static final class LogExceptionMessageHandler implements CommandLine.IExecutionExceptionHandler {
+
+        @Override
+        public int handleExecutionException(Exception ex, CommandLine cmd, CommandLine.ParseResult parseResult) {
+            log.log(ERROR, ex.toString());
+            log.log(DEBUG, "Exception terminating ext-table-gen", ex);
+            return cmd.getExitCodeExceptionMapper() != null
+                    ? cmd.getExitCodeExceptionMapper().getExitCode(ex)
+                    : cmd.getCommandSpec().exitCodeOnExecutionException();
+        }
+
+    }
+    
 }

@@ -6,6 +6,7 @@ import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.FileAlreadyExistsException;
 import java.util.function.UnaryOperator;
 
 import static java.util.Objects.requireNonNull;
@@ -55,10 +56,14 @@ final class ExternalTableWriter extends AbstractRowProcessor implements Closeabl
             out = outputResource.newOutputStream();
             return ProcessingResult.continueProcessing();
         } catch (IOException e) {
-            return ProcessingResult.stopWith(
-                    new InvalidTableException(
-                            "Could not create external table file "
-                            + outputResource.path().map(String::valueOf).orElse("(no path specified)"), e));
+            var resultException = e instanceof FileAlreadyExistsException && !outputResource.allowOverwrite()
+                    ? new TableFileAlreadyExistsException(
+                    ("Could not create external table file '%s' as it already exists, specify --overwrite-table-file "
+                     + "or configure overwrite=true on <tableFile> in XML")
+                            .formatted(outputResource.path().map(String::valueOf).orElse("(no path specified)")), e)
+                    : new InvalidTableException("Could not create external table file %s"
+                            .formatted(outputResource.path().map(String::valueOf).orElse("(no path specified)")), e);
+            return ProcessingResult.stopWith(resultException);
         }
     }
 

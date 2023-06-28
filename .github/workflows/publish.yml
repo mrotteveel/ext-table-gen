@@ -79,5 +79,5 @@ jobs:
         with:
           files: |
             dist/*.zip
-          draft: true
+          tag_name: "${{ github.ref_name }}"
           name: "ex-table-gen ${{ github.ref_name }}"

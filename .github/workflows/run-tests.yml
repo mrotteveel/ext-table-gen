@@ -1,7 +1,12 @@
 # SPDX-FileCopyrightText: 2023 Mark Rotteveel
 # SPDX-License-Identifier: Apache-2.0
 name: run-tests
-on: [push,pull_request]
+
+on:
+  push:
+    branches: ['*']
+  pull_request:
+    branches: ['*']
 
 permissions:
   contents: read

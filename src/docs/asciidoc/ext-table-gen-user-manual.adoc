@@ -1,5 +1,6 @@
 = Firebird External Table Generator: User Manual
 Mark Rotteveel
+{etg-version}
 :doctype: book
 :docinfo:
 :sectanchors:

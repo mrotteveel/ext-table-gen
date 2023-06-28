@@ -1,0 +1,9 @@
+= Firebird External Table Generator: documentation
+
+The "`Firebird External Table Generator`" or _ext-table-gen_ is a commandline tool to convert https://www.rfc-editor.org/rfc/rfc4180[RFC 4180^] CSV files to https://www.firebirdsql.org/[Firebird^] external tables (a binary format for Firebird external table data).
+
+For more information, refer to the links below.
+
+* xref:release-notes.adoc[Release Notes]
+* xref:ext-table-gen-user-manual.adoc[User Manual]
+* https://github.com/mrotteveel/ext-table-gen[GitHub project^]

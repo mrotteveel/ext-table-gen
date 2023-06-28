@@ -101,6 +101,7 @@ distributions {
     main {
         contents {
             from(asciidoctor) {
+                exclude 'index.html'
                 into 'docs'
             }
         }

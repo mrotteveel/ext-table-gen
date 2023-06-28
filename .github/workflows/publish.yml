@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2023 Mark Rotteveel
+# SPDX-License-Identifier: Apache-2.0
 name: Publish documentation and artifacts for tags
 on:
   push:

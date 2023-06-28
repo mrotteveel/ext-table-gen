@@ -78,5 +78,6 @@ jobs:
         uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e
         with:
           artifacts: dist/*.zip
+          artifactContentType: application/x-zip-compressed
           draft: true
           name: "ext-table-gen ${{ github.ref_name }}"

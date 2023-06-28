@@ -75,9 +75,8 @@ jobs:
           name: distribution-artifact
           path: dist
       - name: Create Release
-        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e
         with:
-          files: |
-            dist/*.zip
-          tag_name: "${{ github.ref_name }}"
-          name: "ex-table-gen ${{ github.ref_name }}"
+          artifacts: dist/*.zip
+          draft: true
+          name: "ext-table-gen ${{ github.ref_name }}"

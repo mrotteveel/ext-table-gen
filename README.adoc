@@ -18,4 +18,8 @@ Future versions may introduce support for additional column types.
 
 The project is hosted on GitHub: https://github.com/mrotteveel/ext-table-gen[^].
 
+== Documentation
+
+Documentation of the latest tagged release can be found on: https://mrotteveel.github.io/ext-table-gen/[^]
+
 SPDX-License-Identifier: Apache-2.0

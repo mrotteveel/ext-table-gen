@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
+<extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
     <externalTable name="DEFAULT_EXTERNAL_TABLE_NAME">
         <columns>
             <column name="Index">

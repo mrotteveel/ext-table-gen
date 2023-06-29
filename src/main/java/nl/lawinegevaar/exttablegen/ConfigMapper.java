@@ -23,6 +23,14 @@ import static nl.lawinegevaar.exttablegen.TableDerivationConfig.DEFAULT_END_COLU
  */
 final class ConfigMapper {
 
+    static final String SCHEMA_VERSION_1_0 = "1.0";
+    // Schema version for documents created by ext-table-gen v1.0
+    static final String SCHEMA_VERSION_2_0 = "2.0";
+
+    // Must match /xs:schema[@version]
+    static final String CURRENT_SCHEMA_VERSION = SCHEMA_VERSION_2_0;
+    static final String UNKNOWN_SCHEMA_VERSION = SCHEMA_VERSION_1_0;
+
     private final ObjectFactory factory = new ObjectFactory();
     private final JAXBContext jaxbContext;
     {
@@ -45,9 +53,15 @@ final class ConfigMapper {
      */
     void write(EtgConfig etgConfig, OutputStream out) throws JAXBException {
         ExtTableGenConfig xmlConfigType = toXmlExtTableGenConfig(etgConfig);
-        Marshaller marshaller = jaxbContext.createMarshaller();
+        Marshaller marshaller = getMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
         marshaller.marshal(xmlConfigType, out);
+    }
+
+    private Marshaller getMarshaller() throws JAXBException {
+        Marshaller marshaller = jaxbContext.createMarshaller();
+        marshaller.setListener(new ApplyDefaultsOnMarshallListener());
+        return marshaller;
     }
 
     /**
@@ -75,8 +89,14 @@ final class ConfigMapper {
      */
     // package-private access for tests
     ExtTableGenConfig readAsExtTableGenConfig(InputStream in) throws JAXBException {
-        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        Unmarshaller unmarshaller = getUnmarshaller();
         return (ExtTableGenConfig) unmarshaller.unmarshal(in);
+    }
+
+    private Unmarshaller getUnmarshaller() throws JAXBException {
+        Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
+        unmarshaller.setListener(new ApplyDefaultsOnUnmarshallListener());
+        return unmarshaller;
     }
 
     private ExtTableGenConfig toXmlExtTableGenConfig(EtgConfig etgConfig) {
@@ -176,7 +196,7 @@ final class ConfigMapper {
         return csvFileType;
     }
 
-    private EtgConfig fromXmlExtTableGenConfig(ExtTableGenConfig extTableGenConfig) {
+    EtgConfig fromXmlExtTableGenConfig(ExtTableGenConfig extTableGenConfig) {
         try {
             return new EtgConfig(
                     fromXmlExternalTableType(extTableGenConfig.getExternalTable()),
@@ -296,6 +316,29 @@ final class ConfigMapper {
         } catch (RuntimeException e) {
             throw new InvalidConfigurationException("Could not convert from XML CsvFileType", e);
         }
+    }
+
+    private static final class ApplyDefaultsOnMarshallListener extends Marshaller.Listener {
+
+        @Override
+        public void beforeMarshal(Object source) {
+            if (source instanceof ExtTableGenConfig extTableGenConfig) {
+                // Set or update schema version
+                extTableGenConfig.setSchemaVersion(CURRENT_SCHEMA_VERSION);
+            }
+        }
+
+    }
+
+    private static final class ApplyDefaultsOnUnmarshallListener extends Unmarshaller.Listener {
+
+        @Override
+        public void afterUnmarshal(Object target, Object parent) {
+            if (target instanceof ExtTableGenConfig extTableGenConfig && extTableGenConfig.getSchemaVersion() == null) {
+                extTableGenConfig.setSchemaVersion(UNKNOWN_SCHEMA_VERSION);
+            }
+        }
+
     }
 
 }

@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!-- SPDX-FileCopyrightText: 2023 Mark Rotteveel -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
+<!-- NOTE: Updates to /xs:schema[@version] also need to be reflected in ConfigMapper.CURRENT_SCHEMA_VERSION -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            targetNamespace="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"
            xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"
            elementFormDefault="qualified"
            xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
-           jaxb:version="3.0">
+           jaxb:version="3.0"
+           version="2.0">
 
     <xs:element name="extTableGenConfig">
         <xs:complexType>
@@ -16,6 +18,7 @@
                 <xs:element name="csvFile" type="CsvFileType" minOccurs="0"/>
                 <xs:element name="informational" type="InformationalType" minOccurs="0"/>
             </xs:sequence>
+            <xs:attribute name="schemaVersion" type="xs:token" use="required"/>
         </xs:complexType>
     </xs:element>
 

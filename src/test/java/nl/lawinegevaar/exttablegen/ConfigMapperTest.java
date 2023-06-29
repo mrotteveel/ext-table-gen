@@ -94,7 +94,7 @@ class ConfigMapperTest {
     void columnWithInvalidEncoding_throwsInvalidConfigurationException() {
         String configString =
                 """
-                <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+                <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
                     <externalTable name="DEFAULT_EXTERNAL_TABLE_NAME">
                         <columns>
                             <column name="VALID_COLUMN">
@@ -122,15 +122,15 @@ class ConfigMapperTest {
     @ValueSource(strings = {
             // Empty XML (only /extTableGenConfig)
             """
-            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"/>""",
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0"/>""",
             // Empty /extTableGenConfig/externalTable
             """
-            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
                 <externalTable/>
             </extTableGenConfig>""",
             // Empty /extTableGenConfig/externalTable/columns
             """
-            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
                 <externalTable>
                     <columns/>
                 </externalTable>
@@ -159,7 +159,7 @@ class ConfigMapperTest {
     @ValueSource(strings = {
             // Invalid end column type in columns
             """
-            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
                 <externalTable>
                     <columns>
                         <column name="VALID_COLUMN">
@@ -171,22 +171,22 @@ class ConfigMapperTest {
             </extTableGenConfig>""",
             // Invalid end column in derivation config
             """
-            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
                 <tableDerivation endColumnType="DOES_NOT_EXIST"/>
             </extTableGenConfig>""",
             // Invalid encoding name in derivation config
             """
-            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
                 <tableDerivation columnEncoding="DOES_NOT_EXIST"/>
             </extTableGenConfig>""",
             // Invalid character set name
             """
-            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
                 <csvFile path="input.csv" charset="DOES_NOT_EXIST"/>
             </extTableGenConfig>""",
             // path is required if csvFile element exists
             """
-            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
                 <csvFile charset="UTF-8"/>
             </extTableGenConfig>"""
     })

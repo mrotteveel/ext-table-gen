@@ -188,7 +188,10 @@ class ConfigMapperTest {
             """
             <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
                 <csvFile charset="UTF-8"/>
-            </extTableGenConfig>"""
+            </extTableGenConfig>""",
+            // Unsupported schema version (using a high value to avoid having to revise this)
+            """
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="99.0"/>""",
     })
     void testInvalidXml_throwsInvalidConfigurationException(String configString) {
         assertThrows(InvalidConfigurationException.class, () ->

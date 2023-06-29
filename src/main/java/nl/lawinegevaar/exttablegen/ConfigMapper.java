@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static nl.lawinegevaar.exttablegen.TableDerivationConfig.DEFAULT_COLUMN_ENCODING;
@@ -26,6 +27,7 @@ final class ConfigMapper {
     static final String SCHEMA_VERSION_1_0 = "1.0";
     // Schema version for documents created by ext-table-gen v1.0
     static final String SCHEMA_VERSION_2_0 = "2.0";
+    private static final Set<String> SUPPORTED_SCHEMA_VERSIONS = Set.of(SCHEMA_VERSION_1_0, SCHEMA_VERSION_2_0);
 
     // Must match /xs:schema[@version]
     static final String CURRENT_SCHEMA_VERSION = SCHEMA_VERSION_2_0;
@@ -197,6 +199,10 @@ final class ConfigMapper {
     }
 
     EtgConfig fromXmlExtTableGenConfig(ExtTableGenConfig extTableGenConfig) {
+        if (!SUPPORTED_SCHEMA_VERSIONS.contains(extTableGenConfig.getSchemaVersion())) {
+            throw new InvalidConfigurationException("Unsupported schema version %s, expected one of %s"
+                    .formatted(extTableGenConfig.getSchemaVersion(), SUPPORTED_SCHEMA_VERSIONS));
+        }
         try {
             return new EtgConfig(
                     fromXmlExternalTableType(extTableGenConfig.getExternalTable()),

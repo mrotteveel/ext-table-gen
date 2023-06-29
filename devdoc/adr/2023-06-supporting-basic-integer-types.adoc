@@ -1,0 +1,98 @@
+= 2023-06 Supporting Basic Integer Types
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Draft
+* Proposed for: 2.0
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+Firebird external table files have a binary format, and support data types other than `CHAR` for columns.
+External tables do not support the `NULL` value.
+
+For this ADR, we only cover the basic integer types:
+
+[horizontal]
+`SMALLINT`:: 16-bit signed integer
+`INTEGER`:: 32-bit signed integer
+`BIGINT`:: 64-bit signed integer (not supported in dialect 1)
+`INT128`:: 128-bit signed integer (introduced in Firebird 4.0)
+
+The storage is endian-sensitive, depending on the platform of the target Firebird server.
+
+Numeric presentation in CSV is not formalized in https://www.rfc-editor.org/rfc/rfc4180[RFC 4180^].
+
+In Java, the Firebird data types can be mapped as follows:
+
+* `SMALLINT` -> `java.lang.Short`/`short`
+* `INTEGER` -> `java.lang.Integer`/`int`
+* `BIGINT` -> `java.lang.Long`/`long`
+* `INT128` -> `java.math.BigInteger` and/or `java.math.BigDecimal`
+
+The Java types all provide methods or constructors to parse string values to their respective types, allowing for a radix in the range `[2, 36]`.
+
+The `BigInteger` class has a `toByteArray()` method which converts the value to a big-endian two's-complement with the minimum size necessary to represent the number.
+For the other types, manual bit-manipulation is needed or use of a `java.nio.ByteBuffer` with the appropriate byte order set.
+
+For a `BigInteger`, the method `bitLength()` can be used to check if a value is in range (it returns the minimum number of bits except the sign-bit).
+
+For inspiration, also look at Jaybird's `org.firebirdsql.gds.ng.DefaultDatatypeCoder` and its subclasses.
+
+In Java, byte order is represented by `java.nio.ByteOrder`.
+Its method `nativeOrder()` can be used to detect the byte order of the runtime platform.
+
+== Decision
+
+=== Integer Support
+
+_ext-table-gen_ will support the four integer data types (`SMALLINT`, `INTEGER`, `BIGINT` and `INT128`).
+
+These types will only be available by editing the configuration file, they will not be derived automatically by parsing the CSV.
+
+Initially, we will only support parsing decimal (radix 10) values, following the normal Java parsing rules.
+Expressed as a regex, we'll parse numbers of the following format:
+
+[source,regexp]
+----
+[+-]?[0-9]+
+----
+
+Empty or blank values from the CSV will be interpreted as value `0`.
+Other values not matching above pattern will produce an error.
+Values outside the range of their respective types will produce an error.
+Validation of format and range will only happen while writing the external table.
+
+In the XML config, the data types will be represented by elements:
+
+* `smallint`
+* `integer`
+* `bigint`
+* `int128`
+
+These elements will not have any attributes in this initial design.
+At the moment, we foresee that if additional radixes or other conversions are introduced, this will be configured with nested elements specifying the appropriate conversion and configuration (that said, that is just a quick thought, and not set in stone).
+
+== Byte Order
+
+The configuration will record the byte order to apply.
+
+If no XML config is read, the value returned by `ByteOrder.nativeOrder()` is applied.
+
+In the XML config, this will be recorded in an optional attribute `byteOrder` on `/extTableGenConfig/externalTable` with possible values `BIG_ENDIAN` and `LITTLE_ENDIAN`.
+The value is optional for backwards compatibility with version 1.0 of the XSD.
+If the attribute is absent, the runtime byte order returned by `ByteOrder.nativeOrder()` is applied *and* -- if not overridden by the commandline -- written out to the config if `--config-out` is specified.
+
+The byte order can be set (or overridden) using commandline option `--byte-order`, with values `BIG_ENDIAN` and `LITTLE_ENDIAN`.
+
+== Consequences
+
+The documentation must be updated to explain how to use these new data types, and to describe the configuration changes
+
+See also previous section for some implementation consequences.

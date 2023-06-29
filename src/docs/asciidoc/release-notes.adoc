@@ -40,7 +40,10 @@ Future versions may introduce support for additional column types.
 [#about-version]
 == About this version
 
-Firebird External Table Generator version 1.0 is the first release of this application.
+Firebird External Table Generator version 2.0 is the second release of this application.
+
+// TODO Describe major new features
+
 This application is licensed under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
 
 Consult the xref:ext-table-gen-user-manual.adoc[User Manual] for installation, usage examples and reference documentation.
@@ -49,6 +52,45 @@ For more information, or to report issues or submit pull request, go to https://
 
 [#version-history]
 === Version history
+
+==== _ext-table-gen_ 2.0
+
+The following changes were made in _ext-table-gen_ 2.0
+
+* The XML schema is now versioned.
+Where possible, backwards compatible changes are performed while retaining the same namespace.
+See https://github.com/mrotteveel/ext-table-gen/blob/main/devdoc/adr/2023-05-xml-schema-versioning.adoc[2023-05 XML Schema Versioning^] for details.
+** We introduced a minor breaking change to XSD, while not changing the namespace.
+This will result in validation errors when a config file from version 1.0 is validated against the XSD of version 2.0.
+We considered this change too minor to go through the trouble of changing the namespace.
++
+To address this breaking change, let _ext-table-gen_ upgrade the file for you (this example uses the Windows Command Prompt continuation character `^`):
++
+[listing]
+----
+ext-table-gen --config-in=path-to-config.xml ^
+  --config-out=path-to-config.xml ^
+  --overwrite-config
+----
++
+Alternatively, edit the XML to add the attribute `schemaVersion` with value `1.0` (i.e. `schemaVersion="1.0"`) to the `extTableGenConfig` element.
+For example:
++
+.XML from version 1.0
+[source,xml]
+----
+<extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd">
+    <!-- ... -->
+</extTableGenConfig>
+----
++
+.Modified XML
+[source,xml]
+----
+<extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="1.0">
+    <!-- ... -->
+</extTableGenConfig>
+----
 
 ==== _ext-table-gen_ 1.0
 

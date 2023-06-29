@@ -40,12 +40,12 @@
             </column>
             <endColumn type="LF"/>
         </columns>
-        <tableFile path="C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\output.dat" overwrite="false"/>
+        <tableFile path="output.dat" overwrite="false"/>
     </externalTable>
     <tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/>
-    <csvFile path="C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\input.csv" charset="UTF-8" headerRow="true"/>
+    <csvFile path="input.csv" charset="UTF-8" headerRow="true"/>
     <informational>
-        <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\Users\mark\AppData\Local\Temp\junit4050924511310561643\output.dat' (
+        <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'output.dat' (
   "Index" char(2) character set ISO8859_1,
   "Customer Id" char(15) character set ISO8859_1,
   "First Name" char(8) character set ISO8859_1,

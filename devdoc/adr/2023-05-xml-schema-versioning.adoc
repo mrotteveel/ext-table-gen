@@ -1,0 +1,63 @@
+= 2023-02 XML Schema Versioning
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Draft
+
+== Type
+
+* Project-Specification
+
+== Context
+
+This documentation describes how to handle XML schema versioning.
+This should have been thought of before releasing _ext-table-gen_ version 1.0, but unfortunately I only thought of it after publishing the release.
+
+Currently, _ext-table-gen_ uses XSD `ext-table-gen-1.0.xsd` (namespace `https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd`).
+The namespace specifies a version.
+Unfortunately, creating a new namespace for each schema change is rather painful.
+With a new namespace/schema, the application can't simply read configuration files from older schemas, and would require some form of probing and loading for a specific schema version, or transformation (e.g. using XSLT) to the latest schema version.
+
+This document describes the schema versioning rules the project will apply in an attempt to avoid namespace changes unless absolutely necessary.
+This document is based on the ideas expressed in https://www.xfront.com/Versioning.pdf[^].
+
+We only aim at being able to load documents from previous versions, and given we currently haven't enabled validation on JAXB, this might give us a bit more leeway.
+
+== Decision
+
+We strive to avoid changing the namespace unless absolutely necessary.
+This means that -- where possible -- changes should be additive only (e.g. new elements, attributes, extensions to enumerated lists, etc.), and not invalidate existing documents.
+
+Minor incompatible changes (i.e. validating an old document against the new schema version will fail, for example adding a required attribute) should be avoided, but in motivated cases, we can deviate from that (as long as the JAXB definition in _ext-table-gen_ can load the old document).
+
+Major incompatible changes (e.g. removing elements, attributes, or removing values from enumerated lists, moving elements around, etc.) should be avoided where possible, but must result in a new namespace, with an upgrade path (the exact upgrade path will be considered/designed when the need arises).
+
+From _ext-table-gen_ version 2.0, the `https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd` schema/namespace will be versioned:
+
+* The schema of _ext-table-gen_ version 1.0 will be considered version 1.0
+* The version number inside the schema is entirely separate from the version number in the namespace (e.g. `ext-table-gen-1.0.xsd` could have a version 10.0)
+* Between releases, minor changes will increment the minor version, and major changes, or minor, but incompatible changes will increment the major version (and reset the minor to zero).
++
+The determination what is considered major or minor is left open to the one making the change, but reasoning should be documented in the ADR.
+
+This version is recorded as follows:
+
+* The schema itself will get a `version` attribute with its version.
+* The `extTableGenConfig` root element will get a required `version` attribute recording the schema version used to create it.
++
+This is a minor incompatible change, which will make validation of old documents fail.
+JAXB should be able to read the document, and the `null` value of the property will be considered to mean the value is `1.0`.
+This assumption will need to be verified, and if proven false, this may need to be rethought (e.g. add it as an optional attribute with default value `1.0`).
+
+Where possible, compatibility with documents of older versions should be checked with tests.
+For these tests, valid output of the released _ext-table-gen_ with a schema version is considered sufficient.
+We will not test incomplete or partially populated XML for compatibility.
+
+== Consequences
+
+Given the minor incompatible change of the addition of the required `version` attribute, the version of the `ext-table-gen-1.0.xsd` will change to 2.0 as a result of this ADR.
+
+Tests will need to be created with a version 1.0 document.

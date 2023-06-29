@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2023 Mark Rotteveel -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 <!--suppress RequiredAttributes -->
 <!--
 NOTE: The absence of attribute schemaVersion on extTableGenConfig is intentional here, as it was missing in

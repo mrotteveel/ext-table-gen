@@ -1,11 +1,11 @@
-= 2023-02 XML Schema Versioning
+= 2023-05 XML Schema Versioning
 
 // SPDX-FileCopyrightText: 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 == Status
 
-* Draft
+* Published: 2023-06-29
 
 == Type
 

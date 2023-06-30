@@ -33,7 +33,7 @@ The character set can be explicitly configured using <<#ref-cmd-csv-charset,`--c
 The external table definition derived from a CSV file uses only `CHAR` columnsfootnote:[At this time, `CHAR` is the only supported datatype], and the default character set is `ISO8859_1`.
 This can be overridden by specifying <<ref-cmd-column-encoding,`--column-encoding=ENCODING`>>, where `ENCODING` is a Firebird character set name (e.g. `column-encoding=WIN1252`).
 Alternatively, an existing configuration file can be edited to change the column encoding.
-The configuration file allows you to configure the character set _per column_).
+The configuration file allows you to configure the character set _per column_.
 
 Given the overhead of using `UTF8` columns (e.g. a `CHAR(1000) CHARACTER SET UTF8` column will occupy 4000 bytes in an external table), we recommend to use a single-byte character set where possible, and only define columns as `UTF8` when absolutely necessary.
 

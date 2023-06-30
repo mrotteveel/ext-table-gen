@@ -92,7 +92,7 @@ On Linux, there is generally a common group (e.g. `firebird`) which can be assig
 Enabling `ExternalFileAccess` introduces security risks if not managed carefully.
 All files in the directories (and subdirectories) listed in `ExternalFileAccess` which are readable by the Firebird process can be read this way, and files which are writable can be modified (append only), and files can be created in directories which are writable.
 
-If you have a compromised database or Firebird server, it would be possible exfiltrate the contents of those files with a carefully crafted external table (or tables), and risks files that are writable by the Firebird server user to be modified (only by appending), or additional files to be introduced on your filesystem in directories where the server has write access.
+If you have a compromised database or Firebird server, it would be possible to exfiltrate the contents of those files with a carefully crafted external table (or tables), and risks files that are writable by the Firebird server user to be modified (only by appending), or additional files to be introduced on your filesystem in directories where the server has write access.
 
 To reduce these risks, follow these guidelines
 

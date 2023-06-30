@@ -28,6 +28,7 @@
             <xs:element name="tableFile" type="TableFileType" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute name="name" type="xs:string" use="required"/>
+        <xs:attribute name="byteOrder" type="ByteOrderEnum"/>
     </xs:complexType>
 
     <xs:complexType name="TableDerivationType">
@@ -162,6 +163,19 @@
             <xs:enumeration value="LF"/>
             <xs:enumeration value="CRLF"/>
             <xs:enumeration value="NONE"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ByteOrderEnum">
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:typesafeEnumClass map="false"/>
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="BIG_ENDIAN"/>
+            <xs:enumeration value="LITTLE_ENDIAN"/>
+            <xs:enumeration value="AUTO"/>
         </xs:restriction>
     </xs:simpleType>
 

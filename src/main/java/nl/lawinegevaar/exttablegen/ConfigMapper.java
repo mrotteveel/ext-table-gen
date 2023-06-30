@@ -123,6 +123,7 @@ final class ConfigMapper {
         ExternalTableType externalTableType = factory.createExternalTableType();
         externalTableType.setName(tableConfig.name());
         externalTableType.setColumns(toXmlColumnListType(tableConfig.columns()));
+        externalTableType.setByteOrder(tableConfig.byteOrder().name());
         tableConfig.tableFile()
                 .map(this::toXmlTableFileType)
                 .ifPresent(externalTableType::setTableFile);
@@ -224,7 +225,8 @@ final class ConfigMapper {
         return new TableConfig(
                 externalTableType.getName(),
                 fromXmlColumnListType(externalTableType.getColumns()),
-                fromXmlTableFileType(externalTableType.getTableFile()));
+                fromXmlTableFileType(externalTableType.getTableFile()),
+                fromXmlByteOrderEnum(externalTableType.getByteOrder()));
     }
 
     private List<Column> fromXmlColumnListType(ColumnListType columnListType) {
@@ -262,7 +264,7 @@ final class ConfigMapper {
         try {
             return EndColumn.require(EndColumn.Type.valueOf(endColumnType.getType()));
         } catch (RuntimeException e) {
-            throw new InvalidConfigurationException("Unsupported end column type " + endColumnType.getType(), e);
+            throw new InvalidConfigurationException("Unsupported end column type: " + endColumnType.getType(), e);
         }
     }
 
@@ -275,6 +277,17 @@ final class ConfigMapper {
                             tableFileType.isOverwrite()));
         } catch (RuntimeException e) {
             throw new InvalidConfigurationException("Could not convert from XML TableFileType", e);
+        }
+    }
+
+    private ByteOrderType fromXmlByteOrderEnum(String byteOrderEnumValue) {
+        if (byteOrderEnumValue == null) {
+            return ByteOrderType.AUTO;
+        }
+        try {
+            return ByteOrderType.valueOf(byteOrderEnumValue);
+        } catch (RuntimeException e) {
+            throw new InvalidConfigurationException("Unsupported byte order type: " + byteOrderEnumValue);
         }
     }
 

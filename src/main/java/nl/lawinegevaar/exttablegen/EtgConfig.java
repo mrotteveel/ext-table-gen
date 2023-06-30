@@ -168,17 +168,22 @@ record TableFile(Path path, boolean overwrite) {
  *         list of columns (can be empty, {@code null} will be replaced with empty list)
  * @param tableFile
  *         (optional) table file
+ * @param byteOrder
+ *         byte order
  */
-record TableConfig(String name, List<Column> columns, Optional<TableFile> tableFile) {
+record TableConfig(String name, List<Column> columns, Optional<TableFile> tableFile, ByteOrderType byteOrder) {
 
-    private static final TableConfig EMPTY = new TableConfig(null, null, Optional.empty());
+    private static final TableConfig EMPTY = new TableConfig(null, null, Optional.empty(), ByteOrderType.AUTO);
 
     TableConfig {
         columns = columns != null ? List.copyOf(columns) : List.of();
+        if (byteOrder == null) {
+            byteOrder = ByteOrderType.AUTO;
+        }
     }
 
-    TableConfig(String name, List<Column> columns, TableFile tableFile) {
-        this(name, columns, Optional.ofNullable(tableFile));
+    TableConfig(String name, List<Column> columns, TableFile tableFile, ByteOrderType byteOrder) {
+        this(name, columns, Optional.ofNullable(tableFile), byteOrder);
     }
 
     /**
@@ -198,7 +203,7 @@ record TableConfig(String name, List<Column> columns, Optional<TableFile> tableF
      *         if this configuration is incomplete or invalid for an external table
      */
     ExternalTable toExternalTable() {
-        return new ExternalTable(name(), columns(), tableFile.map(TableFile::toOutputResource).orElse(null));
+        return new ExternalTable(name(), columns(), tableFile.map(TableFile::toOutputResource).orElse(null), byteOrder);
     }
 
     Optional<String> toDdl() {
@@ -218,12 +223,12 @@ record TableConfig(String name, List<Column> columns, Optional<TableFile> tableF
 
     TableConfig withName(String name) {
         if (Objects.equals(this.name, name)) return this;
-        return new TableConfig(name, columns, tableFile);
+        return new TableConfig(name, columns, tableFile, byteOrder);
     }
 
     TableConfig withColumns(List<Column> columns) {
         if (this.columns.equals(columns) || this.columns.isEmpty() && columns == null) return this;
-        return new TableConfig(name, columns, tableFile);
+        return new TableConfig(name, columns, tableFile, byteOrder);
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -233,12 +238,20 @@ record TableConfig(String name, List<Column> columns, Optional<TableFile> tableF
 
     TableConfig withTableFile(TableFile tableFile) {
         if (Objects.equals(this.tableFile.orElse(null), tableFile)) return this;
-        return new TableConfig(name, columns, tableFile);
+        return new TableConfig(name, columns, tableFile, byteOrder);
+    }
+
+    TableConfig withByteOrder(ByteOrderType byteOrder) {
+        if (this.byteOrder == byteOrder) return this;
+        return new TableConfig(name, columns, tableFile, byteOrder);
     }
 
     static TableConfig of(ExternalTable externalTable) {
-        return new TableConfig(externalTable.name(), externalTable.columns(),
-                externalTable.outputResource().path().map(path -> new TableFile(path, false)));
+        return new TableConfig(
+                externalTable.name(),
+                externalTable.columns(),
+                externalTable.outputResource().path().map(path -> new TableFile(path, false)),
+                externalTable.byteOrder());
     }
 
 }

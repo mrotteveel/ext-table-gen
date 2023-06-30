@@ -5,6 +5,7 @@ package nl.lawinegevaar.exttablegen;
 import jakarta.xml.bind.JAXBException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
@@ -88,6 +89,18 @@ class ConfigMapperTest {
         EtgConfig fromXml = roundTripConfig(originalConfig);
 
         assertEquals(originalConfig, fromXml);
+    }
+
+    @ParameterizedTest
+    @EnumSource(ByteOrderType.class)
+    void explicitByteOrders(ByteOrderType byteOrder) throws Exception {
+        EtgConfig originalConfig = testEtgConfig()
+                .withTableConfig(cfg -> cfg.withByteOrder(byteOrder));
+
+        EtgConfig fromXml = roundTripConfig(originalConfig);
+
+        assertEquals(originalConfig, fromXml);
+        assertEquals(byteOrder, fromXml.tableConfig().byteOrder());
     }
 
     @Test

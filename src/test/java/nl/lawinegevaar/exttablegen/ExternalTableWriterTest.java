@@ -108,7 +108,7 @@ class ExternalTableWriterTest {
                 List.of(col("COLUMN_1", 1, FbEncoding.ASCII),
                         col("COLUMN_2", 5, FbEncoding.forName("WIN1252")),
                         EndColumn.require(EndColumn.Type.CRLF)),
-                outputResource);
+                outputResource, ByteOrderType.AUTO);
         return new ExternalTableWriter(externalTable);
     }
 

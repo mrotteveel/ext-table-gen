@@ -98,7 +98,7 @@ We only allow this override if also specifying the external table file, so you'r
 
 Table derivation options configure how _ext-table-gen_ derives the external table definition.
 
-Apart from <<ref-cmd-table-name,`--table-name`>>, these options only have effect when a new external table definitions is generated (see also <<ref-cmd-table-derivation-mode>>).
+Apart from <<ref-cmd-table-name,`--table-name`>> and <<ref-cmd-byte-order,`--byte-order`>>, these options only have effect when a new external table definitions is generated (see also <<ref-cmd-table-derivation-mode>>).
 
 [#ref-cmd-table-name]
 ==== Table name (`--table-name`)
@@ -109,6 +109,25 @@ The value will be converted to a quoted identifier.
 When no name is specified through `--table-name` or the XML file, the table name `DEFAULT_EXTERNAL_TABLE_NAME` is used.
 
 This option can override the XML config of <<ref-xml-externaltable,`/extTableGenConfig/externalTable[@name]`>> if explicitly specified.
+
+[#ref-cmd-byte-order]
+==== Byte order (`--byte-order`)
+
+The byte order option (`--byte-order=ORDER`) specifies the byte order of the external table.
+`ORDER` can have value:
+
+[horizontal]
+`BIG_ENDIAN`::
+big-endian
+`LITTLE_ENDIAN`::
+little-endian
+`AUTO`::
+automatically select based on the byte order of the runtime platform
+
+The default is the effective value of `AUTO` (that is, either `BIG_ENDIAN` or `LITTLE_ENDIAN`).
+Explicitly specifying `AUTO` will store  `AUTO` in the configuration file.
+
+This option can override the XML config of <<ref-xml-externaltable,`/extTableGenConfig/externalTable[@byteOrder]`>> if explicitly specified.
 
 [#ref-cmd-column-encoding]
 ==== Column encoding (`--column-encoding`)
@@ -247,6 +266,21 @@ The columns it contains are used by _ext-table-gen_ to validate the columns in t
 [horizontal]
 `name`::
 Name of the table (used for the DDL; required)
+`byteOrder`::
+Byte order of the table (optional)
+Possible values:
++
+--
+[horizontal]
+`BIG_ENDIAN`::
+big-endian
+`LITTLE_ENDIAN`::
+little-endian
+`AUTO`::
+automatically select based on the byte order of the runtime platform
+--
++
+If the attribute is absent, `AUTO` is used.
 
 .Elements
 * <<ref-xml-columns>> -- required

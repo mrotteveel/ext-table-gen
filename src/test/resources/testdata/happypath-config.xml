@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
-    <externalTable name="DEFAULT_EXTERNAL_TABLE_NAME">
+    <externalTable name="DEFAULT_EXTERNAL_TABLE_NAME" byteOrder="BIG_ENDIAN">
         <columns>
             <column name="Index">
                 <char length="2" encoding="ISO8859_1"/>

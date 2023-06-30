@@ -185,7 +185,7 @@ class CsvFileTest {
         var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, true));
         var externalTable = ExternalTable.deriveFrom(csvFile,
                 new ExternalTable.Config("TEST_CUSTOMERS", outputFile, FbEncoding.forName("WIN1252"),
-                        EndColumn.Type.LF));
+                        EndColumn.Type.LF, ByteOrderType.AUTO));
         System.out.println(externalTable.toCreateTableStatement());
 
         try (var writer = new ExternalTableWriter(externalTable, OutputResource.of(outputFile, true))) {

@@ -72,7 +72,7 @@ class ExtTableGenMainTest {
                 new EtgConfig(
                         new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
                                 customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
-                                new TableFile(tableFilePath, false)),
+                                new TableFile(tableFilePath, false), ByteOrderType.LITTLE_ENDIAN),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
                         new CsvFileConfig(csvFilePath, UTF_8, true)),
                 outConfigFile);
@@ -105,7 +105,7 @@ class ExtTableGenMainTest {
                 new EtgConfig(
                         new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
                                 customers10Columns(EndColumn.Type.NONE, FbEncoding.ISO8859_1),
-                                new TableFile(tableFilePath, false)),
+                                new TableFile(tableFilePath, false), ByteOrderType.LITTLE_ENDIAN),
                         TableDerivationConfig.getDefault()
                                 .withEndColumnType(EndColumn.Type.NONE)
                                 .withMode(TableDerivationMode.NEVER),
@@ -149,7 +149,7 @@ class ExtTableGenMainTest {
                 new EtgConfig(
                         new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
                                 customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
-                                new TableFile(tableFilePath, false)),
+                                new TableFile(tableFilePath, false), ByteOrderType.LITTLE_ENDIAN),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
                         new CsvFileConfig(csvFilePath, UTF_8, true)),
                 outConfigFile);
@@ -191,7 +191,7 @@ class ExtTableGenMainTest {
                         new TableConfig("DEFAULT_EXTERNAL_TABLE_NAME",
                                 List.of(col("column1", 3), col("column2", 2),
                                         EndColumn.Type.LF.getEndColumn().orElseThrow()),
-                                new TableFile(tableFilePath, false)),
+                                new TableFile(tableFilePath, false), ByteOrderType.LITTLE_ENDIAN),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
                         new CsvFileConfig(csvFilePath, UTF_8, true)),
                 outConfigFile);
@@ -409,7 +409,7 @@ class ExtTableGenMainTest {
                                         col("column1", 3, FbEncoding.UTF8),
                                         col("column2", 2, FbEncoding.UTF8),
                                         EndColumn.require(EndColumn.Type.LF)),
-                                new TableFile(tableFilePath, false)),
+                                new TableFile(tableFilePath, false), ByteOrderType.LITTLE_ENDIAN),
                         new TableDerivationConfig(FbEncoding.UTF8, EndColumn.Type.LF, TableDerivationMode.NEVER),
                         new CsvFileConfig(csvFilePath, UTF_8, true)),
                 outConfigFile);

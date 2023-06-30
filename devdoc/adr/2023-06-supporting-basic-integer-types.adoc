@@ -83,13 +83,15 @@ At the moment, we foresee that if additional radixes or other conversions are in
 
 The configuration will record the byte order to apply.
 
-If no XML config is read, the value returned by `ByteOrder.nativeOrder()` is applied.
-
-In the XML config, this will be recorded in an optional attribute `byteOrder` on `/extTableGenConfig/externalTable` with possible values `BIG_ENDIAN` and `LITTLE_ENDIAN`.
+In the XML config, this will be recorded in an optional attribute `byteOrder` on `/extTableGenConfig/externalTable` with possible values `BIG_ENDIAN`, `LITTLE_ENDIAN` and `AUTO`.
+With value `AUTO`, the actual byte order is selected at runtime based on the byte order from `ByteOrder.nativeOrder()`.
 The value is optional for backwards compatibility with version 1.0 of the XSD.
-If the attribute is absent, the runtime byte order returned by `ByteOrder.nativeOrder()` is applied *and* -- if not overridden by the commandline -- written out to the config if `--config-out` is specified.
+If the attribute is absent, the value of `AUTO` is used, and the runtime byte order returned by `ByteOrder.nativeOrder()` is applied;
+the `AUTO` value is preserved when writing the configuration back.
 
-The byte order can be set (or overridden) using commandline option `--byte-order`, with values `BIG_ENDIAN` and `LITTLE_ENDIAN`.
+The byte order can be set (or overridden) using commandline option `--byte-order`, with values `BIG_ENDIAN`, `LITTLE_ENDIAN` and `AUTO`.
+When no value is specified, and no XML config was read, the runtime value of `ByteOrder.nativeOrder()` is used to select `BIG_ENDIAN` or `LITTLE_ENDIAN`.
+This is the effective value of `AUTO`, but with the difference that explicitly specifying `AUTO` will preserve that value in the configuration.
 
 == Consequences
 

@@ -86,13 +86,15 @@ final class ExtTableGen {
     ExternalTable deriveExternalTable() {
         CsvFile csvFile = getCsvFile();
         TableDerivationConfig tableDerivationConfig = config.tableDerivationConfig();
+        TableConfig tableConfig = config.tableConfig();
         ExternalTable externalTable = ExternalTable.deriveFrom(
                 csvFile.withConfig(
                         // Require all rows to have same number of columns
                         csvFile.config().withBuilderCustomizer(
                                 b -> b.withRowValidator(ColumnCountValidator.fromFirstRow()))),
-                new ExternalTable.Config(config.tableConfig().name(), createExternalTableOutputResource(),
-                        tableDerivationConfig.columnEncoding(), tableDerivationConfig.endColumnType()),
+                new ExternalTable.Config(tableConfig.name(), createExternalTableOutputResource(),
+                        tableDerivationConfig.columnEncoding(), tableDerivationConfig.endColumnType(),
+                        tableConfig.byteOrder()),
                 new StopOnExceptionProcessor(CsvValidationException.class));
 
         config = config.withTableConfig(cfg -> TableConfig.of(externalTable).withTableFile(cfg.tableFile()));

@@ -69,7 +69,8 @@ final class ExternalTableProcessor extends MultiplexRowProcessor {
     }
 
     private ExternalTable createExternalTable(List<Column> columns) {
-        return new ExternalTable(tableConfig.tableName(), columns, tableConfig.outputResource());
+        return new ExternalTable(tableConfig.tableName(), columns, tableConfig.outputResource(),
+                tableConfig.byteOrder());
     }
 
 }

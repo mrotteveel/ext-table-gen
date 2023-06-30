@@ -24,6 +24,7 @@ import static java.lang.System.Logger.Level.ERROR;
 import static java.lang.System.Logger.Level.INFO;
 import static java.lang.System.Logger.Level.WARNING;
 import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.requireNonNullElseGet;
 import static nl.lawinegevaar.exttablegen.TableDerivationConfig.DEFAULT_COLUMN_ENCODING;
 import static nl.lawinegevaar.exttablegen.TableDerivationConfig.DEFAULT_END_COLUMN_TYPE;
 
@@ -50,8 +51,8 @@ final class ExtTableGenMain implements Runnable {
     private static final TableDerivationMode DEFAULT_TABLE_DERIVATION_MODE = TableDerivationMode.INCOMPLETE;
     private static final Charset DEFAULT_CSV_CHARSET = StandardCharsets.UTF_8;
 
-    @CommandLine.Option(names = "--csv-file", paramLabel = "CSV",
-            description = "CSV file (RFC 4180 format)", order = 100)
+    @CommandLine.Option(names = "--csv-file", paramLabel = "CSV", description = "CSV file (RFC 4180 format)",
+            order = 100)
     Path csvFile;
 
     @CommandLine.Option(names = "--csv-charset", paramLabel = "CHARSET",
@@ -75,9 +76,15 @@ final class ExtTableGenMain implements Runnable {
         Boolean overwriteTableFile;
     }
 
-    @CommandLine.Option(names = "--table-name", paramLabel = "TABLE",
-            description = "Name of the external table", order = 300)
+    @CommandLine.Option(names = "--table-name", paramLabel = "TABLE", description = "Name of the external table",
+            order = 300)
     String tableName;
+
+    @CommandLine.Option(names = "--byte-order", paramLabel = "ORDER",
+            description = "Byte order ({LITTLE_ENDIAN | BIG_ENDIAN | AUTO}). Default: runtime byte order (effective "
+                          + "value of AUTO)",
+            order = 302)
+    ByteOrderType byteOrder;
 
     @CommandLine.Option(names = "--column-encoding", paramLabel = "ENCODING", converter = FbEncodingConverter.class,
             description = "Name of the character set of external table columns (Firebird character set name). Default: "
@@ -194,6 +201,10 @@ final class ExtTableGenMain implements Runnable {
             config = config.withTableConfig(cfg -> cfg.withName(tableName));
         }
 
+        if (byteOrder != null) {
+            config = config.withTableConfig(cfg -> cfg.withByteOrder(byteOrder));
+        }
+
         if (columnEncoding != null || endColumnType != null || tableDerivationMode != null) {
             config = config.withTableDerivationConfig(
                     cfg -> {
@@ -240,7 +251,8 @@ final class ExtTableGenMain implements Runnable {
                 new TableConfig(tableName, List.of(),
                         Optional.ofNullable(tableFileOptions)
                                 .map(opt -> tableFileOptions.tableFilePath)
-                                .map(file -> new TableFile(file, overwriteTableFileOrDefault()))),
+                                .map(file -> new TableFile(file, overwriteTableFileOrDefault())),
+                        byteOrderOrDefault()),
                 new TableDerivationConfig(
                         columnEncodingOrDefault(), endColumnTypeOrDefault(), tableDerivationModeOrDefault()),
                 createCsvFileConfig());
@@ -256,6 +268,10 @@ final class ExtTableGenMain implements Runnable {
 
     boolean csvHeaderOrDefault() {
         return requireNonNullElse(csvHeader, Boolean.TRUE);
+    }
+
+    ByteOrderType byteOrderOrDefault() {
+        return requireNonNullElseGet(byteOrder, ByteOrderType.AUTO::effectiveValue);
     }
 
     private Optional<TableFileOptions> tableFileOptions() {

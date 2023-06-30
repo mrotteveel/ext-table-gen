@@ -26,7 +26,7 @@ class ExternalTableTest {
     @ValueSource(strings = " ")
     void nullEmptyOrBlankNameReplacedWithDefaultName(String name) {
         var table = new ExternalTable(
-                name, List.of(col("COLUMN1", 10, FbEncoding.ASCII)), null);
+                name, List.of(col("COLUMN1", 10, FbEncoding.ASCII)), null, ByteOrderType.AUTO);
 
         assertEquals("DEFAULT_EXTERNAL_TABLE_NAME", table.name(), "unexpected table name");
     }
@@ -40,7 +40,7 @@ class ExternalTableTest {
             """)
     void nameAndQuotedName(String name, String expectedName, String expectedQuotedName) {
         var table = new ExternalTable(
-                name, List.of(col("COLUMN1", 10, FbEncoding.ASCII)), null);
+                name, List.of(col("COLUMN1", 10, FbEncoding.ASCII)), null, ByteOrderType.AUTO);
 
         assertEquals(expectedName, table.name(), "unexpected name");
         assertEquals(expectedQuotedName, table.quotedName(), "unexpected quotedName");
@@ -48,7 +48,8 @@ class ExternalTableTest {
 
     @Test
     void disallowEmptyColumnList() {
-        assertThrows(IllegalArgumentException.class, () -> new ExternalTable(null, emptyList(), null),
+        assertThrows(IllegalArgumentException.class, () ->
+                        new ExternalTable(null, emptyList(), null, ByteOrderType.AUTO),
                 "should disallow instantiation with empty list");
     }
 
@@ -65,7 +66,7 @@ class ExternalTableTest {
                 column1End ? EndColumn.require(Type.CRLF) : col("COLUMN1", 10, FbEncoding.ASCII),
                 column2End ? EndColumn.require(Type.CRLF) : col("COLUMN2", 10, FbEncoding.ASCII),
                 column3End ? EndColumn.require(Type.CRLF) : col("COLUMN3", 10, FbEncoding.ASCII));
-        assertThrows(IllegalArgumentException.class, () -> new ExternalTable(null, columns, null),
+        assertThrows(IllegalArgumentException.class, () -> new ExternalTable(null, columns, null, ByteOrderType.AUTO),
                 "should disallow instantiation with list containing EndColumn before the last item");
     }
 
@@ -80,7 +81,7 @@ class ExternalTableTest {
                         col("COLUMN1", 10, FbEncoding.ASCII),
                         col("COLUMN2", 25, FbEncoding.forName("WIN1252")),
                         col("COLUMN3", 50, FbEncoding.UTF8)),
-                outputResource);
+                outputResource, ByteOrderType.AUTO);
 
         String expectedCreateTable = """
                 create table "EXAMPLE_TABLE" external file %s (
@@ -108,7 +109,8 @@ class ExternalTableTest {
                         """,
                 ISO_8859_1);
         var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, true));
-        var tableConfig = new ExternalTable.Config("WITH_HEADER", extTablePath, FbEncoding.ISO8859_1, Type.CRLF);
+        var tableConfig = new ExternalTable.Config("WITH_HEADER", extTablePath, FbEncoding.ISO8859_1, Type.CRLF,
+                ByteOrderType.AUTO);
 
         var externalTable = ExternalTable.deriveFrom(csvFile, tableConfig);
 
@@ -133,7 +135,8 @@ class ExternalTableTest {
                         """,
                 ISO_8859_1);
         var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, false));
-        var tableConfig = new ExternalTable.Config("WITHOUT_HEADER", extTablePath, FbEncoding.ISO8859_1, Type.NONE);
+        var tableConfig = new ExternalTable.Config("WITHOUT_HEADER", extTablePath, FbEncoding.ISO8859_1, Type.NONE,
+                ByteOrderType.AUTO);
 
         var externalTable = ExternalTable.deriveFrom(csvFile, tableConfig);
 
@@ -152,7 +155,8 @@ class ExternalTableTest {
         Path extTablePath = tempDir.resolve("deriveFromEmptyFile.dat");
         var inputResource = InputResource.of(new byte[0]);
         var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, false));
-        var tableConfig = new ExternalTable.Config("WITHOUT_HEADER", extTablePath, FbEncoding.ISO8859_1, Type.CRLF);
+        var tableConfig = new ExternalTable.Config("WITHOUT_HEADER", extTablePath, FbEncoding.ISO8859_1, Type.CRLF,
+                ByteOrderType.AUTO);
 
         assertThrows(NoColumnNamesException.class, () -> ExternalTable.deriveFrom(csvFile, tableConfig));
     }

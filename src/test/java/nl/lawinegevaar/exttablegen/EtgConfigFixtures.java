@@ -34,7 +34,8 @@ final class EtgConfigFixtures {
         return new TableConfig(
                 TABLE_NAME,
                 testColumns(),
-                testTableFile());
+                testTableFile(),
+                ByteOrderType.AUTO);
     }
 
     static List<Column> testColumns() {

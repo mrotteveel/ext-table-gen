@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Represents an external table.
  */
-record ExternalTable(String name, List<Column> columns, OutputResource outputResource) {
+record ExternalTable(String name, List<Column> columns, OutputResource outputResource, ByteOrderType byteOrder) {
 
     static final String DEFAULT_TABLE_NAME = "DEFAULT_EXTERNAL_TABLE_NAME";
 
@@ -61,7 +61,7 @@ record ExternalTable(String name, List<Column> columns, OutputResource outputRes
         if (this.outputResource == outputResource) {
             return this;
         }
-        return new ExternalTable(name, columns, outputResource);
+        return new ExternalTable(name, columns, outputResource, byteOrder);
     }
 
     /**
@@ -180,9 +180,11 @@ record ExternalTable(String name, List<Column> columns, OutputResource outputRes
      *         default encoding to use for string columns
      * @param endColumnType
      *         type of end column ({@code NONE} to have no end column)
+     * @param byteOrder
+     *         byte order
      */
     record Config(String tableName, OutputResource outputResource, FbEncoding defaultEncoding,
-            EndColumn.Type endColumnType) {
+            EndColumn.Type endColumnType, ByteOrderType byteOrder) {
 
         Config {
             if (outputResource == null) {
@@ -192,8 +194,9 @@ record ExternalTable(String name, List<Column> columns, OutputResource outputRes
             requireNonNull(endColumnType, "endColumnType");
         }
 
-        Config(String tableName, Path externalTableFile, FbEncoding defaultEncoding, EndColumn.Type endColumnType) {
-            this(tableName, OutputResource.of(externalTableFile), defaultEncoding, endColumnType);
+        Config(String tableName, Path externalTableFile, FbEncoding defaultEncoding, EndColumn.Type endColumnType,
+                ByteOrderType byteOrder) {
+            this(tableName, OutputResource.of(externalTableFile), defaultEncoding, endColumnType, byteOrder);
         }
 
         Optional<EndColumn> endColumn() {

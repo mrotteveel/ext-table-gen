@@ -40,10 +40,10 @@ class EndColumnTest {
         assertEquals(new Char(length, FbEncoding.ASCII), endColumn.datatype(), "datatype");
 
         var baos = new ByteArrayOutputStream();
-        endColumn.writeValue("anything", baos);
+        endColumn.writeValue("anything", EncoderOutputStream.of(ByteOrderType.LITTLE_ENDIAN).with(baos));
         assertEquals(value, baos.toString(StandardCharsets.US_ASCII), "writeValue");
         baos.reset();
-        endColumn.writeEmpty(baos);
+        endColumn.writeEmpty(EncoderOutputStream.of(ByteOrderType.LITTLE_ENDIAN).with(baos));
         assertEquals(value, baos.toString(StandardCharsets.US_ASCII), "writeEmpty");
     }
 

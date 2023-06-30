@@ -51,7 +51,7 @@ final class Char implements Datatype {
     }
 
     @Override
-    public void writeValue(String value, OutputStream out) throws IOException {
+    public void writeValue(String value, EncoderOutputStream out) throws IOException {
         if (value == null || value.isEmpty()) {
             writeEmpty(out);
         } else {
@@ -102,7 +102,7 @@ final class Char implements Datatype {
     }
 
     @Override
-    public void writeEmpty(OutputStream out) throws IOException {
+    public void writeEmpty(EncoderOutputStream out) throws IOException {
         writePaddingFor(0, out);
     }
 

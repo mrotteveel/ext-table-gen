@@ -46,7 +46,7 @@ class ColumnTest {
         Arrays.fill(expectedBytes, (byte) 0x20);
 
         var baos = new ByteArrayOutputStream();
-        column.writeEmpty(baos);
+        column.writeEmpty(EncoderOutputStream.of(ByteOrderType.LITTLE_ENDIAN).with(baos));
         byte[] result = baos.toByteArray();
         assertArrayEquals(expectedBytes, result, "bytes");
     }
@@ -72,7 +72,7 @@ class ColumnTest {
         String expectedValue = outputValueTrimmed + (" ".repeat(trailingSpaces));
 
         var baos = new ByteArrayOutputStream();
-        column.writeValue(inputValue, baos);
+        column.writeValue(inputValue, EncoderOutputStream.of(ByteOrderType.LITTLE_ENDIAN).with(baos));
         assertArrayEquals(expectedValue.getBytes(encoding.charset()), baos.toByteArray());
         assertEquals(expectedValue, baos.toString(encoding.charset()));
     }

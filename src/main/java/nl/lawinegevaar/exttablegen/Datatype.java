@@ -3,7 +3,6 @@
 package nl.lawinegevaar.exttablegen;
 
 import java.io.IOException;
-import java.io.OutputStream;
 
 /**
  * Represents a Firebird datatype (with length, precision and/or scale).
@@ -36,7 +35,7 @@ sealed interface Datatype permits Char {
      */
     // TODO We may need a generic writeValue(T, OutputStream) if we're going to support other types, or at least
     //  determine how to handle the conversion from CSV string input (taking into account thinks like date formats, etc)
-    void writeValue(String value, OutputStream out) throws IOException;
+    void writeValue(String value, EncoderOutputStream out) throws IOException;
 
     /**
      * Writes an empty value to {@code out}.
@@ -47,7 +46,7 @@ sealed interface Datatype permits Char {
      * @param out
      *         output stream to write to
      */
-    default void writeEmpty(OutputStream out) throws IOException {
+    default void writeEmpty(EncoderOutputStream out) throws IOException {
         writeValue("", out);
     }
 }

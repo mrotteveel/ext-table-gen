@@ -3,7 +3,6 @@
 package nl.lawinegevaar.exttablegen;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.HexFormat;
 import java.util.Optional;
 
@@ -60,12 +59,12 @@ final class EndColumn extends Column {
     }
 
     @Override
-    public void writeValue(String value, OutputStream out) throws IOException {
+    public void writeValue(String value, EncoderOutputStream out) throws IOException {
         writeEmpty(out);
     }
 
     @Override
-    public void writeEmpty(OutputStream out) throws IOException {
+    public void writeEmpty(EncoderOutputStream out) throws IOException {
         out.write(this.value);
     }
 

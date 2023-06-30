@@ -21,7 +21,7 @@ final class ExternalTableWriter extends AbstractRowProcessor implements Closeabl
 
     private final ExternalTable externalTable;
     private final OutputResource outputResource;
-    private OutputStream out;
+    private EncoderOutputStream out;
 
     /**
      * Creates a new external table writer, using the current output resource of the external table.
@@ -53,7 +53,8 @@ final class ExternalTableWriter extends AbstractRowProcessor implements Closeabl
             throw new IllegalStateException("onHeader was invoked multiple times");
         }
         try {
-            out = outputResource.newOutputStream();
+            out = EncoderOutputStream.of(externalTable.byteOrder())
+                    .with(outputResource.newOutputStream());
             return ProcessingResult.continueProcessing();
         } catch (IOException e) {
             var resultException = e instanceof FileAlreadyExistsException && !outputResource.allowOverwrite()

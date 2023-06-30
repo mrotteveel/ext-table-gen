@@ -3,7 +3,6 @@
 package nl.lawinegevaar.exttablegen;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
@@ -63,7 +62,7 @@ sealed class Column permits EndColumn {
      * @param out
      *         output stream to write to
      */
-    void writeValue(String value, OutputStream out) throws IOException {
+    void writeValue(String value, EncoderOutputStream out) throws IOException {
         datatype().writeValue(value, out);
     }
 
@@ -73,7 +72,7 @@ sealed class Column permits EndColumn {
      * @param out
      *         output stream to write to
      */
-    void writeEmpty(OutputStream out) throws IOException {
+    void writeEmpty(EncoderOutputStream out) throws IOException {
         datatype().writeEmpty(out);
     }
 

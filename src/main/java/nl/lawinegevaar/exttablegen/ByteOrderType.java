@@ -6,6 +6,8 @@ import java.nio.ByteOrder;
 
 /**
  * Byte order used for writing values.
+ *
+ * @since 2
  */
 public enum ByteOrderType {
 

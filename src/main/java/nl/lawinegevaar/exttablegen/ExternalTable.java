@@ -3,7 +3,6 @@
 package nl.lawinegevaar.exttablegen;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -126,7 +125,7 @@ record ExternalTable(String name, List<Column> columns, OutputResource outputRes
      * @throws IOException
      *         for errors writing to {@code out}
      */
-    void writeRow(Row row, OutputStream out) throws IOException {
+    void writeRow(Row row, EncoderOutputStream out) throws IOException {
         /*
          The column under- or overflow (ignoring EndColumn) like documented in ADR 2023-02 is not handled here,
          this allows the behaviour to be pluggable in the caller of writeRow.

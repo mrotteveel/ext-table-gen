@@ -47,7 +47,7 @@ class FbIntegerTest {
         integerType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
-        assertEquals(0, buf.getShort());
+        assertEquals(0, buf.getInt());
     }
 
     @Test

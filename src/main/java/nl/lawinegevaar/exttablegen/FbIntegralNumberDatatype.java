@@ -5,5 +5,5 @@ package nl.lawinegevaar.exttablegen;
 /**
  * Datatype specialization for integral numbers.
  */
-sealed interface FbIntegralNumberDatatype extends FbDatatype permits FbInteger, FbSmallint {
+sealed interface FbIntegralNumberDatatype extends FbDatatype permits FbBigint, FbInteger, FbSmallint {
 }

@@ -15,6 +15,7 @@ import java.util.List;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static java.util.Collections.emptyList;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.bigint;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.col;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.integer;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.smallint;
@@ -203,6 +204,29 @@ class ExternalTableTest {
                   "COLUMN2" char(25) character set WIN1252,
                   "COLUMN3" char(50) character set UTF8,
                   "COLUMN4" integer
+                );
+                """;
+
+        assertEquals(expectedCreateTable, table.toCreateTableStatement());
+    }
+
+    @Test
+    void toCreateTableStatement_bigint() {
+        var table = new ExternalTable("EXAMPLE_TABLE",
+                List.of(
+                        col("COLUMN1", 10, FbEncoding.ASCII),
+                        col("COLUMN2", 25, FbEncoding.forName("WIN1252")),
+                        col("COLUMN3", 50, FbEncoding.UTF8),
+                        bigint("COLUMN4")),
+                OutputResource.nullOutputResource(), ByteOrderType.AUTO);
+
+        String expectedCreateTable =
+                """
+                create table "EXAMPLE_TABLE" external file '##REPLACE_ME##' (
+                  "COLUMN1" char(10) character set ASCII,
+                  "COLUMN2" char(25) character set WIN1252,
+                  "COLUMN3" char(50) character set UTF8,
+                  "COLUMN4" bigint
                 );
                 """;
 

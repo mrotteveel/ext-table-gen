@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -80,6 +81,41 @@ class EncoderOutputStreamTest {
         var byteBuffer = ByteBuffer.wrap(baos.toByteArray());
         byteBuffer.order(byteOrderType.byteOrder());
         assertEquals(value, byteBuffer.getInt());
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            byteOrder,     value
+            BIG_ENDIAN,    000000000000007f
+            BIG_ENDIAN,    7f00000000000000
+            BIG_ENDIAN,    ff00000000000000
+            BIG_ENDIAN,    00000000000000ff
+            BIG_ENDIAN,    fffffffffffffff0
+            BIG_ENDIAN,    0fffffffffffffff
+            LITTLE_ENDIAN, 000000000000007f
+            LITTLE_ENDIAN, 7f00000000000000
+            LITTLE_ENDIAN, ff00000000000000
+            LITTLE_ENDIAN, 00000000000000ff
+            LITTLE_ENDIAN, fffffffffffffff0
+            LITTLE_ENDIAN, 0fffffffffffffff
+            AUTO,          000000000000007f
+            AUTO,          7f00000000000000
+            AUTO,          ff00000000000000
+            AUTO,          00000000000000ff
+            AUTO,          fffffffffffffff0
+            AUTO,          0fffffffffffffff
+            """)
+    void testWriteLong(ByteOrderType byteOrderType, String valueString) throws Exception {
+        long value = new BigInteger(valueString, 16).longValue();
+        var baos = new ByteArrayOutputStream();
+        var encoder = EncoderOutputStream.of(byteOrderType).with(baos);
+
+        encoder.writeLong(value);
+
+        var byteBuffer = ByteBuffer.wrap(baos.toByteArray());
+        byteBuffer.order(byteOrderType.byteOrder());
+        assertEquals(value, byteBuffer.getLong());
     }
 
 }

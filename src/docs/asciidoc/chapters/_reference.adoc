@@ -316,9 +316,21 @@ Name of the column (used for the DDL; required)
 
 At this time, _ext-table-gen_ supports the following column datatypes:
 
+- <<ref-xml-bigint>>
 - <<ref-xml-char>>
 - <<ref-xml-integer>>
 - <<ref-xml-smallint>>
+
+[float#ref-xml-bigint]
+====== `bigint`
+
+The `bigint` elements represents the Firebird datatype `BIGINT`.
+
+.Attributes
+None
+
+.Elements
+None
 
 [float#ref-xml-char]
 ====== `char`

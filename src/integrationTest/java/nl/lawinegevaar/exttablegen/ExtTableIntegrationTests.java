@@ -46,11 +46,8 @@ class ExtTableIntegrationTests {
     private static final String CUSTOMERS_TABLE_NAME = "CUSTOMERS";
     private static final String CUSTOMERS_1000_RESOURCE = TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_CSV;
     private static final String CUSTOMERS_1000_SMALLINT_CONFIG = CUSTOMERS_1000_PREFIX + "-index-smallint.xml";
-    private static final String CUSTOMERS_1000_SMALLINT_CONFIG_RESOURCE =
-            TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_SMALLINT_CONFIG;
     private static final String CUSTOMERS_1000_INTEGER_CONFIG = CUSTOMERS_1000_PREFIX + "-index-integer.xml";
-    private static final String CUSTOMERS_1000_INTEGER_CONFIG_RESOURCE =
-            TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_INTEGER_CONFIG;
+    private static final String CUSTOMERS_1000_BIGINT_CONFIG = CUSTOMERS_1000_PREFIX + "-index-bigint.xml";
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -61,8 +58,6 @@ class ExtTableIntegrationTests {
     @TempDir
     Path forEachTempDir;
     private static Path customers1000CsvFile;
-    private static Path customers1000SmallintConfig;
-    private static Path customers1000IntegerConfig;
     private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
@@ -76,12 +71,7 @@ class ExtTableIntegrationTests {
 
     @BeforeAll
     static void copyTestDataFromResources() throws Exception {
-        customers1000CsvFile = forAllTempDir.resolve(CUSTOMERS_1000_CSV);
-        copyResourceToPath(CUSTOMERS_1000_RESOURCE, customers1000CsvFile);
-        customers1000SmallintConfig = forAllTempDir.resolve(CUSTOMERS_1000_SMALLINT_CONFIG);
-        copyResourceToPath(CUSTOMERS_1000_SMALLINT_CONFIG_RESOURCE, customers1000SmallintConfig);
-        customers1000IntegerConfig = forAllTempDir.resolve(CUSTOMERS_1000_INTEGER_CONFIG);
-        copyResourceToPath(CUSTOMERS_1000_INTEGER_CONFIG_RESOURCE, customers1000IntegerConfig);
+        customers1000CsvFile = copyForAllResource(CUSTOMERS_1000_RESOURCE, CUSTOMERS_1000_CSV);
     }
 
     @AfterAll
@@ -138,30 +128,24 @@ class ExtTableIntegrationTests {
 
     @Test
     void smallintIntegrationTest() throws Exception {
-        Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
-        Path configOutFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
-        createExternalTableFileFromExistingConfig(customers1000SmallintConfig, CUSTOMERS_TABLE_NAME,
-                customers1000CsvFile, tableFile, configOutFile);
-        String ddl = getDdl(configOutFile).replaceFirst("(?i)^\\s*create table", "recreate table");
-
-        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
-             var statement = connection.createStatement()) {
-            statement.execute(ddl);
-
-            try (var rs = statement.executeQuery(
-                    "select * from " + statement.enquoteIdentifier(CUSTOMERS_TABLE_NAME, true))) {
-                var rsmd = rs.getMetaData();
-                assertEquals(Types.SMALLINT, rsmd.getColumnType(1));
-                assertResultSet(customers1000CsvFile, 1000, rs, EndColumn.Type.NONE);
-            }
-        }
+        integralNumberIntegrationTest(CUSTOMERS_1000_SMALLINT_CONFIG, Types.SMALLINT);
     }
 
     @Test
     void integerIntegrationTest() throws Exception {
+        integralNumberIntegrationTest(CUSTOMERS_1000_INTEGER_CONFIG, Types.INTEGER);
+    }
+
+    @Test
+    void bigintIntegrationTest() throws Exception {
+        integralNumberIntegrationTest(CUSTOMERS_1000_BIGINT_CONFIG, Types.BIGINT);
+    }
+
+    private void integralNumberIntegrationTest(String configName, int expectedJdbcType) throws Exception {
+        Path configIn = copyForEachResource(TEST_DATA_RESOURCE_ROOT + configName, configName);
         Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
         Path configOutFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
-        createExternalTableFileFromExistingConfig(customers1000IntegerConfig, CUSTOMERS_TABLE_NAME,
+        createExternalTableFileFromExistingConfig(configIn, CUSTOMERS_TABLE_NAME,
                 customers1000CsvFile, tableFile, configOutFile);
         String ddl = getDdl(configOutFile).replaceFirst("(?i)^\\s*create table", "recreate table");
 
@@ -172,7 +156,7 @@ class ExtTableIntegrationTests {
             try (var rs = statement.executeQuery(
                     "select * from " + statement.enquoteIdentifier(CUSTOMERS_TABLE_NAME, true))) {
                 var rsmd = rs.getMetaData();
-                assertEquals(Types.INTEGER, rsmd.getColumnType(1));
+                assertEquals(expectedJdbcType, rsmd.getColumnType(1));
                 assertResultSet(customers1000CsvFile, 1000, rs, EndColumn.Type.NONE);
             }
         }
@@ -263,12 +247,21 @@ class ExtTableIntegrationTests {
         }
     }
 
-    private static void copyResourceToPath(String resourceName, Path destinationPath) throws IOException {
-        assert destinationPath.toAbsolutePath().startsWith(forAllTempDir)
-                : "destinationPath should be rooted in forAllTempDir";
+    private static Path copyForAllResource(String resourceName, String filename) throws IOException {
         try (InputStream in = ExtTableIntegrationTests.class.getResourceAsStream(resourceName)) {
             if (in == null) throw new FileNotFoundException("Could not find resource " + resourceName);
+            Path destinationPath = forAllTempDir.resolve(filename);
             Files.copy(in, destinationPath);
+            return destinationPath;
+        }
+    }
+
+    private Path copyForEachResource(String resourceName, String filename) throws IOException {
+        try (InputStream in = ExtTableIntegrationTests.class.getResourceAsStream(resourceName)) {
+            if (in == null) throw new FileNotFoundException("Could not find resource " + resourceName);
+            Path destinationPath = forEachTempDir.resolve(filename);
+            Files.copy(in, destinationPath);
+            return destinationPath;
         }
     }
 

@@ -155,27 +155,17 @@ final class ConfigMapper {
     }
 
     private JAXBElement<? extends DatatypeType> toDataTypeElement(FbDatatype datatype) {
-        DatatypeType xmlDatatypeType = toXmlDatatypeType(datatype);
-        if (xmlDatatypeType instanceof CharType charType) {
-            return factory.createChar(charType);
-        } else if (xmlDatatypeType instanceof IntegerType integerType) {
-            return factory.createInteger(integerType);
-        } else if (xmlDatatypeType instanceof SmallintType smallintType) {
-            return factory.createSmallint(smallintType);
-        }
-        throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
-    }
-
-    private DatatypeType toXmlDatatypeType(FbDatatype datatype) {
         if (datatype instanceof FbChar fbChar) {
             CharType charType = factory.createCharType();
             charType.setLength(fbChar.length());
             charType.setEncoding(fbChar.encoding().firebirdName());
-            return charType;
+            return factory.createChar(charType);
         } else if (datatype instanceof FbInteger) {
-            return factory.createIntegerType();
+            return factory.createInteger(factory.createIntegerType());
+        } else if (datatype instanceof FbBigint) {
+            return factory.createBigint(factory.createBigintType());
         } else if (datatype instanceof FbSmallint) {
-            return factory.createSmallintType();
+            return factory.createSmallint(factory.createSmallintType());
         }
         throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
     }
@@ -267,6 +257,8 @@ final class ConfigMapper {
             return new FbChar(charType.getLength(), FbEncoding.forName(charType.getEncoding()));
         } else if (datatypeType instanceof IntegerType) {
             return new FbInteger();
+        } else if (datatypeType instanceof BigintType) {
+            return new FbBigint();
         } else if (datatypeType instanceof SmallintType) {
             return new FbSmallint();
         }

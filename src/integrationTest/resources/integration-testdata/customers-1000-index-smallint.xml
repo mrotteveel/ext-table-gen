@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2023 Mark Rotteveel -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
 <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
     <externalTable name="CUSTOMERS" byteOrder="AUTO">
         <columns>

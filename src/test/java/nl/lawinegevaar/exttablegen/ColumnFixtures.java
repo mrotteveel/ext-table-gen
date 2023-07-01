@@ -48,6 +48,16 @@ final class ColumnFixtures {
         return new Column(name, new FbChar(length, encoding));
     }
 
+    static Column integralNumber(String name, String typeName) {
+        return switch (typeName) {
+            case "smallint" -> smallint(name);
+            case "integer" -> integer(name);
+            case "bigint" -> bigint(name);
+            case "int128" -> int128(name);
+            default -> throw new IllegalArgumentException("Unsupported typeName: " + typeName);
+        };
+    }
+
     /**
      * Creates a column with {@code name} and data type {@code FbSmallint}.
      *
@@ -79,6 +89,17 @@ final class ColumnFixtures {
      */
     static Column bigint(String name) {
         return new Column(name, new FbBigint());
+    }
+
+    /**
+     * Creates a column with {@code name} and data type {@code FbInt128}.
+     *
+     * @param name
+     *         name of the column
+     * @return column
+     */
+    static Column int128(String name) {
+        return new Column(name, new FbInt128());
     }
 
     /**

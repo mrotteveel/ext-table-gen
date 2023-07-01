@@ -24,12 +24,12 @@ class FbBigintTest {
     private static final FbBigint bigintType = new FbBigint();
 
     @ParameterizedTest
-    @ValueSource(strings = { Long.MAX_VALUE + "", Integer.MIN_VALUE + "", Short.MIN_VALUE + "", "-1", "0", "1",
+    @ValueSource(strings = { Long.MIN_VALUE + "", Integer.MIN_VALUE + "", Short.MIN_VALUE + "", "-1", "0", "1",
             Short.MAX_VALUE + "", Integer.MAX_VALUE + "", Long.MAX_VALUE + "" })
-    void testWriteValue(String integerString) throws Exception {
-        long expectedValue = Long.parseLong(integerString);
+    void testWriteValue(String bigintString) throws Exception {
+        long expectedValue = Long.parseLong(bigintString);
 
-        assertEquals(expectedValue, writeAndGetValue(integerString));
+        assertEquals(expectedValue, writeAndGetValue(bigintString));
     }
 
     @ParameterizedTest

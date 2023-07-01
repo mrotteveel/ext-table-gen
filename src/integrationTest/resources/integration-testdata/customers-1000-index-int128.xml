@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: 2023 Mark Rotteveel -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
+    <externalTable name="CUSTOMERS" byteOrder="AUTO">
+        <columns>
+            <column name="Index">
+                <int128/>
+            </column>
+            <column name="Customer Id">
+                <char length="15" encoding="ISO8859_1"/>
+            </column>
+            <column name="First Name">
+                <char length="20" encoding="ISO8859_1"/>
+            </column>
+            <column name="Last Name">
+                <char length="20" encoding="ISO8859_1"/>
+            </column>
+            <column name="Company">
+                <char length="40" encoding="ISO8859_1"/>
+            </column>
+            <column name="City">
+                <char length="30" encoding="ISO8859_1"/>
+            </column>
+            <column name="Country">
+                <char length="60" encoding="ISO8859_1"/>
+            </column>
+            <column name="Phone 1">
+                <char length="25" encoding="ISO8859_1"/>
+            </column>
+            <column name="Phone 2">
+                <char length="25" encoding="ISO8859_1"/>
+            </column>
+            <column name="Email">
+                <char length="255" encoding="ISO8859_1"/>
+            </column>
+            <column name="Subscription Date">
+                <char length="10" encoding="ISO8859_1"/>
+            </column>
+            <column name="Website">
+                <char length="100" encoding="ISO8859_1"/>
+            </column>
+        </columns>
+        <tableFile path="customers-1000.dat" overwrite="true"/>
+    </externalTable>
+    <tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/>
+    <csvFile path="customers-1000.csv" charset="UTF-8" headerRow="true"/>
+    <informational>
+        <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'D:\Temp\customers-1000.dat' (
+  "Index" int128,
+  "Customer Id" char(15) character set ISO8859_1,
+  "First Name" char(20) character set ISO8859_1,
+  "Last Name" char(20) character set ISO8859_1,
+  "Company" char(40) character set ISO8859_1,
+  "City" char(30) character set ISO8859_1,
+  "Country" char(60) character set ISO8859_1,
+  "Phone 1" char(25) character set ISO8859_1,
+  "Phone 2" char(25) character set ISO8859_1,
+  "Email" char(255) character set ISO8859_1,
+  "Subscription Date" char(10) character set ISO8859_1,
+  "Website" char(100) character set ISO8859_1
+);
+</ddl>
+    </informational>
+</extTableGenConfig>

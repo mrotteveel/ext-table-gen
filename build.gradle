@@ -32,6 +32,7 @@ dependencies {
     annotationProcessor libs.picocli.codegen
     implementation libs.opencsv
     implementation libs.bundles.jaxb
+    implementation libs.commons.lang3
 
     testImplementation platform(testLibs.junit.bom)
 }

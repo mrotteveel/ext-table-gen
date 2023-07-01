@@ -319,6 +319,7 @@ At this time, _ext-table-gen_ supports the following column datatypes:
 - <<ref-xml-bigint>>
 - <<ref-xml-char>>
 - <<ref-xml-integer>>
+- <<ref-xml-int128>>
 - <<ref-xml-smallint>>
 
 [float#ref-xml-bigint]
@@ -353,6 +354,17 @@ None
 ====== `integer`
 
 The `integer` elements represents the Firebird datatype `INTEGER`.
+
+.Attributes
+None
+
+.Elements
+None
+
+[float#ref-xml-int128]
+====== `int128`
+
+The `int128` elements represents the Firebird datatype `INT128`.
 
 .Attributes
 None

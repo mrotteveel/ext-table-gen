@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.bigint;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.integer;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.smallint;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.integralNumber;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_1;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_2;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.testEtgConfig;
@@ -107,37 +105,17 @@ class ConfigMapperTest {
         assertEquals(byteOrder, fromXml.tableConfig().byteOrder());
     }
 
-    @Test
-    void columnListWithSmallintColumn() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = { "smallint", "integer", "bigint", "int128" })
+    void columnListWithIntegralNumberColumn(String typeName) throws Exception {
+        Column integralNumberColumn = integralNumber("COLUMN_IN", typeName);
         EtgConfig originalConfig = testEtgConfig()
-                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, smallint("COLUMN_SI"), COLUMN_2)));
+                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, integralNumberColumn, COLUMN_2)));
 
         EtgConfig fromXml = roundTripConfig(originalConfig);
 
         assertEquals(originalConfig, fromXml);
-        assertThat(fromXml, tableConfig(tableColumns(hasItem(smallint("COLUMN_SI")))));
-    }
-
-    @Test
-    void columnListWithIntegerColumn() throws Exception {
-        EtgConfig originalConfig = testEtgConfig()
-                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, integer("COLUMN_I"), COLUMN_2)));
-
-        EtgConfig fromXml = roundTripConfig(originalConfig);
-
-        assertEquals(originalConfig, fromXml);
-        assertThat(fromXml, tableConfig(tableColumns(hasItem(integer("COLUMN_I")))));
-    }
-
-    @Test
-    void columnListWithBigintColumn() throws Exception {
-        EtgConfig originalConfig = testEtgConfig()
-                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, bigint("COLUMN_BI"), COLUMN_2)));
-
-        EtgConfig fromXml = roundTripConfig(originalConfig);
-
-        assertEquals(originalConfig, fromXml);
-        assertThat(fromXml, tableConfig(tableColumns(hasItem(bigint("COLUMN_BI")))));
+        assertThat(fromXml, tableConfig(tableColumns(hasItem(integralNumberColumn))));
     }
 
     @Test

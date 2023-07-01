@@ -2,14 +2,18 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
+import java.util.Arrays;
 
 /**
  * Output stream for endian-sensitive operations.
@@ -51,6 +55,35 @@ final class EncoderOutputStream extends FilterOutputStream {
         byteBuffer.clear();
         byteBuffer.putLong(v);
         writeBuffer();
+    }
+
+    void writeInt128(BigInteger v) throws IOException {
+        if (v.bitLength() > 127) {
+            throw new NumberFormatException("Received value requires more than 16 bytes storage: " + v);
+        }
+        if (v.equals(BigInteger.ZERO)) {
+            out.write(new byte[16]);
+            return;
+        }
+        byte[] bytes = v.toByteArray();
+        if (bytes.length < 16) {
+            byte[] int128Bytes = new byte[16];
+            int startOfMinimum = 16 - bytes.length;
+            if (v.signum() == -1) {
+                // extend sign
+                Arrays.fill(int128Bytes, 0, startOfMinimum, (byte) -1);
+            }
+            System.arraycopy(bytes, 0, int128Bytes, startOfMinimum, bytes.length);
+            bytes = int128Bytes;
+        }
+        out.write(fromNetworkOrder(bytes));
+    }
+
+    private byte[] fromNetworkOrder(byte[] bytes) {
+        if (byteBuffer.order() == ByteOrder.LITTLE_ENDIAN) {
+            ArrayUtils.reverse(bytes);
+        }
+        return bytes;
     }
 
     private void writeBuffer() throws IOException {

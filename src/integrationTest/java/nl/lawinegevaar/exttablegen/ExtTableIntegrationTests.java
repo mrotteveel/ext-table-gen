@@ -8,10 +8,10 @@ import org.firebirdsql.management.FBManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.opentest4j.AssertionFailedError;
 
@@ -22,9 +22,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +45,6 @@ class ExtTableIntegrationTests {
     private static final String CUSTOMERS_1000_XML = CUSTOMERS_1000_PREFIX + ".xml";
     private static final String CUSTOMERS_TABLE_NAME = "CUSTOMERS";
     private static final String CUSTOMERS_1000_RESOURCE = TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_CSV;
-    private static final String CUSTOMERS_1000_SMALLINT_CONFIG = CUSTOMERS_1000_PREFIX + "-index-smallint.xml";
-    private static final String CUSTOMERS_1000_INTEGER_CONFIG = CUSTOMERS_1000_PREFIX + "-index-integer.xml";
-    private static final String CUSTOMERS_1000_BIGINT_CONFIG = CUSTOMERS_1000_PREFIX + "-index-bigint.xml";
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -126,22 +123,16 @@ class ExtTableIntegrationTests {
         }
     }
 
-    @Test
-    void smallintIntegrationTest() throws Exception {
-        integralNumberIntegrationTest(CUSTOMERS_1000_SMALLINT_CONFIG, Types.SMALLINT);
-    }
-
-    @Test
-    void integerIntegrationTest() throws Exception {
-        integralNumberIntegrationTest(CUSTOMERS_1000_INTEGER_CONFIG, Types.INTEGER);
-    }
-
-    @Test
-    void bigintIntegrationTest() throws Exception {
-        integralNumberIntegrationTest(CUSTOMERS_1000_BIGINT_CONFIG, Types.BIGINT);
-    }
-
-    private void integralNumberIntegrationTest(String configName, int expectedJdbcType) throws Exception {
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            configName,                        expectedJdbcType
+            customers-1000-index-smallint.xml, SMALLINT
+            customers-1000-index-integer.xml,  INTEGER
+            customers-1000-index-bigint.xml,   BIGINT
+            customers-1000-index-int128.xml,   NUMERIC
+            """)
+    void integralNumberIntegrationTest(String configName, JDBCType expectedJdbcType) throws Exception {
         Path configIn = copyForEachResource(TEST_DATA_RESOURCE_ROOT + configName, configName);
         Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
         Path configOutFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
@@ -156,7 +147,7 @@ class ExtTableIntegrationTests {
             try (var rs = statement.executeQuery(
                     "select * from " + statement.enquoteIdentifier(CUSTOMERS_TABLE_NAME, true))) {
                 var rsmd = rs.getMetaData();
-                assertEquals(expectedJdbcType, rsmd.getColumnType(1));
+                assertEquals(expectedJdbcType.getVendorTypeNumber(), rsmd.getColumnType(1));
                 assertResultSet(customers1000CsvFile, 1000, rs, EndColumn.Type.NONE);
             }
         }

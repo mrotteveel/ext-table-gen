@@ -2,12 +2,14 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.HexFormat;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -116,6 +118,44 @@ class EncoderOutputStreamTest {
         var byteBuffer = ByteBuffer.wrap(baos.toByteArray());
         byteBuffer.order(byteOrderType.byteOrder());
         assertEquals(value, byteBuffer.getLong());
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            byteOrder,     value
+            BIG_ENDIAN,    0000000000000000000000000000007f
+            BIG_ENDIAN,    7f000000000000000000000000000000
+            BIG_ENDIAN,    ff000000000000000000000000000000
+            BIG_ENDIAN,    000000000000000000000000000000ff
+            BIG_ENDIAN,    fffffffffffffffffffffffffffffff0
+            BIG_ENDIAN,    0fffffffffffffffffffffffffffffff
+            LITTLE_ENDIAN, 0000000000000000000000000000007f
+            LITTLE_ENDIAN, 7f000000000000000000000000000000
+            LITTLE_ENDIAN, ff000000000000000000000000000000
+            LITTLE_ENDIAN, 000000000000000000000000000000ff
+            LITTLE_ENDIAN, fffffffffffffffffffffffffffffff0
+            LITTLE_ENDIAN, 0fffffffffffffffffffffffffffffff
+            AUTO,          0000000000000000000000000000007f
+            AUTO,          7f000000000000000000000000000000
+            AUTO,          ff000000000000000000000000000000
+            AUTO,          000000000000000000000000000000ff
+            AUTO,          fffffffffffffffffffffffffffffff0
+            AUTO,          0fffffffffffffffffffffffffffffff
+            """)
+    void testWriteInt128(ByteOrderType byteOrderType, String inputHex) throws Exception {
+        var value = new BigInteger(HexFormat.of().parseHex(inputHex));
+        var baos = new ByteArrayOutputStream();
+        var encoder = EncoderOutputStream.of(byteOrderType).with(baos);
+
+        encoder.writeInt128(value);
+
+        byte[] bytes = baos.toByteArray();
+        assertEquals(16, bytes.length);
+        if (byteOrderType.effectiveValue() == ByteOrderType.LITTLE_ENDIAN) {
+            ArrayUtils.reverse(bytes);
+        }
+        assertEquals(value, new BigInteger(bytes));
     }
 
 }

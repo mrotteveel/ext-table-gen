@@ -166,6 +166,8 @@ final class ConfigMapper {
             return factory.createBigint(factory.createBigintType());
         } else if (datatype instanceof FbSmallint) {
             return factory.createSmallint(factory.createSmallintType());
+        } else if (datatype instanceof FbInt128) {
+            return factory.createInt128(factory.createInt128Type());
         }
         throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
     }
@@ -261,6 +263,8 @@ final class ConfigMapper {
             return new FbBigint();
         } else if (datatypeType instanceof SmallintType) {
             return new FbSmallint();
+        } else if (datatypeType instanceof Int128Type) {
+            return new FbInt128();
         }
         throw new InvalidConfigurationException("Unsupported DatatypeType: " + datatypeType.getClass().getName());
     }

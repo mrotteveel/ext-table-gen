@@ -8,6 +8,7 @@ import org.firebirdsql.management.FBManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,6 +24,7 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +45,9 @@ class ExtTableIntegrationTests {
     private static final String CUSTOMERS_1000_XML = CUSTOMERS_1000_PREFIX + ".xml";
     private static final String CUSTOMERS_TABLE_NAME = "CUSTOMERS";
     private static final String CUSTOMERS_1000_RESOURCE = TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_CSV;
+    public static final String CUSTOMERS_1000_SMALLINT_CONFIG = CUSTOMERS_1000_PREFIX + "-index-smallint.xml";
+    private static final String CUSTOMERS_1000_SMALLINT_CONFIG_RESOURCE =
+            TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_SMALLINT_CONFIG;
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -53,6 +58,7 @@ class ExtTableIntegrationTests {
     @TempDir
     Path forEachTempDir;
     private static Path customers1000CsvFile;
+    private static Path customers1000SmallintConfig;
     private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
@@ -66,11 +72,10 @@ class ExtTableIntegrationTests {
 
     @BeforeAll
     static void copyTestDataFromResources() throws Exception {
-        try (InputStream in = ExtTableIntegrationTests.class.getResourceAsStream(CUSTOMERS_1000_RESOURCE)) {
-            if (in == null) throw new FileNotFoundException("Could not find resource " + CUSTOMERS_1000_RESOURCE);
-            customers1000CsvFile = forAllTempDir.resolve(CUSTOMERS_1000_CSV);
-            Files.copy(in, customers1000CsvFile);
-        }
+        customers1000CsvFile = forAllTempDir.resolve(CUSTOMERS_1000_CSV);
+        copyResourceToPath(CUSTOMERS_1000_RESOURCE, customers1000CsvFile);
+        customers1000SmallintConfig = forAllTempDir.resolve(CUSTOMERS_1000_SMALLINT_CONFIG);
+        copyResourceToPath(CUSTOMERS_1000_SMALLINT_CONFIG_RESOURCE, customers1000SmallintConfig);
     }
 
     @AfterAll
@@ -125,6 +130,27 @@ class ExtTableIntegrationTests {
         }
     }
 
+    @Test
+    void smallintIntegrationTest() throws Exception {
+        Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
+        Path configOutFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
+        createExternalTableFileFromExistingConfig(customers1000SmallintConfig, CUSTOMERS_TABLE_NAME,
+                customers1000CsvFile, tableFile, configOutFile);
+        String ddl = getDdl(configOutFile).replaceFirst("(?i)^\\s*create table", "recreate table");
+
+        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
+             var statement = connection.createStatement()) {
+            statement.execute(ddl);
+
+            try (var rs = statement.executeQuery(
+                    "select * from " + statement.enquoteIdentifier(CUSTOMERS_TABLE_NAME, true))) {
+                var rsmd = rs.getMetaData();
+                assertEquals(Types.SMALLINT, rsmd.getColumnType(1));
+                assertResultSet(customers1000CsvFile, 1000, rs, EndColumn.Type.NONE);
+            }
+        }
+    }
+
     private static void createExternalTableFile(String tableName, Path csvFile, Path tableFile,
             EndColumn.Type endColumnType, Path configOut) {
         int exitCode = ExtTableGenMain.parseAndExecute(
@@ -133,6 +159,19 @@ class ExtTableIntegrationTests {
                 "--table-file", tableFile.toString(),
                 "--overwrite-table-file",
                 "--end-column", endColumnType.name(),
+                "--config-out", configOut.toString(),
+                "--overwrite-config");
+        assertEquals(0, exitCode, "expected zero exit-code for successful execution");
+    }
+
+    private static void createExternalTableFileFromExistingConfig(Path configIn, String tableName, Path csvFile,
+            Path tableFile, Path configOut) {
+        int exitCode = ExtTableGenMain.parseAndExecute(
+                "--config-in", configIn.toString(),
+                "--table-name", tableName,
+                "--csv-file", csvFile.toString(),
+                "--table-file", tableFile.toString(),
+                "--overwrite-table-file",
                 "--config-out", configOut.toString(),
                 "--overwrite-config");
         assertEquals(0, exitCode, "expected zero exit-code for successful execution");
@@ -194,6 +233,15 @@ class ExtTableIntegrationTests {
                 throw afe;
             }
             throw e;
+        }
+    }
+
+    private static void copyResourceToPath(String resourceName, Path destinationPath) throws IOException {
+        assert destinationPath.toAbsolutePath().startsWith(forAllTempDir)
+                : "destinationPath should be rooted in forAllTempDir";
+        try (InputStream in = ExtTableIntegrationTests.class.getResourceAsStream(resourceName)) {
+            if (in == null) throw new FileNotFoundException("Could not find resource " + resourceName);
+            Files.copy(in, destinationPath);
         }
     }
 

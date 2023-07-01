@@ -7,7 +7,7 @@ import java.io.IOException;
 /**
  * Represents a Firebird datatype (with length, precision and/or scale).
  */
-sealed interface Datatype permits Char {
+sealed interface Datatype permits Char, IntegralNumberDatatype {
 
     /**
      * Appends the type definition of this datatype (this includes length, precision, scale, character set name, etc.).

@@ -50,6 +50,8 @@ final class ColumnSizeValidator implements RowValidator {
         if (column.datatype() instanceof Char c) {
             return c.length();
         }
+        // TODO Check max length for integer types (i.e. sign + maximum number of digits)?
+        //  Doing so might limit or complicate future changes with parsing
         return -1;
     }
 

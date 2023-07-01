@@ -274,6 +274,8 @@ Again, it is important to keep in mind, that by using two different and incompat
 In our example it just happens to work OK when shown as text, because all other characters are in ASCII, which is a subset of both ISO-8859-1 and UTF-8.
 If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would have been rendered as Unicode replacement characters (because the AsciiDoctor tool used to create this manual also reads our example data as UTF-8).
 
+// TODO Add section on using integral types
+
 [#usage-workflow]
 == Recommended workflow
 

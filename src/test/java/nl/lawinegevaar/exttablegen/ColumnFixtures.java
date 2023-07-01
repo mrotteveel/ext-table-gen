@@ -48,6 +48,17 @@ final class ColumnFixtures {
     }
 
     /**
+     * Creates a column with {@code name} and data type {@code Smallint}.
+     *
+     * @param name
+     *         name of the column
+     * @return column
+     */
+    static Column smallint(String name) {
+        return new Column(name, new Smallint());
+    }
+
+    /**
      * Columns of the {@code customers-10.csv} file with the specified end column type and encoding.
      * <p>
      * The returned columns use encoding {@code ISO8859_1}.

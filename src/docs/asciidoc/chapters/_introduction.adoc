@@ -15,6 +15,7 @@ At a high level, _ext-table-gen_ provides the following features:
 * Derive a `CHAR`-based external table definition (i.e. a `CREATE TABLE` statement and a configuration for _ext-table-gen_) from a CSV file
 * Transform a CSV file to an external table file (either based on the CSV file itself, or based on a configuration file)
 
+// TODO Revise when all integral types are added
 The current version only supports `CHAR` columns, which makes the generated file essentially a fixed-width text format.
 Future versions may introduce support for additional column types.
 

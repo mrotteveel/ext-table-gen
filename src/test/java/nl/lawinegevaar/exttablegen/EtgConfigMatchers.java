@@ -59,7 +59,7 @@ final class EtgConfigMatchers {
         };
     }
 
-    static Matcher<TableConfig> tableColumns(Matcher<Collection<Column>> matcher) {
+    static Matcher<TableConfig> tableColumns(Matcher<? super Collection<Column>> matcher) {
         return new FeatureMatcher<TableConfig, List<Column>>(matcher, "table columns", "table columns") {
             @Override
             protected List<Column> featureValueOf(TableConfig actual) {

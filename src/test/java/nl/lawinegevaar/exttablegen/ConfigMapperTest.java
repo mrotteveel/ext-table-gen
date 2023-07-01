@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.smallint;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_1;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_2;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.testEtgConfig;
@@ -29,6 +30,7 @@ import static nl.lawinegevaar.exttablegen.ResourceHelper.requireResourceStream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.emptyCollectionOf;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -101,6 +103,17 @@ class ConfigMapperTest {
 
         assertEquals(originalConfig, fromXml);
         assertEquals(byteOrder, fromXml.tableConfig().byteOrder());
+    }
+
+    @Test
+    void columnListWithSmallintColumn() throws Exception {
+        EtgConfig originalConfig = testEtgConfig()
+                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, smallint("COLUMN_SI"), COLUMN_2)));
+
+        EtgConfig fromXml = roundTripConfig(originalConfig);
+
+        assertEquals(originalConfig, fromXml);
+        assertThat(fromXml, tableConfig(tableColumns(hasItem(smallint("COLUMN_SI")))));
     }
 
     @Test

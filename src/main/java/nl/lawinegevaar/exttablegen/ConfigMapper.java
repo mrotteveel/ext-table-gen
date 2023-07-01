@@ -155,8 +155,11 @@ final class ConfigMapper {
     }
 
     private JAXBElement<? extends DatatypeType> toDataTypeElement(Datatype datatype) {
-        if (toXmlDatatypeType(datatype) instanceof CharType charType) {
+        DatatypeType xmlDatatypeType = toXmlDatatypeType(datatype);
+        if (xmlDatatypeType instanceof CharType charType) {
             return factory.createChar(charType);
+        } else if (xmlDatatypeType instanceof SmallintType smallintType) {
+            return factory.createSmallint(smallintType);
         }
         throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
     }
@@ -167,6 +170,8 @@ final class ConfigMapper {
             charType.setLength(charInstance.length());
             charType.setEncoding(charInstance.encoding().firebirdName());
             return charType;
+        } else if (datatype instanceof Smallint) {
+            return factory.createSmallintType();
         }
         throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
     }
@@ -256,6 +261,8 @@ final class ConfigMapper {
     private Datatype fromXmlDatatypeType(DatatypeType datatypeType) {
         if (datatypeType instanceof CharType charType) {
             return new Char(charType.getLength(), FbEncoding.forName(charType.getEncoding()));
+        } else if (datatypeType instanceof SmallintType) {
+            return new Smallint();
         }
         throw new InvalidConfigurationException("Unsupported DatatypeType: " + datatypeType.getClass().getName());
     }

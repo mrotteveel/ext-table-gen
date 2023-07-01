@@ -18,7 +18,7 @@ import java.nio.channels.WritableByteChannel;
  */
 final class EncoderOutputStream extends FilterOutputStream {
 
-    private static final int REQUIRED_CAPACITY = 2;
+    private static final int REQUIRED_CAPACITY = 4;
     private final ByteBuffer byteBuffer;
     private final WritableByteChannel channel;
 
@@ -38,6 +38,12 @@ final class EncoderOutputStream extends FilterOutputStream {
     void writeShort(short v) throws IOException {
         byteBuffer.clear();
         byteBuffer.putShort(v);
+        writeBuffer();
+    }
+
+    void writeInt(int v) throws IOException {
+        byteBuffer.clear();
+        byteBuffer.putInt(v);
         writeBuffer();
     }
 

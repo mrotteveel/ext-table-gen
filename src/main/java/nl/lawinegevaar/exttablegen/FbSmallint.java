@@ -9,7 +9,7 @@ import java.io.IOException;
  *
  * @since 2
  */
-final class Smallint implements IntegralNumberDatatype {
+final class FbSmallint implements FbIntegralNumberDatatype {
 
     @Override
     public void appendTypeDefinition(StringBuilder sb) {
@@ -25,7 +25,7 @@ final class Smallint implements IntegralNumberDatatype {
         }
     }
 
-    void writeShort(short value, EncoderOutputStream out) throws IOException {
+    private void writeShort(short value, EncoderOutputStream out) throws IOException {
         out.writeShort(value);
     }
 
@@ -36,12 +36,12 @@ final class Smallint implements IntegralNumberDatatype {
 
     @Override
     public int hashCode() {
-        return Smallint.class.hashCode();
+        return FbSmallint.class.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof Smallint;
+        return obj instanceof FbSmallint;
     }
     
 }

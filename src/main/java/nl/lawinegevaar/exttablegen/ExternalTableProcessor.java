@@ -65,7 +65,7 @@ final class ExternalTableProcessor extends MultiplexRowProcessor {
     }
 
     private Column createColumn(String columnName, int columnSize) {
-        return new Column(columnName, new Char(Math.max(1, columnSize), tableConfig.defaultEncoding()));
+        return new Column(columnName, new FbChar(Math.max(1, columnSize), tableConfig.defaultEncoding()));
     }
 
     private ExternalTable createExternalTable(List<Column> columns) {

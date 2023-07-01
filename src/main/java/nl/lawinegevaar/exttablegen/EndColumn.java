@@ -11,13 +11,13 @@ import java.util.Optional;
  */
 final class EndColumn extends Column {
 
-    private static final EndColumn LF_COLUMN = new EndColumn("LF", new Char(1, FbEncoding.ASCII), new byte[] { '\n' });
+    private static final EndColumn LF_COLUMN = new EndColumn("LF", new FbChar(1, FbEncoding.ASCII), new byte[] { '\n' });
     private static final EndColumn CRLF_COLUMN =
-            new EndColumn("CRLF", new Char(2, FbEncoding.ASCII), new byte[] { '\r', '\n' });
+            new EndColumn("CRLF", new FbChar(2, FbEncoding.ASCII), new byte[] { '\r', '\n' });
 
     private final byte[] value;
 
-    private EndColumn(String name, Char datatype, byte[] value) {
+    private EndColumn(String name, FbChar datatype, byte[] value) {
         super(name, datatype);
         this.value = value;
     }

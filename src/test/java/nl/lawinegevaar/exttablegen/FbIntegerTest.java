@@ -12,28 +12,27 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
-class SmallintTest {
+class FbIntegerTest {
 
-    private static final Smallint smallintType = new Smallint();
+    private static final FbInteger integerType = new FbInteger();
 
     @ParameterizedTest
-    @ValueSource(strings = { Short.MIN_VALUE + "", "-1", "0", "1", Short.MAX_VALUE + "" })
-    void testWriteValue(String shortString) throws Exception {
-        short expectedValue = Short.parseShort(shortString);
+    @ValueSource(strings = { Integer.MIN_VALUE + "", Short.MIN_VALUE + "", "-1", "0", "1", Short.MAX_VALUE + "",
+            Integer.MAX_VALUE + "" })
+    void testWriteValue(String integerString) throws Exception {
+        int expectedValue = Integer.parseInt(integerString);
 
-        assertEquals(expectedValue, writeAndGetValue(shortString));
+        assertEquals(expectedValue, writeAndGetValue(integerString));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { (Short.MIN_VALUE - 1) + "", (Short.MAX_VALUE + 1) + "", "NOT_A_NUMBER", "FF" })
+    @ValueSource(strings = { (Integer.MIN_VALUE - 1L) + "", (Integer.MAX_VALUE + 1L) + "", "NOT_A_NUMBER", "FF" })
     void testWriteValue_outOfRangeOrInvalid_throwsNumberFormatException(String valueToWrite) {
         var baos = new ByteArrayOutputStream();
         assertThrows(NumberFormatException.class, () ->
-                smallintType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos)));
+                integerType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos)));
     }
 
     @ParameterizedTest
@@ -45,7 +44,7 @@ class SmallintTest {
     @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
-        smallintType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        integerType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         assertEquals(0, buf.getShort());
@@ -53,22 +52,22 @@ class SmallintTest {
 
     @Test
     void testHashCode() {
-        assertEquals(smallintType.hashCode(), new Smallint().hashCode());
+        assertEquals(integerType.hashCode(), new FbInteger().hashCode());
     }
 
     @Test
     void testEquals() {
-        assertEquals(smallintType, new Smallint());
+        assertEquals(integerType, new FbInteger());
         //noinspection AssertBetweenInconvertibleTypes
-        assertNotEquals(smallintType, new Char(10, FbEncoding.ASCII));
+        assertNotEquals(integerType, new FbChar(10, FbEncoding.ASCII));
     }
 
-    short writeAndGetValue(String valueToWrite) throws IOException {
+    int writeAndGetValue(String valueToWrite) throws IOException {
         var baos = new ByteArrayOutputStream();
-        smallintType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        integerType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
-        return buf.getShort();
+        return buf.getInt();
     }
 
 }

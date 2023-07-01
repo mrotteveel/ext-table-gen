@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.integer;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.smallint;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_1;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_2;
@@ -114,6 +115,17 @@ class ConfigMapperTest {
 
         assertEquals(originalConfig, fromXml);
         assertThat(fromXml, tableConfig(tableColumns(hasItem(smallint("COLUMN_SI")))));
+    }
+
+    @Test
+    void columnListWithIntegerColumn() throws Exception {
+        EtgConfig originalConfig = testEtgConfig()
+                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, integer("COLUMN_I"), COLUMN_2)));
+
+        EtgConfig fromXml = roundTripConfig(originalConfig);
+
+        assertEquals(originalConfig, fromXml);
+        assertThat(fromXml, tableConfig(tableColumns(hasItem(integer("COLUMN_I")))));
     }
 
     @Test

@@ -11,7 +11,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * A datatype representing the Firebird datatype {@code CHAR} with a specific length and character set.
  */
-final class Char implements Datatype {
+final class FbChar implements FbDatatype {
 
     private final int length;
     private final FbEncoding encoding;
@@ -25,7 +25,7 @@ final class Char implements Datatype {
      * @param encoding
      *         Firebird encoding of the CHAR column
      */
-    Char(int length, FbEncoding encoding) {
+    FbChar(int length, FbEncoding encoding) {
         if (length < 1) {
             throw new IllegalArgumentException("Minimum size is 1 character");
         }
@@ -109,7 +109,7 @@ final class Char implements Datatype {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Char that)) return false;
+        if (!(o instanceof FbChar that)) return false;
         // Given maxByteLength is derived, we don't need to include it
         return length == that.length && encoding.equals(that.encoding);
     }

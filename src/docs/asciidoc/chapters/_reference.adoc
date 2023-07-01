@@ -317,6 +317,7 @@ Name of the column (used for the DDL; required)
 At this time, _ext-table-gen_ supports the following column datatypes:
 
 - <<ref-xml-char>>
+- <<ref-xml-integer>>
 - <<ref-xml-smallint>>
 
 [float#ref-xml-char]
@@ -332,6 +333,17 @@ The XSD does not validate maximum length for multibyte character sets (e.g. for 
 `encoding`::
 Encoding (character set) of the column, using Firebird character set names (required). +
 The XSD uses an enum-type, `encoding`, with supported names.
+
+.Elements
+None
+
+[float#ref-xml-integer]
+====== `integer`
+
+The `integer` elements represents the Firebird datatype `INTEGER`.
+
+.Attributes
+None
 
 .Elements
 None

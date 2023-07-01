@@ -37,7 +37,7 @@ class EndColumnTest {
         endColumn.appendColumnDefinition(sb);
         assertEquals("\"%s\" char(%d) character set ASCII default _ASCII x'%s'".formatted(type, length, defaultValue),
                 sb.toString(), "column definition");
-        assertEquals(new Char(length, FbEncoding.ASCII), endColumn.datatype(), "datatype");
+        assertEquals(new FbChar(length, FbEncoding.ASCII), endColumn.datatype(), "datatype");
 
         var baos = new ByteArrayOutputStream();
         endColumn.writeValue("anything", EncoderOutputStream.of(ByteOrderType.LITTLE_ENDIAN).with(baos));

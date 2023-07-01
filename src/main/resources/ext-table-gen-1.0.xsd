@@ -62,6 +62,7 @@
     <xs:element name="datatype" type="DatatypeType" abstract="true"/>
     <xs:element name="char" type="CharType" substitutionGroup="datatype"/>
     <xs:element name="smallint" type="SmallintType" substitutionGroup="datatype"/>
+    <xs:element name="integer" type="IntegerType" substitutionGroup="datatype"/>
 
     <xs:complexType name="DatatypeType" abstract="true"/>
 
@@ -82,6 +83,12 @@
     </xs:complexType>
 
     <xs:complexType name="SmallintType">
+        <xs:complexContent>
+            <xs:extension base="DatatypeType"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="IntegerType">
         <xs:complexContent>
             <xs:extension base="DatatypeType"/>
         </xs:complexContent>

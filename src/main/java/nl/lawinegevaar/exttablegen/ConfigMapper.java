@@ -154,23 +154,27 @@ final class ConfigMapper {
         return columnType;
     }
 
-    private JAXBElement<? extends DatatypeType> toDataTypeElement(Datatype datatype) {
+    private JAXBElement<? extends DatatypeType> toDataTypeElement(FbDatatype datatype) {
         DatatypeType xmlDatatypeType = toXmlDatatypeType(datatype);
         if (xmlDatatypeType instanceof CharType charType) {
             return factory.createChar(charType);
+        } else if (xmlDatatypeType instanceof IntegerType integerType) {
+            return factory.createInteger(integerType);
         } else if (xmlDatatypeType instanceof SmallintType smallintType) {
             return factory.createSmallint(smallintType);
         }
         throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
     }
 
-    private DatatypeType toXmlDatatypeType(Datatype datatype) {
-        if (datatype instanceof Char charInstance) {
+    private DatatypeType toXmlDatatypeType(FbDatatype datatype) {
+        if (datatype instanceof FbChar fbChar) {
             CharType charType = factory.createCharType();
-            charType.setLength(charInstance.length());
-            charType.setEncoding(charInstance.encoding().firebirdName());
+            charType.setLength(fbChar.length());
+            charType.setEncoding(fbChar.encoding().firebirdName());
             return charType;
-        } else if (datatype instanceof Smallint) {
+        } else if (datatype instanceof FbInteger) {
+            return factory.createIntegerType();
+        } else if (datatype instanceof FbSmallint) {
             return factory.createSmallintType();
         }
         throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
@@ -254,15 +258,17 @@ final class ConfigMapper {
         return new Column(columnType.getName(), fromXmlDatatype(columnType.getDatatype()));
     }
 
-    private Datatype fromXmlDatatype(JAXBElement<? extends DatatypeType> datatype) {
+    private FbDatatype fromXmlDatatype(JAXBElement<? extends DatatypeType> datatype) {
         return fromXmlDatatypeType(datatype.getValue());
     }
 
-    private Datatype fromXmlDatatypeType(DatatypeType datatypeType) {
+    private FbDatatype fromXmlDatatypeType(DatatypeType datatypeType) {
         if (datatypeType instanceof CharType charType) {
-            return new Char(charType.getLength(), FbEncoding.forName(charType.getEncoding()));
+            return new FbChar(charType.getLength(), FbEncoding.forName(charType.getEncoding()));
+        } else if (datatypeType instanceof IntegerType) {
+            return new FbInteger();
         } else if (datatypeType instanceof SmallintType) {
-            return new Smallint();
+            return new FbSmallint();
         }
         throw new InvalidConfigurationException("Unsupported DatatypeType: " + datatypeType.getClass().getName());
     }

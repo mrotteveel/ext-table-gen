@@ -59,8 +59,8 @@ class ColumnSizeValidatorTest {
         var externalTable = new ExternalTable(
                 "TEST",
                 List.of(
-                        new Column("COL1", new Char(5, FbEncoding.ASCII)),
-                        new Column("COL2", new Char(11, FbEncoding.ASCII)),
+                        new Column("COL1", new FbChar(5, FbEncoding.ASCII)),
+                        new Column("COL2", new FbChar(11, FbEncoding.ASCII)),
                         EndColumn.require(EndColumn.Type.CRLF)),
                 OutputResource.nullOutputResource(),
                 ByteOrderType.AUTO);

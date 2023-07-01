@@ -45,9 +45,12 @@ class ExtTableIntegrationTests {
     private static final String CUSTOMERS_1000_XML = CUSTOMERS_1000_PREFIX + ".xml";
     private static final String CUSTOMERS_TABLE_NAME = "CUSTOMERS";
     private static final String CUSTOMERS_1000_RESOURCE = TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_CSV;
-    public static final String CUSTOMERS_1000_SMALLINT_CONFIG = CUSTOMERS_1000_PREFIX + "-index-smallint.xml";
+    private static final String CUSTOMERS_1000_SMALLINT_CONFIG = CUSTOMERS_1000_PREFIX + "-index-smallint.xml";
     private static final String CUSTOMERS_1000_SMALLINT_CONFIG_RESOURCE =
             TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_SMALLINT_CONFIG;
+    private static final String CUSTOMERS_1000_INTEGER_CONFIG = CUSTOMERS_1000_PREFIX + "-index-integer.xml";
+    private static final String CUSTOMERS_1000_INTEGER_CONFIG_RESOURCE =
+            TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_INTEGER_CONFIG;
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -59,6 +62,7 @@ class ExtTableIntegrationTests {
     Path forEachTempDir;
     private static Path customers1000CsvFile;
     private static Path customers1000SmallintConfig;
+    private static Path customers1000IntegerConfig;
     private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
@@ -76,6 +80,8 @@ class ExtTableIntegrationTests {
         copyResourceToPath(CUSTOMERS_1000_RESOURCE, customers1000CsvFile);
         customers1000SmallintConfig = forAllTempDir.resolve(CUSTOMERS_1000_SMALLINT_CONFIG);
         copyResourceToPath(CUSTOMERS_1000_SMALLINT_CONFIG_RESOURCE, customers1000SmallintConfig);
+        customers1000IntegerConfig = forAllTempDir.resolve(CUSTOMERS_1000_INTEGER_CONFIG);
+        copyResourceToPath(CUSTOMERS_1000_INTEGER_CONFIG_RESOURCE, customers1000IntegerConfig);
     }
 
     @AfterAll
@@ -146,6 +152,27 @@ class ExtTableIntegrationTests {
                     "select * from " + statement.enquoteIdentifier(CUSTOMERS_TABLE_NAME, true))) {
                 var rsmd = rs.getMetaData();
                 assertEquals(Types.SMALLINT, rsmd.getColumnType(1));
+                assertResultSet(customers1000CsvFile, 1000, rs, EndColumn.Type.NONE);
+            }
+        }
+    }
+
+    @Test
+    void integerIntegrationTest() throws Exception {
+        Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
+        Path configOutFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
+        createExternalTableFileFromExistingConfig(customers1000IntegerConfig, CUSTOMERS_TABLE_NAME,
+                customers1000CsvFile, tableFile, configOutFile);
+        String ddl = getDdl(configOutFile).replaceFirst("(?i)^\\s*create table", "recreate table");
+
+        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
+             var statement = connection.createStatement()) {
+            statement.execute(ddl);
+
+            try (var rs = statement.executeQuery(
+                    "select * from " + statement.enquoteIdentifier(CUSTOMERS_TABLE_NAME, true))) {
+                var rsmd = rs.getMetaData();
+                assertEquals(Types.INTEGER, rsmd.getColumnType(1));
                 assertResultSet(customers1000CsvFile, 1000, rs, EndColumn.Type.NONE);
             }
         }

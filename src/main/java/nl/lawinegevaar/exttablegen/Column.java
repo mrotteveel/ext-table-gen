@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
 sealed class Column permits EndColumn {
 
     private final String name;
-    private final Datatype datatype;
+    private final FbDatatype datatype;
 
     /**
      * Creates a column.
@@ -23,7 +23,7 @@ sealed class Column permits EndColumn {
      * @param datatype
      *         datatype of the column
      */
-    Column(String name, Datatype datatype) {
+    Column(String name, FbDatatype datatype) {
         name = name != null ? name.trim() : null;
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("name must not be null, empty or blank");
@@ -50,7 +50,7 @@ sealed class Column permits EndColumn {
     /**
      * @return column datatype
      */
-    final Datatype datatype() {
+    final FbDatatype datatype() {
         return datatype;
     }
 
@@ -84,7 +84,7 @@ sealed class Column permits EndColumn {
      * <ul>
      * <li>{@link #quotedName()}</li>
      * <li>&lt;SPACE&gt;</li>
-     * <li>{@link Datatype#appendTypeDefinition(StringBuilder)} of {@link #datatype()}</li>
+     * <li>{@link FbDatatype#appendTypeDefinition(StringBuilder)} of {@link #datatype()}</li>
      * </ul>
      *
      * @param sb

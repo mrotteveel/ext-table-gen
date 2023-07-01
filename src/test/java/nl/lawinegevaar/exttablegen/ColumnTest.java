@@ -18,7 +18,7 @@ class ColumnTest {
     @NullAndEmptySource
     @ValueSource(strings = " ")
     void nullEmptyOrBlankNameNotAllowed(String name) {
-        assertThrows(IllegalArgumentException.class, () -> new Column(name, new Char(10, FbEncoding.ASCII)));
+        assertThrows(IllegalArgumentException.class, () -> new Column(name, new FbChar(10, FbEncoding.ASCII)));
     }
 
     @ParameterizedTest
@@ -29,7 +29,7 @@ class ColumnTest {
             ' columnname ', columnname, "columnname"
             """)
     void nameAndQuotedName(String name, String expectedName, String expectedQuotedName) {
-        var column = new Column(name, new Char(10, FbEncoding.ASCII));
+        var column = new Column(name, new FbChar(10, FbEncoding.ASCII));
 
         assertEquals(expectedName, column.name(), "unexpected name");
         assertEquals(expectedQuotedName, column.quotedName(), "unexpected quotedName");
@@ -41,7 +41,7 @@ class ColumnTest {
             10, UTF8,  40
             """)
     void writeEmpty(int length, String fbEncodingName, int expectedLength) throws Exception {
-        var column = new Column("dummy", new Char(length, FbEncoding.forName(fbEncodingName)));
+        var column = new Column("dummy", new FbChar(length, FbEncoding.forName(fbEncodingName)));
         byte[] expectedBytes = new byte[expectedLength];
         Arrays.fill(expectedBytes, (byte) 0x20);
 
@@ -68,7 +68,7 @@ class ColumnTest {
     void writeValue(int length, String fbEncodingName, String inputValue, String outputValueTrimmed,
             int trailingSpaces) throws Exception {
         var encoding = FbEncoding.forName(fbEncodingName);
-        var column = new Column("dummy", new Char(length, encoding));
+        var column = new Column("dummy", new FbChar(length, encoding));
         String expectedValue = outputValueTrimmed + (" ".repeat(trailingSpaces));
 
         var baos = new ByteArrayOutputStream();

@@ -20,7 +20,8 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name} and data type {@code Char} with {@code length} and encoding {@code ISO8859_1}.
+     * Creates a column with {@code name} and data type {@code FbChar} with {@code length} and encoding
+     * {@code ISO8859_1}.
      *
      * @param name
      *         name of the column
@@ -33,7 +34,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name} and data type {@code Char} with {@code length} and {@code encoding}.
+     * Creates a column with {@code name} and data type {@code FbChar} with {@code length} and {@code encoding}.
      *
      * @param name
      *         name of the column
@@ -44,18 +45,29 @@ final class ColumnFixtures {
      * @return column
      */
     static Column col(String name, int length, FbEncoding encoding) {
-        return new Column(name, new Char(length, encoding));
+        return new Column(name, new FbChar(length, encoding));
     }
 
     /**
-     * Creates a column with {@code name} and data type {@code Smallint}.
+     * Creates a column with {@code name} and data type {@code FbSmallint}.
      *
      * @param name
      *         name of the column
      * @return column
      */
     static Column smallint(String name) {
-        return new Column(name, new Smallint());
+        return new Column(name, new FbSmallint());
+    }
+
+    /**
+     * Creates a column with {@code name} and data type {@code FbInteger}.
+     *
+     * @param name
+     *         name of the column
+     * @return column
+     */
+    static Column integer(String name) {
+        return new Column(name, new FbInteger());
     }
 
     /**

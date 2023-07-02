@@ -153,8 +153,7 @@ tasks.named('jar', Jar).configure {
     manifest {
         attributes(
                 'Implementation-Title': 'ext-table-gen',
-                'Implementation-Version': project.version,
-                'Automatic-Module-Name': 'nl.lawinegevaar.exttablegen'
+                'Implementation-Version': project.version
         )
     }
 }

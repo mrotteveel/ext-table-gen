@@ -1,0 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Mark Rotteveel
+# SPDX-License-Identifier: Apache-2.0
+repos:
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v1.1.2
+    hooks:
+      - id: reuse

@@ -48,3 +48,24 @@ The `ExternalFileAccess` setting of Firebird server must allow access to the pat
 
 In theory, a remote Firebird server could also work, but due to the configuration of _ext-table-gen_ and the tests, this would require the `test.db.ext-table-dir` to be a local path which maps to the remote file system, while for the Firebird server, that path is the same value locally.
 In practice, we think it will be simpler to just use a local Firebird server.
+
+== Commit hooks
+
+This project comes with a commit hook configuration in `.pre-commit-config.yaml`.
+
+To use it, install `pre-commit`:
+
+[listing]
+----
+pip install pre-commit
+----
+
+See https://pre-commit.com/[^] for more details.
+
+Then -- from the repository root -- install the pre-commit hook:
+
+[listing]
+----
+pre-commit install
+pre-commit autoupdate
+----

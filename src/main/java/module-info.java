@@ -6,4 +6,6 @@ module nl.lawinegevaar.exttablegen {
     requires org.apache.commons.lang3;
     requires jakarta.xml.bind;
     requires java.logging;
+    opens nl.lawinegevaar.exttablegen to info.picocli;
+    opens nl.lawinegevaar.exttablegen.xmlconfig to jakarta.xml.bind;
 }

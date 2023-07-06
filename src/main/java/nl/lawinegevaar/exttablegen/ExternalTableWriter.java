@@ -4,7 +4,6 @@ package nl.lawinegevaar.exttablegen;
 
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -18,8 +17,7 @@ import static java.util.Objects.requireNonNull;
 final class ExternalTableWriter extends AbstractRowProcessor implements Closeable {
 
     private static final int BUFFER_SIZE = 256 * 1024;
-    private static final UnaryOperator<OutputStream> ADD_BUFFERED =
-            out -> out instanceof FileOutputStream ? out : new BufferedOutputStream(out, BUFFER_SIZE);
+    private static final UnaryOperator<OutputStream> ADD_BUFFERED = out -> new BufferedOutputStream(out, BUFFER_SIZE);
 
     private final ExternalTable externalTable;
     private final OutputResource outputResource;

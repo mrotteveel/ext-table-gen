@@ -32,9 +32,7 @@ final class EncoderOutputStream extends FilterOutputStream {
             throw new IllegalArgumentException(
                     "An EncoderOutputStream should not wrap an instance of EncoderOutputStream");
         }
-        byteBuffer = out instanceof FileOutputStream
-                ? ByteBuffer.allocateDirect(REQUIRED_CAPACITY)
-                : ByteBuffer.allocate(REQUIRED_CAPACITY);
+        byteBuffer = ByteBuffer.allocate(REQUIRED_CAPACITY);
         byteBuffer.order(byteOrder);
         channel = Channels.newChannel(out);
     }

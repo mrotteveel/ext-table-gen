@@ -8,6 +8,7 @@ import org.firebirdsql.management.FBManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -110,7 +111,7 @@ class ExtTableIntegrationTests {
         Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
         Path configFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
         createExternalTableFile(CUSTOMERS_TABLE_NAME, customers1000CsvFile, tableFile, endColumnType, configFile);
-        String ddl = getDdl(configFile).replaceFirst("(?i)^\\s*create table", "recreate table");
+        String ddl = getDdl(configFile);
 
         try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
              var statement = connection.createStatement()) {
@@ -132,13 +133,13 @@ class ExtTableIntegrationTests {
             customers-1000-index-bigint.xml,   BIGINT
             customers-1000-index-int128.xml,   NUMERIC
             """)
-    void integralNumberIntegrationTest(String configName, JDBCType expectedJdbcType) throws Exception {
+    void integralNumberIntegrationTest_simple(String configName, JDBCType expectedJdbcType) throws Exception {
         Path configIn = copyForEachResource(TEST_DATA_RESOURCE_ROOT + configName, configName);
         Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
         Path configOutFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
         createExternalTableFileFromExistingConfig(configIn, CUSTOMERS_TABLE_NAME,
                 customers1000CsvFile, tableFile, configOutFile);
-        String ddl = getDdl(configOutFile).replaceFirst("(?i)^\\s*create table", "recreate table");
+        String ddl = getDdl(configOutFile);
 
         try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
              var statement = connection.createStatement()) {
@@ -149,6 +150,49 @@ class ExtTableIntegrationTests {
                 var rsmd = rs.getMetaData();
                 assertEquals(expectedJdbcType.getVendorTypeNumber(), rsmd.getColumnType(1));
                 assertResultSet(customers1000CsvFile, 1000, rs, EndColumn.Type.NONE);
+            }
+        }
+    }
+
+    @Test
+    void integralNumberIntegrationTest_boundaries() throws Exception {
+        Path csvFile = forEachTempDir.resolve("integral-boundary.csv");
+        Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile("integral-boundary.dat"));
+        Files.writeString(csvFile,
+                """
+                name,smallint,integer,bigint,int128
+                minimum,-32768,-2147483648,-9223372036854775808,-170141183460469231731687303715884105728
+                minus one,-1,-1,-1,-1
+                zero,0,0,0,0
+                plus one,1,1,1,1
+                maximum,32767,2147483647,9223372036854775807,170141183460469231731687303715884105727
+                """);
+        String tableName = "INTEGRAL_BOUNDARY";
+        Path configFile = forEachTempDir.resolve("integral-boundary.xml");
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    new TableConfig(tableName,
+                            List.of(new Column("name", new FbChar(15, FbEncoding.ASCII)),
+                                    new Column("smallint", new FbSmallint()),
+                                    new Column("integer", new FbInteger()),
+                                    new Column("bigint", new FbBigint()),
+                                    new Column("int128", new FbInt128()),
+                                    EndColumn.require(EndColumn.Type.LF)),
+                            new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    TableDerivationConfig.getDefault(),
+                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
+        String ddl = getDdl(configFile);
+
+        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
+             var statement = connection.createStatement()) {
+            statement.execute(ddl);
+
+            try (var rs = statement.executeQuery(
+                    "select * from " + statement.enquoteIdentifier(tableName, true))) {
+                assertResultSet(csvFile, 5, rs, EndColumn.Type.LF);
             }
         }
     }
@@ -183,7 +227,8 @@ class ExtTableIntegrationTests {
         try (var in = Files.newInputStream(configPath)) {
             ExtTableGenConfig extTableGenConfig = configMapper.readAsExtTableGenConfig(in);
             InformationalType informational = requireNonNull(extTableGenConfig.getInformational(), "informational");
-            return requireNonNull(informational.getDdl(), "informational/ddl");
+            return requireNonNull(informational.getDdl(), "informational/ddl")
+                    .replaceFirst("(?i)^\\s*create table", "recreate table");
         }
     }
 

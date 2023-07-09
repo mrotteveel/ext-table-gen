@@ -32,7 +32,8 @@ class FbIntegerTest {
     void testWriteValue_outOfRangeOrInvalid_throwsNumberFormatException(String valueToWrite) {
         var baos = new ByteArrayOutputStream();
         assertThrows(NumberFormatException.class, () ->
-                integerType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos)));
+                integerType.writeValue(valueToWrite,
+                        EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos)));
     }
 
     @ParameterizedTest
@@ -44,7 +45,7 @@ class FbIntegerTest {
     @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
-        integerType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        integerType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         assertEquals(0, buf.getInt());
@@ -64,7 +65,8 @@ class FbIntegerTest {
 
     int writeAndGetValue(String valueToWrite) throws IOException {
         var baos = new ByteArrayOutputStream();
-        integerType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        integerType.writeValue(valueToWrite,
+                EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         return buf.getInt();

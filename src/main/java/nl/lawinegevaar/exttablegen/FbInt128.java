@@ -27,6 +27,7 @@ final class FbInt128 implements FbIntegralNumberDatatype {
     }
 
     private void writeInt128(BigInteger value, EncoderOutputStream out) throws IOException {
+        out.align(8);
         out.writeInt128(value);
     }
 

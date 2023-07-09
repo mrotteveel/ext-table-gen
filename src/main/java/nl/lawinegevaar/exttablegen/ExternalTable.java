@@ -126,6 +126,7 @@ record ExternalTable(String name, List<Column> columns, OutputResource outputRes
      *         for errors writing to {@code out}
      */
     void writeRow(Row row, EncoderOutputStream out) throws IOException {
+        out.startRow();
         /*
          The column under- or overflow (ignoring EndColumn) like documented in ADR 2023-02 is not handled here,
          this allows the behaviour to be pluggable in the caller of writeRow.
@@ -133,7 +134,7 @@ record ExternalTable(String name, List<Column> columns, OutputResource outputRes
          Here we ignore overflow (NOTE if there is an end column, the last column is not written, but instead writes
          the end column value)
         */
-        int rowColumnCount = Math.min(row.size(), columns.size());
+        int rowColumnCount = Math.min(row.size(), columnCount());
         int currentColumn;
         for (currentColumn = 0; currentColumn < rowColumnCount; currentColumn++) {
             Column column = columns.get(currentColumn);

@@ -26,6 +26,7 @@ final class FbInteger implements FbIntegralNumberDatatype {
     }
 
     private void writeInt(int value, EncoderOutputStream out) throws IOException {
+        out.align(4);
         out.writeInt(value);
     }
 

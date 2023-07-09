@@ -37,7 +37,8 @@ class FbBigintTest {
     void testWriteValue_outOfRangeOrInvalid_throwsNumberFormatException(String valueToWrite) {
         var baos = new ByteArrayOutputStream();
         assertThrows(NumberFormatException.class, () ->
-                bigintType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos)));
+                bigintType.writeValue(valueToWrite,
+                        EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos)));
     }
 
     static Stream<String> outOfRangeOrInvalidValues() {
@@ -57,7 +58,7 @@ class FbBigintTest {
     @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
-        bigintType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        bigintType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         assertEquals(0, buf.getLong());
@@ -77,7 +78,8 @@ class FbBigintTest {
 
     long writeAndGetValue(String valueToWrite) throws IOException {
         var baos = new ByteArrayOutputStream();
-        bigintType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        bigintType.writeValue(valueToWrite,
+                EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         return buf.getLong();

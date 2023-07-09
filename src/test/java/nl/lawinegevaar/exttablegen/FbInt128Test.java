@@ -51,7 +51,8 @@ class FbInt128Test {
     void testWriteValue_outOfRangeOrInvalid_throwsNumberFormatException(String valueToWrite) {
         var baos = new ByteArrayOutputStream();
         assertThrows(NumberFormatException.class, () ->
-                int128Type.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos)));
+                int128Type.writeValue(valueToWrite,
+                        EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos)));
     }
 
     static Stream<String> outOfRangeOrInvalidValues() {
@@ -71,7 +72,7 @@ class FbInt128Test {
     @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
-        int128Type.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        int128Type.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         byte[] bytes = baos.toByteArray();
         if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
             ArrayUtils.reverse(bytes);
@@ -93,7 +94,8 @@ class FbInt128Test {
 
     BigInteger writeAndGetValue(String valueToWrite) throws IOException {
         var baos = new ByteArrayOutputStream();
-        int128Type.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        int128Type.writeValue(valueToWrite,
+                EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         byte[] bytes = baos.toByteArray();
         if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
             ArrayUtils.reverse(bytes);

@@ -41,7 +41,7 @@ class EncoderOutputStreamTest {
     void testWriteShort(ByteOrderType byteOrderType, String valueString) throws Exception {
         short value = (short) Integer.parseInt(valueString, 16);
         var baos = new ByteArrayOutputStream();
-        var encoder = EncoderOutputStream.of(byteOrderType).with(baos);
+        var encoder = EncoderOutputStream.of(byteOrderType).withColumnCount(1).writeTo(baos);
 
         encoder.writeShort(value);
 
@@ -76,7 +76,7 @@ class EncoderOutputStreamTest {
     void testWriteInt(ByteOrderType byteOrderType, String valueString) throws Exception {
         int value = (int) Long.parseLong(valueString, 16);
         var baos = new ByteArrayOutputStream();
-        var encoder = EncoderOutputStream.of(byteOrderType).with(baos);
+        var encoder = EncoderOutputStream.of(byteOrderType).withColumnCount(1).writeTo(baos);
 
         encoder.writeInt(value);
 
@@ -111,7 +111,7 @@ class EncoderOutputStreamTest {
     void testWriteLong(ByteOrderType byteOrderType, String valueString) throws Exception {
         long value = new BigInteger(valueString, 16).longValue();
         var baos = new ByteArrayOutputStream();
-        var encoder = EncoderOutputStream.of(byteOrderType).with(baos);
+        var encoder = EncoderOutputStream.of(byteOrderType).withColumnCount(1).writeTo(baos);
 
         encoder.writeLong(value);
 
@@ -146,7 +146,7 @@ class EncoderOutputStreamTest {
     void testWriteInt128(ByteOrderType byteOrderType, String inputHex) throws Exception {
         var value = new BigInteger(HexFormat.of().parseHex(inputHex));
         var baos = new ByteArrayOutputStream();
-        var encoder = EncoderOutputStream.of(byteOrderType).with(baos);
+        var encoder = EncoderOutputStream.of(byteOrderType).withColumnCount(1).writeTo(baos);
 
         encoder.writeInt128(value);
 
@@ -156,6 +156,106 @@ class EncoderOutputStreamTest {
             ArrayUtils.reverse(bytes);
         }
         assertEquals(value, new BigInteger(bytes));
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            columnCount, writtenBytes, alignment, expectedSize
+            1,  0,  1, 0
+            1,  1,  1, 1
+            1,  0,  2, 0
+            1,  1,  2, 2
+            1,  2,  2, 2
+            1,  3,  2, 4
+            1,  0,  4, 0
+            1,  1,  4, 4
+            1,  2,  4, 4
+            1,  3,  4, 4
+            1,  4,  4, 4
+            1,  5,  4, 8
+            # Alignment of first column is not written, but is taken into account for further alignment
+            1,  0,  5, 0
+            1,  1,  5, 1
+            1,  2,  5, 6
+            1,  0,  8, 0
+            1,  1,  8, 4
+            1,  2,  8, 4
+            1,  3,  8, 4
+            1,  4,  8, 4
+            1,  5,  8, 12
+            1,  6,  8, 12
+            1,  7,  8, 12
+            1,  8,  8, 12
+            1,  9,  8, 12
+            1,  10, 8, 12
+            1,  11, 8, 12
+            1,  12, 8, 12
+            1,  13, 8, 20
+            33, 0,  8, 0
+            33, 1,  8, 8
+            33, 2,  8, 8
+            33, 3,  8, 8
+            33, 4,  8, 8
+            33, 5,  8, 8
+            33, 6,  8, 8
+            33, 7,  8, 8
+            33, 8,  8, 8
+            33, 9,  8, 16
+            """)
+    void testAlignmentBehaviour(int columnCount, int writtenBytes, int alignment, int expectedSize) throws Exception {
+        var baos = new ByteArrayOutputStream();
+        var encoder = EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(columnCount).writeTo(baos);
+        encoder.startRow();
+        if (writtenBytes > 0) {
+            encoder.write(new byte[writtenBytes]);
+        }
+        encoder.align(alignment);
+        assertEquals(expectedSize, baos.size());
+    }
+
+    /**
+     * Rationale: Alignment of first column is not written, but is taken into account for further alignment
+     */
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            columnCount, firstAlign, expectedResult
+            1,  1, ffffffffffffffff61000000ffffffffffffffff
+            1,  2, ffffffffffffffff61000000ffffffffffffffff
+            1,  3, ffffffffffffffff6100ffffffffffffffff
+            1,  4, ffffffffffffffff61000000ffffffffffffffff
+            1,  5, ffffffffffffffff610000ffffffffffffffff
+            1,  6, ffffffffffffffff6100ffffffffffffffff
+            1,  7, ffffffffffffffff61ffffffffffffffff
+            1,  8, ffffffffffffffff6100000000000000ffffffffffffffff
+            32, 1, ffffffffffffffff61000000ffffffffffffffff
+            32, 2, ffffffffffffffff61000000ffffffffffffffff
+            32, 4, ffffffffffffffff61000000ffffffffffffffff
+            32, 8, ffffffffffffffff6100000000000000ffffffffffffffff
+            33, 1, ffffffffffffffff6100000000000000ffffffffffffffff
+            33, 2, ffffffffffffffff6100000000000000ffffffffffffffff
+            33, 3, ffffffffffffffff61000000000000ffffffffffffffff
+            33, 4, ffffffffffffffff6100000000000000ffffffffffffffff
+            33, 5, ffffffffffffffff610000000000ffffffffffffffff
+            33, 6, ffffffffffffffff61000000ffffffffffffffff
+            33, 7, ffffffffffffffff6100ffffffffffffffff
+            33, 8, ffffffffffffffff6100000000000000ffffffffffffffff
+            65, 1, ffffffffffffffff61000000ffffffffffffffff
+            65, 8, ffffffffffffffff6100000000000000ffffffffffffffff
+            """)
+    void testAlignment_firstAlignmentNotWritten(int columnCount, int firstAlign, String expectedResult)
+            throws Exception {
+        var baos = new ByteArrayOutputStream();
+        var encoder = EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(columnCount).writeTo(baos);
+        encoder.startRow();
+        encoder.align(firstAlign);
+        encoder.writeLong(-1);
+        encoder.write('a');
+        encoder.align(8);
+        encoder.writeLong(-1);
+
+        assertEquals(expectedResult, HexFormat.of().formatHex(baos.toByteArray()));
     }
 
 }

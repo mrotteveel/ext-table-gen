@@ -26,6 +26,7 @@ final class FbSmallint implements FbIntegralNumberDatatype {
     }
 
     private void writeShort(short value, EncoderOutputStream out) throws IOException {
+        out.align(2);
         out.writeShort(value);
     }
 

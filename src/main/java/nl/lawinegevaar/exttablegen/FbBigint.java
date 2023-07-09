@@ -21,6 +21,7 @@ final class FbBigint implements FbIntegralNumberDatatype{
     }
 
     private void writeLong(long value, EncoderOutputStream out) throws IOException {
+        out.align(8);
         out.writeLong(value);
     }
 

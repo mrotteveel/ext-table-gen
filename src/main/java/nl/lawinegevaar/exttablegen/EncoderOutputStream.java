@@ -4,7 +4,6 @@ package nl.lawinegevaar.exttablegen;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.io.FileOutputStream;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,18 +22,78 @@ import java.util.Arrays;
 final class EncoderOutputStream extends FilterOutputStream {
 
     private static final int REQUIRED_CAPACITY = 8;
-    private final ByteBuffer byteBuffer;
-    private final WritableByteChannel channel;
+    private static final int NULL_MASK_BLOCK_SIZE = 4;
+    private static final int COLUMNS_PER_NULL_MASK_BLOCK = 32;
 
-    private EncoderOutputStream(OutputStream out, ByteOrder byteOrder) {
+    private final ByteBuffer byteBuffer = ByteBuffer.allocate(REQUIRED_CAPACITY);;
+    private final WritableByteChannel channel;
+    // Size of the null mask of a row; this is used as a virtual offset for alignment purposes
+    private final int nullMaskSize;
+    // NOTE: This is a virtual position, it includes an offset for the NULL mask which is not included in the row data,
+    // but is taken into account for alignment purposes; the alignment of the first column is also not written, but is
+    // counted
+    private int positionInRow;
+
+    private EncoderOutputStream(OutputStream out, ByteOrder byteOrder, int columnCount) {
         super(out);
         if (out instanceof EncoderOutputStream) {
             throw new IllegalArgumentException(
                     "An EncoderOutputStream should not wrap an instance of EncoderOutputStream");
         }
-        byteBuffer = ByteBuffer.allocate(REQUIRED_CAPACITY);
         byteBuffer.order(byteOrder);
         channel = Channels.newChannel(out);
+        // size of unwritten NULL mask (4 bytes per 32 columns)
+        nullMaskSize = NULL_MASK_BLOCK_SIZE * (1 + (columnCount - 1) / COLUMNS_PER_NULL_MASK_BLOCK);
+    }
+
+    /**
+     * Signals the start of a new row.
+     * <p>
+     * Calling this for each row is necessary for correct calculation of alignment.
+     * </p>
+     */
+    void startRow() {
+        // offset position with unwritten NULL mask
+        positionInRow = nullMaskSize;
+    }
+
+    /**
+     * Makes sure the value is aligned to multiples of {@code alignment}.
+     *
+     * @param alignment
+     *         alignment range: [1, 8], 1 means no alignment
+     * @throws IOException
+     *         for errors writing the alignment
+     */
+    void align(int alignment) throws IOException {
+        assert 1 <= alignment && alignment <= 8 : "alignment must be [1, 8], was: " + alignment;
+        int requiredBytes = alignment - positionInRow % alignment;
+        if (requiredBytes > 0 && requiredBytes < alignment) {
+            writeAlignment(requiredBytes);
+        }
+    }
+
+    private void writeAlignment(int requiredBytes) throws IOException {
+        class Holder {
+            private static final byte[] PADDING_BYTES = new byte[8];
+        }
+        if (positionInRow != nullMaskSize) {
+            write(Holder.PADDING_BYTES, 0, requiredBytes);
+        } else {
+            positionInRow += requiredBytes;
+        }
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        out.write(b, off, len);
+        positionInRow += len;
+    }
+
+    @Override
+    public void write(int b) throws IOException {
+        super.write(b);
+        positionInRow++;
     }
 
     void writeShort(short v) throws IOException {
@@ -87,7 +146,7 @@ final class EncoderOutputStream extends FilterOutputStream {
     private void writeBuffer() throws IOException {
         byteBuffer.flip();
         do {
-            channel.write(byteBuffer);
+            positionInRow += channel.write(byteBuffer);
         } while (byteBuffer.hasRemaining());
     }
 
@@ -100,18 +159,33 @@ final class EncoderOutputStream extends FilterOutputStream {
         }
     }
 
-    static Builder of(ByteOrderType byteOrder) {
-        return switch (byteOrder.effectiveValue()) {
-            case BIG_ENDIAN -> out -> new EncoderOutputStream(out, ByteOrder.BIG_ENDIAN);
-            case LITTLE_ENDIAN -> out -> new EncoderOutputStream(out, ByteOrder.LITTLE_ENDIAN);
-            default -> throw new IllegalArgumentException("Unexpected effective value for " + byteOrder);
-        };
+    static Builder of(ByteOrderType byteOrderType) {
+        return new Builder(byteOrderType.byteOrder());
     }
 
-    @FunctionalInterface
-    interface Builder {
+    static class Builder {
 
-        EncoderOutputStream with(OutputStream outputStream);
+        private final ByteOrder byteOrder;
+        private int columnCount;
+
+        private Builder(ByteOrder byteOrder) {
+            this.byteOrder = byteOrder;
+        }
+
+        Builder withColumnCount(int columnCount) {
+            if (columnCount <= 0) {
+                throw new IllegalArgumentException("columnCount must be greater than 0, was: " + columnCount);
+            }
+            this.columnCount = columnCount;
+            return this;
+        }
+
+        EncoderOutputStream writeTo(OutputStream out) {
+            if (columnCount == 0) {
+                throw new IllegalStateException("withColumnCount must be called first");
+            }
+            return new EncoderOutputStream(out, byteOrder, columnCount);
+        }
 
     }
 

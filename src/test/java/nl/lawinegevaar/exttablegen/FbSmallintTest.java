@@ -33,7 +33,8 @@ class FbSmallintTest {
     void testWriteValue_outOfRangeOrInvalid_throwsNumberFormatException(String valueToWrite) {
         var baos = new ByteArrayOutputStream();
         assertThrows(NumberFormatException.class, () ->
-                smallintType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos)));
+                smallintType.writeValue(valueToWrite,
+                        EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos)));
     }
 
     @ParameterizedTest
@@ -45,7 +46,7 @@ class FbSmallintTest {
     @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
-        smallintType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        smallintType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         assertEquals(0, buf.getShort());
@@ -65,7 +66,8 @@ class FbSmallintTest {
 
     short writeAndGetValue(String valueToWrite) throws IOException {
         var baos = new ByteArrayOutputStream();
-        smallintType.writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).with(baos));
+        smallintType.writeValue(valueToWrite,
+                EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         return buf.getShort();

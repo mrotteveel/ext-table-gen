@@ -54,7 +54,8 @@ final class ExternalTableWriter extends AbstractRowProcessor implements Closeabl
         }
         try {
             out = EncoderOutputStream.of(externalTable.byteOrder())
-                    .with(outputResource.newOutputStream());
+                    .withColumnCount(externalTable.columnCount())
+                    .writeTo(outputResource.newOutputStream());
             return ProcessingResult.continueProcessing();
         } catch (IOException e) {
             var resultException = e instanceof FileAlreadyExistsException && !outputResource.allowOverwrite()

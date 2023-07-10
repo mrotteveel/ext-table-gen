@@ -5,8 +5,8 @@
 
 == Status
 
-* Draft
-* Proposed for: 2.0
+* Published: 2023-07-10
+* Implemented in: 2.0
 
 == Type
 

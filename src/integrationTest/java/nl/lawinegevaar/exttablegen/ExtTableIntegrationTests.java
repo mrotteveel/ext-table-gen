@@ -2,6 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import com.opencsv.CSVWriterBuilder;
+import com.opencsv.ICSVWriter;
+import com.opencsv.RFC4180Parser;
 import nl.lawinegevaar.exttablegen.xmlconfig.ExtTableGenConfig;
 import nl.lawinegevaar.exttablegen.xmlconfig.InformationalType;
 import org.firebirdsql.management.FBManager;
@@ -12,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.opentest4j.AssertionFailedError;
@@ -28,6 +32,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.System.Logger.Level.WARNING;
 import static java.util.Objects.requireNonNull;
@@ -176,8 +182,7 @@ class ExtTableIntegrationTests {
                                     new Column("smallint", new FbSmallint()),
                                     new Column("integer", new FbInteger()),
                                     new Column("bigint", new FbBigint()),
-                                    new Column("int128", new FbInt128()),
-                                    EndColumn.require(EndColumn.Type.LF)),
+                                    new Column("int128", new FbInt128())),
                             new TableFile(tableFile, false), ByteOrderType.AUTO),
                     TableDerivationConfig.getDefault(),
                     new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
@@ -192,8 +197,110 @@ class ExtTableIntegrationTests {
 
             try (var rs = statement.executeQuery(
                     "select * from " + statement.enquoteIdentifier(tableName, true))) {
-                assertResultSet(csvFile, 5, rs, EndColumn.Type.LF);
+                assertResultSet(csvFile, 5, rs, EndColumn.Type.NONE);
             }
+        }
+    }
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "/integration-testcases/verify-alignment-testcases.csv", useHeadersInDisplayName = true)
+    void verifyAlignment(String firstType, String secondType, String thirdType, int totalColumnCount) throws Exception {
+        var columns = new ArrayList<Column>(Math.max(3, totalColumnCount));
+        columns.add(createColumn("COLUMN_1", firstType));
+        columns.add(createColumn("COLUMN_2", secondType));
+        columns.add(createColumn("COLUMN_3", thirdType));
+        for (int idx = 4; idx <= totalColumnCount; idx++) {
+            columns.add(ColumnFixtures.smallint("COLUMN_" + idx));
+        }
+        Path csvFile = forEachTempDir.resolve("verify-alignment.csv");
+        int rowCount = 5;
+        generateCsvFile(csvFile, columns, rowCount);
+        Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile("verify-alignment.dat"));
+        String tableName = "VERIFY_ALIGNMENT";
+        Path configFile = forEachTempDir.resolve("verify-alignment.xml");
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    new TableConfig(tableName, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    TableDerivationConfig.getDefault(),
+                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
+        String ddl = getDdl(configFile);
+
+        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
+             var statement = connection.createStatement()) {
+            statement.execute(ddl);
+
+            try (var rs = statement.executeQuery(
+                    "select * from " + statement.enquoteIdentifier(tableName, true))) {
+                assertResultSet(csvFile, rowCount, rs, EndColumn.Type.NONE);
+            }
+        }
+    }
+
+    // TODO Maybe some or all of the following methods should be moved to test-common
+
+    private static Column createColumn(String name, String columnType) {
+        class Holder {
+            static final Pattern CHAR_PATTERN = Pattern.compile("char_(\\d+)");
+        }
+        Matcher charMatcher = Holder.CHAR_PATTERN.matcher(columnType);
+        if (charMatcher.matches()) {
+            return ColumnFixtures.col(name, Integer.parseInt(charMatcher.group(1)));
+        }
+        return ColumnFixtures.integralNumber(name, columnType);
+    }
+
+    private static void generateCsvFile(Path csvFile, List<Column> columns, int rowCount) throws IOException {
+        assert rowCount > 1 : "Generate a CSV file with two or more rows, a single row can hide some issues";
+        try (var out = Files.newBufferedWriter(csvFile);
+             ICSVWriter csvWriter = new CSVWriterBuilder(out)
+                     .withParser(new RFC4180Parser())
+                     .build()) {
+            // write header
+            csvWriter.writeNext(columns.stream().map(Column::name).toArray(String[]::new));
+            // write row data
+            for (int row = 1; row <= rowCount; row++) {
+                csvWriter.writeNext(generateRow(row, columns));
+            }
+        }
+    }
+
+    // NOTE The implementation of this method is coupled to the requirements of verifyAlignment; it might not be
+    // generally usable
+    private static String[] generateRow(int row, List<Column> columns) {
+        int columnCount = columns.size();
+        String[] rowData = new String[columnCount];
+        for (int colIdx = 0; colIdx < columnCount; colIdx++) {
+            rowData[colIdx] = generateColumnData(row, colIdx + 1, columns.get(colIdx).datatype());
+        }
+        return rowData;
+    }
+
+    private static String generateColumnData(int row, int colIdx, FbDatatype datatype) {
+        if (datatype instanceof FbChar fbChar) {
+            String stringValue = Integer.toString(row * colIdx, 36);
+            int requiredLength = fbChar.length();
+            int actualLength = stringValue.length();
+            if (actualLength > requiredLength) {
+                stringValue = stringValue.substring(actualLength - requiredLength);
+            } else if (actualLength < requiredLength) {
+                stringValue = "_".repeat(requiredLength - actualLength) + stringValue;
+            }
+            return stringValue;
+        }
+        // We use a negative value, so at least for starting rows the sign bit is set, which makes it easier to detect
+        // alignment issues
+        long value = -1L * row * colIdx;
+        if (datatype instanceof FbSmallint) {
+            return Short.toString((short) value);
+        } else if (datatype instanceof FbInteger) {
+            return Integer.toString((int) value);
+        } else if (datatype instanceof FbBigint || datatype instanceof FbInt128) {
+            return Long.toString(value);
+        } else {
+            throw new IllegalArgumentException("Unsupported datatype: " + datatype.getClass().getSimpleName());
         }
     }
 

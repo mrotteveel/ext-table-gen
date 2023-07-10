@@ -44,6 +44,8 @@ testing {
             useJUnitJupiter()
             dependencies {
                 implementation.bundle(testLibs.bundles.junit)
+                implementation(project('test-common'))
+                implementation libs.opencsv
             }
             targets {
                 configureEach {

@@ -27,6 +27,21 @@ For this ADR, we only cover the basic integer types:
 
 The storage is endian-sensitive, depending on the platform of the target Firebird server.
 
+The storage of the integral data types has alignment requirements.
+This alignment is calculated for the offset in the current row, and takes into account the null mask of a row, which is not written for an external table.
+The null mask is 4 bytes per 32 columns.
+
+The following alignment is used:
+
+[horizontal]
+`SMALLINT`:: 2 bytes
+`INTEGER`:: 4 bytes
+`BIGINT`:: 8 bytes
+`INT128`:: 8 bytes
+
+Alignment is achieved by writing padding with NUL bytes so the offset for the value to write is a multiple of the alignment.
+If the first column needs alignment, it is not written to the file, but just like the null mask, it is counted towards the offset within the row.
+
 Numeric presentation in CSV is not formalized in https://www.rfc-editor.org/rfc/rfc4180[RFC 4180^].
 
 In Java, the Firebird data types can be mapped as follows:

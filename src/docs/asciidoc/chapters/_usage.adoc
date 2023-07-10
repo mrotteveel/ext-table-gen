@@ -30,10 +30,10 @@ At this time, _ext-table-gen_ does not support other CSV formats, and it does no
 CSV files are assumed to be encoded in UTF-8.
 The character set can be explicitly configured using <<#ref-cmd-csv-charset,`--csv-charset=CHARSET`>>, where `CHARSET` is a Java character set name (e.g. `--csv-charset=windows-1252`).
 
-The external table definition derived from a CSV file uses only `CHAR` columnsfootnote:[At this time, `CHAR` is the only supported datatype], and the default character set is `ISO8859_1`.
+The external table definition derived from a CSV file uses only `CHAR` columns, and the default character set is `ISO8859_1`.
 This can be overridden by specifying <<ref-cmd-column-encoding,`--column-encoding=ENCODING`>>, where `ENCODING` is a Firebird character set name (e.g. `column-encoding=WIN1252`).
 Alternatively, an existing configuration file can be edited to change the column encoding.
-The configuration file allows you to configure the character set _per column_.
+The configuration file allows you to configure the character set _per column_, and also allows you to use data types other than `CHAR`.
 
 Given the overhead of using `UTF8` columns (e.g. a `CHAR(1000) CHARACTER SET UTF8` column will occupy 4000 bytes in an external table), we recommend to use a single-byte character set where possible, and only define columns as `UTF8` when absolutely necessary.
 
@@ -109,6 +109,7 @@ This needs to be explicitly enabled with <<ref-cmd-overwrite-table-file,`--overw
 
 Generating an external table file using the instructions of the previous section, <<usage-basic-csv>>, is simple and easy, but has some limitations and downsides:
 
+. The datatype is always `CHAR`, while using a different data type may be more efficient (both from a storage perspective, and in loading it into Firebird)
 . The maximum lengths of columns is derived from the CSV data.
 If you want to reuse the external table without dropping and recreating it, with data files derived from CSV files with the same layout, but columns have longer (or shorter!) maximum length, this will not work.
 +
@@ -119,7 +120,7 @@ Using `UTF8` would be a catch-all solution, but given its downsides (wider colum
 
 These limitations can be addressed by modifying the configuration file and using it for subsequent calls to _ext-table-gen_.
 
-We'll demonstrate this for length, and separately for character set.
+We'll demonstrate this separately for length, character set, and using a different column type.
 
 [#usage-config-length]
 === Changing column lengths
@@ -276,6 +277,50 @@ If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would h
 
 // TODO Add section on using integral types
 
+[#usage-config-datatype]
+=== Using a different column data type
+
+The default configuration file derived from a CSV file only uses `CHAR` columns.
+It can be more efficient -- both in terms of storage space and for performance loading the data into Firebird -- to use a different datatype.
+
+In this example, we'll change the data type of the `ID` column from a `CHAR(1)`
+
+[source,xml]
+----
+<column name="ID">
+    <char length="1" encoding="ISO8859_1"/>
+</column>
+----
+
+to a `SMALLINT`
+
+[source,xml]
+----
+<column name="ID">
+    <smallint/>
+</column>
+----
+
+For a full list of possible data types and their attributes, see <<ref-xml-datatype>>.
+
+If you change the data type to anything other than `char`, the generated file becomes truly _binary_.
+Having an end-column makes less sense for this type of file, so we recommend removing it.
+
+Taking the original example from <<usage-basic-csv>>, modifying it like above, and then regenerating the file as described in <<usage-config-regen>> results in the following file:
+
+.persons.xml with ID changed to smallint, and no end-column
+[source,xml]
+----
+include::{includedir}/chapters/data/persons-type-modified.xml[]
+----
+
+For data types other than `char` the `byteOrder` is important for determining how to write out data.
+The default setting of `byteOrder="AUTO"` is generally sufficient;
+it will use the endianness of the system where _ext-table-gen_ is run.
+However, if you generate the table file on a little-endian machine, while your Firebird server runs on a big-endian machine (or vice-versa), you'll need to set the `byteOrder` appropriately to match the endianness of the Firebird server.
+
+See <<ref-xml-externaltable>> for more information on `byteOrder`.
+
 [#usage-workflow]
 == Recommended workflow
 
@@ -287,8 +332,9 @@ You may need to use <<ref-cmd-column-encoding,`--column-encoding`>> if you need 
 For repeated imports, or where multiple character sets are needed, we recommend the following steps:
 
 . Generate a config file using <<usage-basic-csv>>,
-. Tweak the configuration file to increase columns lengths to expected maximums (see <<usage-config-length>>),
+. Increase columns lengths to expected maximums (see <<usage-config-length>>),
 . If needed, change the encoding of columns (see <<usage-config-charset>>),
+. Determine if there are more appropriate types for columns and change the type if needed (see <<usage-config-datatype>>),
 . Finally, regenerate the config file (see <<usage-config-regen>>) for up-to-date DDL.
 
 Use the DDL from the last step to create the external table, and use the external table file it generated to verify the definition by querying the external table from Firebird.

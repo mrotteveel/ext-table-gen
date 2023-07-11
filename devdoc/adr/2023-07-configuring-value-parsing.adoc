@@ -1,0 +1,114 @@
+= 2023-07 Configuring Value Parsing
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Draft
+* Proposed for: 2.0
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+CSV is a string based format, and non-`char` data types need a pattern to convert from the string format to the desired data type value.
+For the integral types we can use the common format of -- in regex -- `[+-]?\d+`, but other data types can have a wide variety of formats, consider dates, or decimal values with either a comma or dot as decimal separator, and others.
+
+While we can use a sensible format as the default, for example ISO 8601 calendar date format -- `yyyy-MM-dd` -- for `date`, this would limit the usefulness to transform real-world data (especially if you don't control the producer of the CSV).
+
+In short, we need a way to transform string input to a destination data type.
+
+In the future we may also need to perform the reverse operation: transforming from the column data type to a string value.
+
+== Decision
+
+Columns receive a common way to define a transformation, to convert a string to the eventual data type of the column.
+If the transformation is absent, a default transformation for the specific data type is applied.
+
+A transformation consists of one step to convert from a string to a (Java) data type.
+The output data type of this step needs to be compatible with the Java data type of the column data type.
+In the future we may introduce support for chaining multiple steps together.
+
+For this design we're ignoring future plans to perform a reverse transformation (from external table to CSV).
+We guess and assume this design will also work for that case, for example, by using the transformation in reverse direction, but we'll only evaluate that when the time comes to design for that case.
+
+The XML configuration is extended as follows:
+
+* `column` receives an optional element `transformation`
+* `transformation` has one required element which specifies the transformation
+* As a starting point, this ADR defines the following transformations.
+We opted to define these in terms of Firebird data types, to avoid introducing another set of data type names (e.g. Java names).
+The default transformation for the integral number data types is equivalent to using these with radix 10.
+** `parseSmallint` -- transforms to Java `Short` -- with attribute:
+*** `radix` (optional, defaults to `10`) -- with value in range [2, 36]
+** `parseInteger` -- transforms to Java `Integer` -- with attribute:
+*** `radix` (optional, defaults to `10`) -- with value in range [2, 36]
+** `parseBigint` -- transforms to Java `Long` -- with attribute:
+*** `radix` (optional, defaults to `10`) -- with value in range [2, 36]
+** `parseInt128` -- transforms to Java `BigInteger`, but restricts it to the range of an `INT128` -- with attributes
+*** `radix` (optional, defaults to `10`) -- with value in range [2, 36]
+
+Other ADRs will define further transformations to add, for example ADR 2023-08 will add the `parseDate` transform.
+
+Given the design of the XML, it is possible to specify incompatible transformations.
+For example, using `parseInteger` instead of `parseSmallint` for a `smallint` column:
+
+[source,xml]
+----
+<column name="ID">
+    <smallint/>
+    <transformation>
+        <parseInteger radix="16"/>
+    </transformation>
+</column>
+----
+
+For this specific example, we might be able to implement some flexibility, but we won't.
+
+If the XML defines an incompatible transformation, it is rejected with an error when the XML is transformed to the _ext-table-gen_ `Column`, and exits the application.
+
+=== Rejected Design Decisions
+
+* Nest the transformation in the data type instead of the column
++
+Maybe this could have been used to validate the compatibility of a transformation in the XSD (we're not entirely sure of that), but this would also have increased complexity.
+Our consideration for putting it in the column is that we consider the transformation a bridge between CSV column and Firebird column, so making it a property of `column` seems more appropriate.
+* Allow multiple steps in a transformation.
++
+For example, consider a conversion from string to long, and then from long (epoch milliseconds) to a datetime value, or using transformations to change formatting (e.g. from string to date, back to string with a different format).
++
+While this may be useful to add in the future, all current known cases require a single step, so we'll design for that, but keep the option open to extend this to allow multiple steps in the future.
+* Allow reading of incompatible transformations, failing on actual conversion from CSV to external table.
++
+In our opinion, this results in unnecessary complexity, and fail-fast should be preferred.
+* Allow reading of incompatible transformations, by converting the transformation result back to string and then using the default transformation.
++
+Though this will work for integral types, it is unlikely to work for other data types.
+Being explicit about such configuration errors is preferred over trying to make it work.
+See also previous item.
+
+== Consequences
+
+The documentation must be updated to explain how to use these transformations, and to describe the configuration changes.
+
+The XSD will be amended with the new elements, and suitable error handling will be added to reject incompatible transformations.
+
+=== Implementation consequences
+
+Most of the consequences listed below should be considered implementation details and guideline for implementation, which may change during actual implementation or by future refactoring.
+
+An interface `Transformation<T, U>` is added, which provides a method `U transform(T)` to provide the actual transformation, and methods `Class<T> inputType()` and `Class<U> outputType()` to support runtime type checking.
+
+A `Column` will have a property for the `Transformation`, when `null`, the default from the data type will be used.
+
+Existing data types will be modified to accept a suitable Java data type as input, instead of string.
+That is `FbDataType.writeValue(String, EncoderOutputStream)` will be changed to `FbDataType.writeValue(U, EncoderOutputStream)`, with `U` a parameterized type specifying the Java data type (we're using `U` as the type parameter to link its meaning to `Transformation<T, U>`).
+`FbDataType` will also receive a method `Class<U> inputType()` to specify the input type.
+A data type will define a _default_ transformation, returned from the method `Transformation<String, U> defaultTransformation()`, which the column will use when no transformation has been configured.
+Existing conversion from string will be moved to that default transformation.
+
+For the integral types `smallint`, `integer`, `bigint`, it may make sense if the transformation has an additional option to support conversion using a primitive type, to avoid additional overhead of object allocation.
+This will be decided during implementation.

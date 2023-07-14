@@ -10,7 +10,7 @@ import java.util.Optional;
 /**
  * Represents a Firebird datatype (with length, precision and/or scale).
  */
-sealed interface FbDatatype<T> permits AbstractFbDatatype, FbChar, FbIntegralNumberDatatype {
+public sealed interface FbDatatype<T> permits AbstractFbDatatype, FbChar, FbIntegralNumberDatatype {
 
     /**
      * @return Java type used by this data type

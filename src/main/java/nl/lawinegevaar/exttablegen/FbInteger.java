@@ -13,7 +13,7 @@ import java.io.IOException;
  *
  * @since 2
  */
-final class FbInteger extends AbstractFbDatatype<Integer, IntConverter>
+public final class FbInteger extends AbstractFbDatatype<Integer, IntConverter>
         implements FbIntegralNumberDatatype<Integer> {
 
     private static final ParseInteger DEFAULT_CONVERTER = ParseInteger.ofRadix(10);
@@ -21,7 +21,7 @@ final class FbInteger extends AbstractFbDatatype<Integer, IntConverter>
     /**
      * Constructs a {@code FbInteger} using the default conversion.
      */
-    FbInteger() {
+    public FbInteger() {
         this(null);
     }
 
@@ -32,7 +32,7 @@ final class FbInteger extends AbstractFbDatatype<Integer, IntConverter>
      *         converter, or {@code null} for the default conversion
      * @since 2
      */
-    FbInteger(Converter<Integer> converter) {
+    public FbInteger(Converter<Integer> converter) {
         super(Integer.class, IntConverter.wrap(converter), DEFAULT_CONVERTER);
     }
 

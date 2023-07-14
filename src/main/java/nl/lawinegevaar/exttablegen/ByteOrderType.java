@@ -9,7 +9,7 @@ import java.nio.ByteOrder;
  *
  * @since 2
  */
-enum ByteOrderType {
+public enum ByteOrderType {
 
     /**
      * Big-endian.

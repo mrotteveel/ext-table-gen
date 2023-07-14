@@ -20,7 +20,7 @@ import java.util.Arrays;
  *
  * @since 2
  */
-final class EncoderOutputStream extends FilterOutputStream {
+public final class EncoderOutputStream extends FilterOutputStream {
 
     private static final int REQUIRED_CAPACITY = 8;
     private static final int NULL_MASK_BLOCK_SIZE = 4;
@@ -53,7 +53,7 @@ final class EncoderOutputStream extends FilterOutputStream {
      * Calling this for each row is necessary for correct calculation of alignment.
      * </p>
      */
-    void startRow() {
+    public void startRow() {
         // offset position with unwritten NULL mask
         positionInRow = nullMaskSize;
     }
@@ -66,7 +66,7 @@ final class EncoderOutputStream extends FilterOutputStream {
      * @throws IOException
      *         for errors writing the alignment
      */
-    void align(int alignment) throws IOException {
+    public void align(int alignment) throws IOException {
         assert 1 <= alignment && alignment <= 8 : "alignment must be [1, 8], was: " + alignment;
         int requiredBytes = alignment - positionInRow % alignment;
         if (requiredBytes > 0 && requiredBytes < alignment) {
@@ -98,25 +98,25 @@ final class EncoderOutputStream extends FilterOutputStream {
         positionInRow++;
     }
 
-    void writeShort(short v) throws IOException {
+    public void writeShort(short v) throws IOException {
         byteBuffer.clear();
         byteBuffer.putShort(v);
         writeBuffer();
     }
 
-    void writeInt(int v) throws IOException {
+    public void writeInt(int v) throws IOException {
         byteBuffer.clear();
         byteBuffer.putInt(v);
         writeBuffer();
     }
 
-    void writeLong(long v) throws IOException {
+    public void writeLong(long v) throws IOException {
         byteBuffer.clear();
         byteBuffer.putLong(v);
         writeBuffer();
     }
 
-    void writeInt128(BigInteger v) throws IOException {
+    public void writeInt128(BigInteger v) throws IOException {
         if (RangeChecks.checkInt128Range(v).equals(BigInteger.ZERO)) {
             out.write(new byte[16]);
             return;
@@ -158,11 +158,11 @@ final class EncoderOutputStream extends FilterOutputStream {
         }
     }
 
-    static Builder of(ByteOrderType byteOrderType) {
+    public static Builder of(ByteOrderType byteOrderType) {
         return new Builder(byteOrderType.byteOrder());
     }
 
-    static final class Builder {
+    public static final class Builder {
 
         private final ByteOrder byteOrder;
         private int columnCount;
@@ -171,7 +171,7 @@ final class EncoderOutputStream extends FilterOutputStream {
             this.byteOrder = byteOrder;
         }
 
-        Builder withColumnCount(int columnCount) {
+        public Builder withColumnCount(int columnCount) {
             if (columnCount <= 0) {
                 throw new IllegalArgumentException("columnCount must be greater than 0, was: " + columnCount);
             }
@@ -179,7 +179,7 @@ final class EncoderOutputStream extends FilterOutputStream {
             return this;
         }
 
-        EncoderOutputStream writeTo(OutputStream out) {
+        public EncoderOutputStream writeTo(OutputStream out) {
             if (columnCount == 0) {
                 throw new IllegalStateException("withColumnCount must be called first");
             }

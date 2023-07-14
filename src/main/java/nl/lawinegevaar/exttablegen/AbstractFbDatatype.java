@@ -19,7 +19,7 @@ import static java.util.Objects.requireNonNullElse;
  *         specialised {@link Converter} type
  * @since 2
  */
-sealed abstract class AbstractFbDatatype<T, C extends Converter<T>> implements FbDatatype<T>
+public sealed abstract class AbstractFbDatatype<T, C extends Converter<T>> implements FbDatatype<T>
         permits FbBigint, FbChar, FbInt128, FbInteger, FbSmallint {
 
     private final Class<T> targetType;

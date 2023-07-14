@@ -13,14 +13,14 @@ import java.io.IOException;
  *
  * @since 2
  */
-final class FbBigint extends AbstractFbDatatype<Long, LongConverter> implements FbIntegralNumberDatatype<Long> {
+public final class FbBigint extends AbstractFbDatatype<Long, LongConverter> implements FbIntegralNumberDatatype<Long> {
 
     private static final ParseBigint DEFAULT_CONVERTER = ParseBigint.ofRadix(10);
 
     /**
      * Constructs a {@code FbBigint} using the default conversion.
      */
-    FbBigint() {
+    public FbBigint() {
         this(null);
     }
 
@@ -31,7 +31,7 @@ final class FbBigint extends AbstractFbDatatype<Long, LongConverter> implements 
      *         converter, or {@code null} for the default conversion
      * @since 2
      */
-    FbBigint(Converter<Long> converter) {
+    public FbBigint(Converter<Long> converter) {
         super(Long.class, LongConverter.wrap(converter), DEFAULT_CONVERTER);
     }
 

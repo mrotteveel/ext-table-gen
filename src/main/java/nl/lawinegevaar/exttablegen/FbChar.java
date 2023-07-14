@@ -14,7 +14,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * A data type representing the Firebird datatype {@code CHAR} with a specific length and character set.
  */
-final class FbChar extends AbstractFbDatatype<String, Converter<String>> implements FbDatatype<String> {
+public final class FbChar extends AbstractFbDatatype<String, Converter<String>> implements FbDatatype<String> {
 
     private static final Converter<String> DEFAULT_CONVERTER =
             Converter.of(String.class, Function.identity());
@@ -31,7 +31,7 @@ final class FbChar extends AbstractFbDatatype<String, Converter<String>> impleme
      * @param encoding
      *         Firebird encoding of the CHAR column
      */
-    FbChar(int length, FbEncoding encoding) {
+    public FbChar(int length, FbEncoding encoding) {
         this(length, encoding, null);
     }
 
@@ -46,7 +46,7 @@ final class FbChar extends AbstractFbDatatype<String, Converter<String>> impleme
      *         converter to apply
      * @since 2
      */
-    FbChar(int length, FbEncoding encoding, Converter<String> converter) {
+    public FbChar(int length, FbEncoding encoding, Converter<String> converter) {
         super(String.class, converter, DEFAULT_CONVERTER);
         if (length < 1) {
             throw new IllegalArgumentException("Minimum size is 1 character");
@@ -70,11 +70,11 @@ final class FbChar extends AbstractFbDatatype<String, Converter<String>> impleme
     /**
      * @return {@code CHAR} length (in Unicode codepoints)
      */
-    int length() {
+    public int length() {
         return length;
     }
 
-    FbEncoding encoding() {
+    public FbEncoding encoding() {
         return encoding;
     }
 

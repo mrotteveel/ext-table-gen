@@ -13,7 +13,7 @@ import java.math.BigInteger;
  *
  * @since 2
  */
-final class FbInt128 extends AbstractFbDatatype<BigInteger, Converter<BigInteger>>
+public final class FbInt128 extends AbstractFbDatatype<BigInteger, Converter<BigInteger>>
         implements FbIntegralNumberDatatype<BigInteger> {
 
     static final BigInteger MIN_VALUE = new BigInteger("-80000000000000000000000000000000", 16);
@@ -24,7 +24,7 @@ final class FbInt128 extends AbstractFbDatatype<BigInteger, Converter<BigInteger
     /**
      * Constructs a {@code FbInt128} using the default conversion.
      */
-    FbInt128() {
+    public FbInt128() {
         this(null);
     }
 
@@ -35,7 +35,7 @@ final class FbInt128 extends AbstractFbDatatype<BigInteger, Converter<BigInteger
      *         converter, or {@code null} for the default conversion
      * @since 2
      */
-    FbInt128(Converter<BigInteger> converter) {
+    public FbInt128(Converter<BigInteger> converter) {
         super(BigInteger.class, converter, DEFAULT_CONVERTER);
     }
 

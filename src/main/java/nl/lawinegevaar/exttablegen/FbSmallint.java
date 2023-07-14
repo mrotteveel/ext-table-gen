@@ -13,7 +13,7 @@ import java.io.IOException;
  *
  * @since 2
  */
-final class FbSmallint extends AbstractFbDatatype<Short, ShortConverter>
+public final class FbSmallint extends AbstractFbDatatype<Short, ShortConverter>
         implements FbIntegralNumberDatatype<Short> {
 
     private static final ParseSmallint DEFAULT_CONVERTER = ParseSmallint.ofRadix(10);
@@ -21,7 +21,7 @@ final class FbSmallint extends AbstractFbDatatype<Short, ShortConverter>
     /**
      * Constructs a {@code FbSmallint} using the default conversion.
      */
-    FbSmallint() {
+    public FbSmallint() {
         this(null);
     }
 
@@ -32,7 +32,7 @@ final class FbSmallint extends AbstractFbDatatype<Short, ShortConverter>
      *         converter, or {@code null} for the default conversion
      * @since 2
      */
-    FbSmallint(Converter<Short> converter) {
+    public FbSmallint(Converter<Short> converter) {
         super(Short.class, ShortConverter.wrap(converter), DEFAULT_CONVERTER);
     }
 

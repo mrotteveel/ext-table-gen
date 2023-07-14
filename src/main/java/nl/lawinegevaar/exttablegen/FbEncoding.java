@@ -13,13 +13,13 @@ import static java.util.Objects.requireNonNull;
 /**
  * A Firebird character set encoding and its mapping to Java character sets.
  */
-final class FbEncoding {
+public final class FbEncoding {
 
     private static final Map<String, FbEncoding> encodings = new ConcurrentHashMap<>();
 
-    static final FbEncoding ASCII = FbEncoding.forName("ASCII");
-    static final FbEncoding ISO8859_1 = FbEncoding.forName("ISO8859_1");
-    static final FbEncoding UTF8 = FbEncoding.forName("UTF8");
+    public static final FbEncoding ASCII = FbEncoding.forName("ASCII");
+    public static final FbEncoding ISO8859_1 = FbEncoding.forName("ISO8859_1");
+    public static final FbEncoding UTF8 = FbEncoding.forName("UTF8");
 
     private final String firebirdName;
     private final Charset charset;
@@ -47,28 +47,28 @@ final class FbEncoding {
      *         character length in Unicode codepoints
      * @return maximum byte length for {@code charLength} codepoints
      */
-    int maxByteLength(int charLength) {
+    public int maxByteLength(int charLength) {
         return charLength * maxBytesPerCharacter;
     }
 
     /**
      * @return Firebird character set name
      */
-    String firebirdName() {
+    public String firebirdName() {
         return firebirdName;
     }
 
     /**
      * @return name of the Java {@code Charset} (see {@link #charset()}
      */
-    String charsetName() {
+    public String charsetName() {
         return charset.name();
     }
 
     /**
      * @return the Java {@code Charset}
      */
-    Charset charset() {
+    public Charset charset() {
         return charset;
     }
 
@@ -81,7 +81,7 @@ final class FbEncoding {
      *         length in {@code char} to encode (starting with the first character of the string)
      * @return string as bytes in this encoding
      */
-    byte[] getBytes(String value, int length) {
+    public byte[] getBytes(String value, int length) {
         return value.substring(0, length).getBytes(charset);
     }
 
@@ -114,7 +114,7 @@ final class FbEncoding {
      *         if {@code firebirdName} is an unknown encoding (at least, not known to this program), explicitly not
      *         supported (i.e. NONE, OCTETS, UNICODE_FSS), or the associated Java character set could not be loaded
      */
-    static FbEncoding forName(String firebirdName) {
+    public static FbEncoding forName(String firebirdName) {
         // create encodings lazily, on some platforms loading character sets can be slow (see Jaybird history)
         return encodings.computeIfAbsent(firebirdName, FbEncoding::createForName);
     }

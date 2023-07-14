@@ -321,6 +321,27 @@ However, if you generate the table file on a little-endian machine, while your F
 
 See <<ref-xml-externaltable>> for more information on `byteOrder`.
 
+[#usage-config-converter]
+=== Using a different data type conversion
+
+Each data type has a default conversion from the CSV string value to a Firebird data type value.
+This default conversion is not always suitable.
+For example, a CSV with hexadecimal string values for integers cannot be read as a `integer`, because the default conversion uses radix 10.
+
+To address this, the data type elements in the configuration have an optional element, <<ref-xml-converter>>, to specify a conversion using a _converter step_.
+Currently, there is only one _converter step_, <<ref-xml-parseintegralnumber>>, which can be used to specify a different radix for converting CSV values.
+
+For example, to convert integer values in radix 16 instead of radix 10, use the following data type definition:
+
+[source,xml]
+----
+<integer>
+    <converter>
+        <parseIntegralNumber radix="16"/>
+    </converter>
+</integer>
+----
+
 [#usage-workflow]
 == Recommended workflow
 
@@ -335,6 +356,7 @@ For repeated imports, or where multiple character sets are needed, we recommend 
 . Increase columns lengths to expected maximums (see <<usage-config-length>>),
 . If needed, change the encoding of columns (see <<usage-config-charset>>),
 . Determine if there are more appropriate types for columns and change the type if needed (see <<usage-config-datatype>>),
+. Determine if a custom converter is needed (see <<usage-config-converter>>),
 . Finally, regenerate the config file (see <<usage-config-regen>>) for up-to-date DDL.
 
 Use the DDL from the last step to create the external table, and use the external table file it generated to verify the definition by querying the external table from Firebird.

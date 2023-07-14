@@ -1,17 +1,23 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
+
+import nl.lawinegevaar.exttablegen.convert.Converter;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
 
 /**
- * A datatype representing the Firebird datatype {@code CHAR} with a specific length and character set.
+ * A data type representing the Firebird datatype {@code CHAR} with a specific length and character set.
  */
-final class FbChar implements FbDatatype {
+final class FbChar extends AbstractFbDatatype<String, Converter<String>> implements FbDatatype<String> {
+
+    private static final Converter<String> DEFAULT_CONVERTER =
+            Converter.of(String.class, Function.identity());
 
     private final int length;
     private final FbEncoding encoding;
@@ -26,6 +32,22 @@ final class FbChar implements FbDatatype {
      *         Firebird encoding of the CHAR column
      */
     FbChar(int length, FbEncoding encoding) {
+        this(length, encoding, null);
+    }
+
+    /**
+     * Creates a column datatype representing a Firebird {@code CHAR}.
+     *
+     * @param length
+     *         CHAR length (in Unicode codepoints)
+     * @param encoding
+     *         Firebird encoding of the CHAR column
+     * @param converter
+     *         converter to apply
+     * @since 2
+     */
+    FbChar(int length, FbEncoding encoding, Converter<String> converter) {
+        super(String.class, converter, DEFAULT_CONVERTER);
         if (length < 1) {
             throw new IllegalArgumentException("Minimum size is 1 character");
         }
@@ -37,6 +59,12 @@ final class FbChar implements FbDatatype {
     @Override
     public void appendTypeDefinition(StringBuilder sb) {
         sb.append("char(").append(length).append(") character set ").append(encoding.firebirdName());
+    }
+
+    @Override
+    public FbChar withConverter(Converter<String> converter) {
+        if (hasConverter(converter)) return this;
+        return new FbChar(length, encoding, converter);
     }
 
     /**
@@ -51,14 +79,10 @@ final class FbChar implements FbDatatype {
     }
 
     @Override
-    public void writeValue(String value, EncoderOutputStream out) throws IOException {
-        if (value == null || value.isEmpty()) {
-            writeEmpty(out);
-        } else {
-            byte[] bytes = encoding.getBytes(value, getMaxLength(value));
-            out.write(bytes);
-            writePaddingFor(bytes.length, out);
-        }
+    protected void writeValueImpl(String value, EncoderOutputStream out) throws IOException {
+        byte[] bytes = encoding.getBytes(value, getMaxLength(value));
+        out.write(bytes);
+        writePaddingFor(bytes.length, out);
     }
 
     /**
@@ -94,8 +118,12 @@ final class FbChar implements FbDatatype {
      *         for errors writing to {@code out}
      */
     private void writePaddingFor(int byteLength, OutputStream out) throws IOException {
-        if (byteLength < maxByteLength) {
-            var bytes = new byte[maxByteLength - byteLength];
+        if (byteLength >= maxByteLength) return;
+        int padSize = maxByteLength - byteLength;
+        if (padSize == 1) {
+            out.write(0x20);
+        } else {
+            var bytes = new byte[padSize];
             Arrays.fill(bytes, (byte) 0x20);
             out.write(bytes);
         }
@@ -107,16 +135,18 @@ final class FbChar implements FbDatatype {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FbChar that)) return false;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
         // Given maxByteLength is derived, we don't need to include it
-        return length == that.length && encoding.equals(that.encoding);
+        return obj instanceof FbChar that
+               && this.length == that.length
+               && this.encoding.equals(that.encoding)
+               && this.converter().equals(that.converter());
     }
 
     @Override
     public int hashCode() {
-        return 31 * length + encoding.hashCode();
+        return 31 * (31 * length + encoding.hashCode()) + converter().hashCode();
     }
 
     @Override

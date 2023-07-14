@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel -->
+<!-- SPDX-License-Identifier: Apache-2.0 -->
+<extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
+    <externalTable name="ID_VALUES" byteOrder="AUTO">
+        <columns>
+            <column name="Id">
+                <integer>
+                    <converter>
+                        <parseIntegralNumber radix="16"/>
+                    </converter>
+                </integer>
+            </column>
+         </columns>
+        <tableFile path="customers-1000.dat" overwrite="true"/>
+    </externalTable>
+    <tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/>
+    <csvFile path="id-values-hex.csv" charset="UTF-8" headerRow="true"/>
+    <informational>
+        <ddl>create table "ID_VALUES" external file 'id-values.dat' (
+  "Id" integer
+);
+</ddl>
+    </informational>
+</extTableGenConfig>

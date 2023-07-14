@@ -5,6 +5,7 @@ package nl.lawinegevaar.exttablegen;
 import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
 import com.opencsv.RFC4180Parser;
+import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.xmlconfig.ExtTableGenConfig;
 import nl.lawinegevaar.exttablegen.xmlconfig.InformationalType;
 import org.firebirdsql.management.FBManager;
@@ -37,6 +38,8 @@ import java.util.regex.Pattern;
 
 import static java.lang.System.Logger.Level.WARNING;
 import static java.util.Objects.requireNonNull;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.integralNumber;
+import static nl.lawinegevaar.exttablegen.IntegrationTestProperties.externalTableFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -47,11 +50,14 @@ class ExtTableIntegrationTests {
 
     private static final String TEST_DATA_RESOURCE_ROOT = "/integration-testdata/";
     private static final String CUSTOMERS_1000_PREFIX = "customers-1000";
-    private static final String CUSTOMERS_1000_CSV = CUSTOMERS_1000_PREFIX + ".csv";
-    private static final String CUSTOMERS_1000_DAT = CUSTOMERS_1000_PREFIX + ".dat";
-    private static final String CUSTOMERS_1000_XML = CUSTOMERS_1000_PREFIX + ".xml";
     private static final String CUSTOMERS_TABLE_NAME = "CUSTOMERS";
-    private static final String CUSTOMERS_1000_RESOURCE = TEST_DATA_RESOURCE_ROOT + CUSTOMERS_1000_CSV;
+    private static final String CUSTOMERS_1000_RESOURCE = TEST_DATA_RESOURCE_ROOT + csvFilename(CUSTOMERS_1000_PREFIX);
+    private static final String ID_VALUES_PREFIX = "id-values";
+    private static final String ID_VALUES_DEC_PREFIX = ID_VALUES_PREFIX + "-dec";
+    private static final String ID_VALUES_DEC_RESOURCE = TEST_DATA_RESOURCE_ROOT + csvFilename(ID_VALUES_DEC_PREFIX);
+    private static final String ID_VALUES_HEX_PREFIX = ID_VALUES_PREFIX + "-hex";
+    private static final String ID_VALUES_HEX_RESOURCE = TEST_DATA_RESOURCE_ROOT + csvFilename(ID_VALUES_HEX_PREFIX);
+    private static final int ID_VALUES_ROW_COUNT = 18;
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -62,6 +68,8 @@ class ExtTableIntegrationTests {
     @TempDir
     Path forEachTempDir;
     private static Path customers1000CsvFile;
+    private static Path idValueDecCsvFile;
+    private static Path idValueHexCsvFile;
     private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
@@ -75,7 +83,9 @@ class ExtTableIntegrationTests {
 
     @BeforeAll
     static void copyTestDataFromResources() throws Exception {
-        customers1000CsvFile = copyForAllResource(CUSTOMERS_1000_RESOURCE, CUSTOMERS_1000_CSV);
+        customers1000CsvFile = copyForAllResource(CUSTOMERS_1000_RESOURCE, csvFilename(CUSTOMERS_1000_PREFIX));
+        idValueDecCsvFile = copyForAllResource(ID_VALUES_DEC_RESOURCE, csvFilename(ID_VALUES_DEC_PREFIX));
+        idValueHexCsvFile = copyForAllResource(ID_VALUES_HEX_RESOURCE, csvFilename(ID_VALUES_HEX_PREFIX));
     }
 
     @AfterAll
@@ -114,8 +124,8 @@ class ExtTableIntegrationTests {
     @ParameterizedTest
     @EnumSource(EndColumn.Type.class)
     void compareOriginalDataWithDataFromFirebird(EndColumn.Type endColumnType) throws Exception {
-        Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
-        Path configFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
+        Path tableFile = registerForCleanup(externalTableFile(tableFilename(CUSTOMERS_1000_PREFIX)));
+        Path configFile = forEachTempDir.resolve(configFilename(CUSTOMERS_1000_PREFIX));
         createExternalTableFile(CUSTOMERS_TABLE_NAME, customers1000CsvFile, tableFile, endColumnType, configFile);
         String ddl = getDdl(configFile);
 
@@ -141,8 +151,8 @@ class ExtTableIntegrationTests {
             """)
     void integralNumberIntegrationTest_simple(String configName, JDBCType expectedJdbcType) throws Exception {
         Path configIn = copyForEachResource(TEST_DATA_RESOURCE_ROOT + configName, configName);
-        Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile(CUSTOMERS_1000_DAT));
-        Path configOutFile = forEachTempDir.resolve(CUSTOMERS_1000_XML);
+        Path tableFile = registerForCleanup(externalTableFile(tableFilename(CUSTOMERS_1000_PREFIX)));
+        Path configOutFile = forEachTempDir.resolve(configFilename(CUSTOMERS_1000_PREFIX));
         createExternalTableFileFromExistingConfig(configIn, CUSTOMERS_TABLE_NAME,
                 customers1000CsvFile, tableFile, configOutFile);
         String ddl = getDdl(configOutFile);
@@ -163,7 +173,7 @@ class ExtTableIntegrationTests {
     @Test
     void integralNumberIntegrationTest_boundaries() throws Exception {
         Path csvFile = forEachTempDir.resolve("integral-boundary.csv");
-        Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile("integral-boundary.dat"));
+        Path tableFile = registerForCleanup(externalTableFile("integral-boundary.dat"));
         Files.writeString(csvFile,
                 """
                 name,smallint,integer,bigint,int128
@@ -210,12 +220,12 @@ class ExtTableIntegrationTests {
         columns.add(createColumn("COLUMN_2", secondType));
         columns.add(createColumn("COLUMN_3", thirdType));
         for (int idx = 4; idx <= totalColumnCount; idx++) {
-            columns.add(ColumnFixtures.smallint("COLUMN_" + idx));
+            columns.add(ColumnFixtures.smallint("COLUMN_" + idx, null));
         }
         Path csvFile = forEachTempDir.resolve("verify-alignment.csv");
         int rowCount = 5;
         generateCsvFile(csvFile, columns, rowCount);
-        Path tableFile = registerForCleanup(IntegrationTestProperties.externalTableFile("verify-alignment.dat"));
+        Path tableFile = registerForCleanup(externalTableFile("verify-alignment.dat"));
         String tableName = "VERIFY_ALIGNMENT";
         Path configFile = forEachTempDir.resolve("verify-alignment.xml");
         try (var out = Files.newOutputStream(configFile)) {
@@ -239,6 +249,69 @@ class ExtTableIntegrationTests {
         }
     }
 
+    @Test
+    void testWithExplicitConverter_fromFile() throws Exception {
+        Path configFile = copyForEachResource(
+                TEST_DATA_RESOURCE_ROOT + configFilename(ID_VALUES_HEX_PREFIX + "-integer"),
+                configFilename(ID_VALUES_HEX_PREFIX + "-integer"));
+        Path tableFile = registerForCleanup(externalTableFile(tableFilename(ID_VALUES_PREFIX)));
+        createExternalTableFileFromExistingConfig(configFile, ID_VALUES_PREFIX, idValueHexCsvFile, tableFile, configFile);
+        String ddl = getDdl(configFile);
+
+        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
+             var statement = connection.createStatement()) {
+            statement.execute(ddl);
+
+            try (var rs = statement.executeQuery(
+                    "select * from " + statement.enquoteIdentifier(ID_VALUES_PREFIX, true))) {
+                // NOTE: We're using the "dec" value for comparison, because we compare as decimal values
+                assertResultSet(idValueDecCsvFile, ID_VALUES_ROW_COUNT, rs, EndColumn.Type.NONE);
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            type,     radix
+            bigint,   10
+            bigint,   16
+            int128,   10
+            int128,   16
+            integer,  10
+            integer,  16
+            smallint, 10
+            smallint, 16
+            """)
+    void testWithExplicitConverter_parseIntegral(String typeName, int radix) throws Exception {
+        assert radix == 10 || radix == 16 : "Test only works for radix 10 or 16 (due to available test data)";
+        Path csvFile = radix == 10 ? idValueDecCsvFile : idValueHexCsvFile;
+        Converter<?> converter = Converter.parseIntegralNumber(typeName, radix);
+        var columns = List.of(integralNumber("Id", typeName, converter));
+        Path tableFile = registerForCleanup(externalTableFile(tableFilename(ID_VALUES_PREFIX)));
+        Path configFile = forEachTempDir.resolve(configFilename(ID_VALUES_PREFIX));
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    new TableConfig(ID_VALUES_PREFIX, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    TableDerivationConfig.getDefault(),
+                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, ID_VALUES_PREFIX, csvFile, tableFile, configFile);
+        String ddl = getDdl(configFile);
+
+        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
+             var statement = connection.createStatement()) {
+            statement.execute(ddl);
+
+            try (var rs = statement.executeQuery(
+                    "select * from " + statement.enquoteIdentifier(ID_VALUES_PREFIX, true))) {
+                // NOTE: We're using the "dec" value for comparison, because we compare as decimal values
+                assertResultSet(idValueDecCsvFile, ID_VALUES_ROW_COUNT, rs, EndColumn.Type.NONE);
+            }
+        }
+    }
+
     // TODO Maybe some or all of the following methods should be moved to test-common
 
     private static Column createColumn(String name, String columnType) {
@@ -249,7 +322,7 @@ class ExtTableIntegrationTests {
         if (charMatcher.matches()) {
             return ColumnFixtures.col(name, Integer.parseInt(charMatcher.group(1)));
         }
-        return ColumnFixtures.integralNumber(name, columnType);
+        return integralNumber(name, columnType);
     }
 
     private static void generateCsvFile(Path csvFile, List<Column> columns, int rowCount) throws IOException {
@@ -278,7 +351,7 @@ class ExtTableIntegrationTests {
         return rowData;
     }
 
-    private static String generateColumnData(int row, int colIdx, FbDatatype datatype) {
+    private static String generateColumnData(int row, int colIdx, FbDatatype<?> datatype) {
         if (datatype instanceof FbChar fbChar) {
             String stringValue = Integer.toString(row * colIdx, 36);
             int requiredLength = fbChar.length();
@@ -406,6 +479,18 @@ class ExtTableIntegrationTests {
             Files.copy(in, destinationPath);
             return destinationPath;
         }
+    }
+
+    private static String csvFilename(String prefix) {
+        return prefix + ".csv";
+    }
+
+    private static String tableFilename(String prefix) {
+        return prefix + ".dat";
+    }
+
+    private static String configFilename(String prefix) {
+        return prefix + ".xml";
     }
 
 }

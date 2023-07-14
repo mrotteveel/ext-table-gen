@@ -2,9 +2,38 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import nl.lawinegevaar.exttablegen.convert.LongConverter;
+import nl.lawinegevaar.exttablegen.convert.ParseBigint;
+import nl.lawinegevaar.exttablegen.convert.Converter;
+
 import java.io.IOException;
 
-final class FbBigint implements FbIntegralNumberDatatype{
+/**
+ * A data type representing the Firebird datatype {@code BIGINT}.
+ *
+ * @since 2
+ */
+final class FbBigint extends AbstractFbDatatype<Long, LongConverter> implements FbIntegralNumberDatatype<Long> {
+
+    private static final ParseBigint DEFAULT_CONVERTER = ParseBigint.ofRadix(10);
+
+    /**
+     * Constructs a {@code FbBigint} using the default conversion.
+     */
+    FbBigint() {
+        this(null);
+    }
+
+    /**
+     * Constructs a {@code FbBigint} with a converter.
+     *
+     * @param converter
+     *         converter, or {@code null} for the default conversion
+     * @since 2
+     */
+    FbBigint(Converter<Long> converter) {
+        super(Long.class, LongConverter.wrap(converter), DEFAULT_CONVERTER);
+    }
 
     @Override
     public void appendTypeDefinition(StringBuilder sb) {
@@ -16,11 +45,16 @@ final class FbBigint implements FbIntegralNumberDatatype{
         if (value == null || value.isEmpty()) {
             writeEmpty(out);
         } else {
-            writeLong(Long.parseLong(value), out);
+            writeLong(finalConverter().convertToLong(value), out);
         }
     }
 
-    private void writeLong(long value, EncoderOutputStream out) throws IOException {
+    @Override
+    protected void writeValueImpl(Long value, EncoderOutputStream out) throws IOException {
+        writeLong(value, out);
+    }
+
+    private static void writeLong(long value, EncoderOutputStream out) throws IOException {
         out.align(8);
         out.writeLong(value);
     }
@@ -31,13 +65,22 @@ final class FbBigint implements FbIntegralNumberDatatype{
     }
 
     @Override
+    public FbDatatype<Long> withConverter(Converter<Long> converter) {
+        LongConverter wrappedConverter = LongConverter.wrap(converter);
+        if (hasConverter(wrappedConverter)) return this;
+        return new FbBigint(wrappedConverter);
+    }
+
+    @Override
     public int hashCode() {
-        return FbBigint.class.hashCode();
+        return 31 * FbBigint.class.hashCode() + converter().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof FbBigint;
+        if (obj == this) return true;
+        return obj instanceof FbBigint that
+               && this.converter().equals(that.converter());
     }
-    
+
 }

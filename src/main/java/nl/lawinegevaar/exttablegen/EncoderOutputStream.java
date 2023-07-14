@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import nl.lawinegevaar.exttablegen.util.RangeChecks;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.io.FilterOutputStream;
@@ -25,7 +26,7 @@ final class EncoderOutputStream extends FilterOutputStream {
     private static final int NULL_MASK_BLOCK_SIZE = 4;
     private static final int COLUMNS_PER_NULL_MASK_BLOCK = 32;
 
-    private final ByteBuffer byteBuffer = ByteBuffer.allocate(REQUIRED_CAPACITY);;
+    private final ByteBuffer byteBuffer = ByteBuffer.allocate(REQUIRED_CAPACITY);
     private final WritableByteChannel channel;
     // Size of the null mask of a row; this is used as a virtual offset for alignment purposes
     private final int nullMaskSize;
@@ -80,6 +81,7 @@ final class EncoderOutputStream extends FilterOutputStream {
         if (positionInRow != nullMaskSize) {
             write(Holder.PADDING_BYTES, 0, requiredBytes);
         } else {
+            // this is alignment before the first column, don't write it, but increase the virtual position in row
             positionInRow += requiredBytes;
         }
     }
@@ -115,10 +117,7 @@ final class EncoderOutputStream extends FilterOutputStream {
     }
 
     void writeInt128(BigInteger v) throws IOException {
-        if (v.bitLength() > 127) {
-            throw new NumberFormatException("Received value requires more than 16 bytes storage: " + v);
-        }
-        if (v.equals(BigInteger.ZERO)) {
+        if (RangeChecks.checkInt128Range(v).equals(BigInteger.ZERO)) {
             out.write(new byte[16]);
             return;
         }
@@ -163,7 +162,7 @@ final class EncoderOutputStream extends FilterOutputStream {
         return new Builder(byteOrderType.byteOrder());
     }
 
-    static class Builder {
+    static final class Builder {
 
         private final ByteOrder byteOrder;
         private int columnCount;

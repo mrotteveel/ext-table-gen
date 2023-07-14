@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import nl.lawinegevaar.exttablegen.convert.ParseInteger;
+import nl.lawinegevaar.exttablegen.convert.Converter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -43,6 +45,13 @@ class FbIntegerTest {
     }
 
     @Test
+    void testWriteValue_callsNonNullConverter() throws Exception {
+        var normalConverter = ParseInteger.ofRadix(16);
+        var offsetByTwoConverter = Converter.of(Integer.class, v -> normalConverter.convertToInt(v) + 2);
+        assertEquals(5, writeAndGetValue("3", offsetByTwoConverter));
+    }
+
+    @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
         integerType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
@@ -64,9 +73,13 @@ class FbIntegerTest {
     }
 
     int writeAndGetValue(String valueToWrite) throws IOException {
+        return writeAndGetValue(valueToWrite, null);
+    }
+
+    int writeAndGetValue(String valueToWrite, Converter<Integer> converter) throws IOException {
         var baos = new ByteArrayOutputStream();
-        integerType.writeValue(valueToWrite,
-                EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
+        integerType.withConverter(converter)
+                .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         return buf.getInt();

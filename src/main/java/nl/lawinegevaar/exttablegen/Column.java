@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
 sealed class Column permits EndColumn {
 
     private final String name;
-    private final FbDatatype datatype;
+    private final FbDatatype<?> datatype;
 
     /**
      * Creates a column.
@@ -22,13 +22,14 @@ sealed class Column permits EndColumn {
      *         name of the column (must not be {@code null} or blank), value is trimmed
      * @param datatype
      *         datatype of the column
+     * @throws IllegalArgumentException
+     *         if {@code name} is {@code null} or blank
      */
-    Column(String name, FbDatatype datatype) {
-        name = name != null ? name.trim() : null;
-        if (name == null || name.isEmpty()) {
+    Column(String name, FbDatatype<?> datatype) {
+        if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("name must not be null, empty or blank");
         }
-        this.name = name;
+        this.name = name.trim();
         this.datatype = requireNonNull(datatype, "datatype");
     }
 
@@ -50,7 +51,7 @@ sealed class Column permits EndColumn {
     /**
      * @return column datatype
      */
-    final FbDatatype datatype() {
+    final FbDatatype<?> datatype() {
         return datatype;
     }
 
@@ -63,7 +64,7 @@ sealed class Column permits EndColumn {
      *         output stream to write to
      */
     void writeValue(String value, EncoderOutputStream out) throws IOException {
-        datatype().writeValue(value, out);
+        datatype.writeValue(value, out);
     }
 
     /**
@@ -73,7 +74,7 @@ sealed class Column permits EndColumn {
      *         output stream to write to
      */
     void writeEmpty(EncoderOutputStream out) throws IOException {
-        datatype().writeEmpty(out);
+        datatype.writeEmpty(out);
     }
 
     /**
@@ -92,7 +93,7 @@ sealed class Column permits EndColumn {
      */
     void appendColumnDefinition(StringBuilder sb) {
         sb.append(quotedName()).append(' ');
-        datatype().appendTypeDefinition(sb);
+        datatype.appendTypeDefinition(sb);
     }
 
     @Override
@@ -100,7 +101,7 @@ sealed class Column permits EndColumn {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (Column) obj;
-        return Objects.equals(this.name, that.name) &&
+        return this.name.equals(that.name) &&
                this.datatype.equals(that.datatype);
     }
 

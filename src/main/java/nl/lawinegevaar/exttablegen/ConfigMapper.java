@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -7,6 +7,8 @@ import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
+import nl.lawinegevaar.exttablegen.convert.AbstractParseIntegralNumber;
+import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.xmlconfig.*;
 
 import java.io.InputStream;
@@ -150,11 +152,18 @@ final class ConfigMapper {
         }
         ColumnType columnType = factory.createColumnType();
         columnType.setName(column.name());
-        columnType.setDatatype(toDataTypeElement(column.datatype()));
+        columnType.setDatatype(toXmlDataTypeElement(column.datatype()));
         return columnType;
     }
 
-    private JAXBElement<? extends DatatypeType> toDataTypeElement(FbDatatype datatype) {
+    private JAXBElement<? extends DatatypeType> toXmlDataTypeElement(FbDatatype<?> datatype) {
+        JAXBElement<? extends DatatypeType> datatypeTypeElement = createXmlDataTypeElement(datatype);
+        datatype.converter()
+                .ifPresent(converter -> datatypeTypeElement.getValue().setConverter(toXmlConverterType(converter)));
+        return datatypeTypeElement;
+    }
+
+    private JAXBElement<? extends DatatypeType> createXmlDataTypeElement(FbDatatype<?> datatype) {
         if (datatype instanceof FbChar fbChar) {
             CharType charType = factory.createCharType();
             charType.setLength(fbChar.length());
@@ -168,8 +177,24 @@ final class ConfigMapper {
             return factory.createSmallint(factory.createSmallintType());
         } else if (datatype instanceof FbInt128) {
             return factory.createInt128(factory.createInt128Type());
+        } else {
+            throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
         }
-        throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
+    }
+
+    private ConverterType toXmlConverterType(Converter<?> converter) {
+        String converterName = converter.converterName();
+        JAXBElement<? extends ConverterStepType> stepType;
+        if (converter instanceof AbstractParseIntegralNumber<?> integralNumberConverter) {
+            ParseIntegralType parseIntegralType = factory.createParseIntegralType();
+            parseIntegralType.setRadix(integralNumberConverter.radix());
+            stepType = factory.createParseIntegralNumber(parseIntegralType);
+        } else {
+            throw new InvalidConfigurationException("Unsupported converter: " + converterName);
+        }
+        ConverterType converterType = factory.createConverterType();
+        converterType.setConverterStep(stepType);
+        return converterType;
     }
 
     private EndColumnType toXmlEndColumnType(EndColumn endColumn) {
@@ -219,7 +244,7 @@ final class ConfigMapper {
         }
     }
 
-    private TableConfig fromXmlExternalTableType(ExternalTableType externalTableType) {
+    private static TableConfig fromXmlExternalTableType(ExternalTableType externalTableType) {
         if (externalTableType == null) {
             return TableConfig.empty();
         }
@@ -230,14 +255,15 @@ final class ConfigMapper {
                 fromXmlByteOrderEnum(externalTableType.getByteOrder()));
     }
 
-    private List<Column> fromXmlColumnListType(ColumnListType columnListType) {
+    private static List<Column> fromXmlColumnListType(ColumnListType columnListType) {
         if (columnListType == null) {
             return List.of();
         }
         try {
             return Stream.concat(
-                            columnListType.getColumns().stream().map(this::fromXmlColumnType),
-                            Optional.ofNullable(columnListType.getEndColumn()).map(this::fromXmlEndColumnType).stream())
+                            columnListType.getColumns().stream().map(ConfigMapper::fromXmlColumnType),
+                            Optional.ofNullable(columnListType.getEndColumn()).map(ConfigMapper::fromXmlEndColumnType)
+                                    .stream())
                     .toList();
         } catch (InvalidConfigurationException e) {
             throw e;
@@ -246,15 +272,14 @@ final class ConfigMapper {
         }
     }
 
-    private Column fromXmlColumnType(ColumnType columnType) {
-        return new Column(columnType.getName(), fromXmlDatatype(columnType.getDatatype()));
+    private static Column fromXmlColumnType(ColumnType columnType) {
+        JAXBElement<? extends DatatypeType> datatype = columnType.getDatatype();
+        return new Column(columnType.getName(),
+                fromXmlDatatype(datatype).withConverterChecked(fromXmlConverter(datatype)));
     }
 
-    private FbDatatype fromXmlDatatype(JAXBElement<? extends DatatypeType> datatype) {
-        return fromXmlDatatypeType(datatype.getValue());
-    }
-
-    private FbDatatype fromXmlDatatypeType(DatatypeType datatypeType) {
+    private static FbDatatype<?> fromXmlDatatype(JAXBElement<? extends DatatypeType> datatype) {
+        DatatypeType datatypeType = datatype.getValue();
         if (datatypeType instanceof CharType charType) {
             return new FbChar(charType.getLength(), FbEncoding.forName(charType.getEncoding()));
         } else if (datatypeType instanceof IntegerType) {
@@ -269,7 +294,30 @@ final class ConfigMapper {
         throw new InvalidConfigurationException("Unsupported DatatypeType: " + datatypeType.getClass().getName());
     }
 
-    private EndColumn fromXmlEndColumnType(EndColumnType endColumnType) {
+    private static Converter<?> fromXmlConverter(JAXBElement<? extends DatatypeType> datatype) {
+        ConverterType converterType = datatype.getValue().getConverter();
+        if (converterType == null) return null;
+        JAXBElement<? extends ConverterStepType> converterStepElement = converterType.getConverterStep();
+        ConverterStepType converterStep = converterStepElement.getValue();
+        if (converterStep instanceof ParseIntegralType parseIntegralType) {
+            return fromXmlParseIntegralType(parseIntegralType, datatype);
+        } else {
+            throw new InvalidConfigurationException("Unsupported element: " + converterStepElement.getName());
+        }
+    }
+
+    private static Converter<?> fromXmlParseIntegralType(ParseIntegralType parseIntegralType,
+            JAXBElement<? extends DatatypeType> datatype) {
+        int radix = parseIntegralType.getRadix();
+        try {
+            return Converter.parseIntegralNumber(datatype.getName().getLocalPart(), radix);
+        } catch (RuntimeException e) {
+            throw new InvalidConfigurationException(
+                    "Unsupported ParseIntegralType data type: " + datatype.getName(), e);
+        }
+    }
+
+    private static EndColumn fromXmlEndColumnType(EndColumnType endColumnType) {
         try {
             return EndColumn.require(EndColumn.Type.valueOf(endColumnType.getType()));
         } catch (RuntimeException e) {
@@ -277,7 +325,7 @@ final class ConfigMapper {
         }
     }
 
-    private Optional<TableFile> fromXmlTableFileType(TableFileType tableFileType) {
+    private static Optional<TableFile> fromXmlTableFileType(TableFileType tableFileType) {
         if (tableFileType == null) return Optional.empty();
         try {
             return Optional.of(
@@ -289,7 +337,7 @@ final class ConfigMapper {
         }
     }
 
-    private ByteOrderType fromXmlByteOrderEnum(String byteOrderEnumValue) {
+    private static ByteOrderType fromXmlByteOrderEnum(String byteOrderEnumValue) {
         if (byteOrderEnumValue == null) {
             return ByteOrderType.AUTO;
         }
@@ -300,14 +348,14 @@ final class ConfigMapper {
         }
     }
 
-    private TableDerivationConfig fromXmlTableDerivationType(TableDerivationType tableDerivationType) {
+    private static TableDerivationConfig fromXmlTableDerivationType(TableDerivationType tableDerivationType) {
         return new TableDerivationConfig(
                 fromXmlColumnEncoding(tableDerivationType),
                 fromXmlEndColumnTypeName(tableDerivationType),
                 TableDerivationMode.NEVER);
     }
 
-    private FbEncoding fromXmlColumnEncoding(TableDerivationType tableDerivationType) {
+    private static FbEncoding fromXmlColumnEncoding(TableDerivationType tableDerivationType) {
         String columnEncoding = tableDerivationType != null ? tableDerivationType.getColumnEncoding() : null;
         if (columnEncoding == null) {
             return DEFAULT_COLUMN_ENCODING;
@@ -320,7 +368,7 @@ final class ConfigMapper {
         }
     }
 
-    private EndColumn.Type fromXmlEndColumnTypeName(TableDerivationType tableDerivationType) {
+    private static EndColumn.Type fromXmlEndColumnTypeName(TableDerivationType tableDerivationType) {
         String endColumnType = tableDerivationType != null ? tableDerivationType.getEndColumnType() : null;
         if (endColumnType == null) {
             return DEFAULT_END_COLUMN_TYPE;
@@ -333,7 +381,7 @@ final class ConfigMapper {
         }
     }
 
-    private Optional<CsvFileConfig> fromXmlCsvFileType(CsvFileType csvFileType) {
+    private static Optional<CsvFileConfig> fromXmlCsvFileType(CsvFileType csvFileType) {
         if (csvFileType == null) return Optional.empty();
         try {
             return Optional.of(

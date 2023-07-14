@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import nl.lawinegevaar.exttablegen.convert.ParseBigint;
+import nl.lawinegevaar.exttablegen.convert.Converter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -56,6 +58,13 @@ class FbBigintTest {
     }
 
     @Test
+    void testWriteValue_callsNonNullConverter() throws Exception {
+        var normalConverter = ParseBigint.ofRadix(16);
+        var offsetByTwoConverter = Converter.of(Long.class, v -> normalConverter.convertToLong(v) + 2);
+        assertEquals(5L, writeAndGetValue("3", offsetByTwoConverter));
+    }
+
+    @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
         bigintType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
@@ -77,9 +86,13 @@ class FbBigintTest {
     }
 
     long writeAndGetValue(String valueToWrite) throws IOException {
+        return writeAndGetValue(valueToWrite, null);
+    }
+
+    long writeAndGetValue(String valueToWrite, Converter<Long> converter) throws IOException {
         var baos = new ByteArrayOutputStream();
-        bigintType.writeValue(valueToWrite,
-                EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
+        bigintType.withConverter(converter)
+                .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         return buf.getLong();

@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import nl.lawinegevaar.exttablegen.convert.ParseInt128;
+import nl.lawinegevaar.exttablegen.convert.Converter;
 import org.apache.commons.lang3.ArrayUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,7 +14,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.ByteOrder;
-import java.util.HexFormat;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,6 +71,13 @@ class FbInt128Test {
     }
 
     @Test
+    void testWriteValue_callsNonNullConverter() throws Exception {
+        var normalConverter = ParseInt128.ofRadix(16);
+        var offsetByTwoConverter = Converter.of(BigInteger.class, v -> normalConverter.convert(v).add(BigInteger.TWO));
+        assertEquals(BigInteger.valueOf(5), writeAndGetValue("3", offsetByTwoConverter));
+    }
+
+    @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
         int128Type.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
@@ -93,9 +101,13 @@ class FbInt128Test {
     }
 
     BigInteger writeAndGetValue(String valueToWrite) throws IOException {
+        return writeAndGetValue(valueToWrite, null);
+    }
+
+    BigInteger writeAndGetValue(String valueToWrite, Converter<BigInteger> converter) throws IOException {
         var baos = new ByteArrayOutputStream();
-        int128Type.writeValue(valueToWrite,
-                EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
+        int128Type.withConverter(converter)
+                .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         byte[] bytes = baos.toByteArray();
         if (ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN) {
             ArrayUtils.reverse(bytes);

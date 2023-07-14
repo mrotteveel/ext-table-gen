@@ -2,14 +2,39 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import nl.lawinegevaar.exttablegen.convert.ParseSmallint;
+import nl.lawinegevaar.exttablegen.convert.ShortConverter;
+import nl.lawinegevaar.exttablegen.convert.Converter;
+
 import java.io.IOException;
 
 /**
- * A datatype representing the Firebird datatype {@code SMALLINT}.
+ * A data type representing the Firebird datatype {@code SMALLINT}.
  *
  * @since 2
  */
-final class FbSmallint implements FbIntegralNumberDatatype {
+final class FbSmallint extends AbstractFbDatatype<Short, ShortConverter>
+        implements FbIntegralNumberDatatype<Short> {
+
+    private static final ParseSmallint DEFAULT_CONVERTER = ParseSmallint.ofRadix(10);
+
+    /**
+     * Constructs a {@code FbSmallint} using the default conversion.
+     */
+    FbSmallint() {
+        this(null);
+    }
+
+    /**
+     * Constructs a {@code FbSmallint} with a converter.
+     *
+     * @param converter
+     *         converter, or {@code null} for the default conversion
+     * @since 2
+     */
+    FbSmallint(Converter<Short> converter) {
+        super(Short.class, ShortConverter.wrap(converter), DEFAULT_CONVERTER);
+    }
 
     @Override
     public void appendTypeDefinition(StringBuilder sb) {
@@ -21,11 +46,16 @@ final class FbSmallint implements FbIntegralNumberDatatype {
         if (value == null || value.isEmpty()) {
             writeEmpty(out);
         } else {
-            writeShort(Short.parseShort(value), out);
+            writeShort(finalConverter().convertToShort(value), out);
         }
     }
 
-    private void writeShort(short value, EncoderOutputStream out) throws IOException {
+    @Override
+    protected void writeValueImpl(Short value, EncoderOutputStream out) throws IOException {
+        writeShort(value, out);
+    }
+
+    private static void writeShort(short value, EncoderOutputStream out) throws IOException {
         out.align(2);
         out.writeShort(value);
     }
@@ -36,13 +66,22 @@ final class FbSmallint implements FbIntegralNumberDatatype {
     }
 
     @Override
+    public FbDatatype<Short> withConverter(Converter<Short> converter) {
+        ShortConverter wrappedConverter = ShortConverter.wrap(converter);
+        if (hasConverter(wrappedConverter)) return this;
+        return new FbSmallint(wrappedConverter);
+    }
+
+    @Override
     public int hashCode() {
-        return FbSmallint.class.hashCode();
+        return 31 * FbSmallint.class.hashCode() + converter().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof FbSmallint;
+        if (obj == this) return true;
+        return obj instanceof FbSmallint that
+                && this.converter().equals(that.converter());
     }
-    
+
 }

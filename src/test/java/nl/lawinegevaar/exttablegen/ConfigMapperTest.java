@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import jakarta.xml.bind.JAXBException;
+import nl.lawinegevaar.exttablegen.convert.Converter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -118,6 +119,20 @@ class ConfigMapperTest {
         assertThat(fromXml, tableConfig(tableColumns(hasItem(integralNumberColumn))));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = { "smallint", "integer", "bigint", "int128" })
+    void columnListWithNonDefaultConverter(String typeName) throws Exception {
+        Column integralNumberColumn = integralNumber("COLUMN_IN", typeName,
+                Converter.parseIntegralNumber(typeName, 16));
+        EtgConfig originalConfig = testEtgConfig()
+                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, integralNumberColumn, COLUMN_2)));
+
+        EtgConfig fromXml = roundTripConfig(originalConfig);
+
+        assertEquals(originalConfig, fromXml);
+        assertThat(fromXml, tableConfig(tableColumns(hasItem(integralNumberColumn))));
+    }
+
     @Test
     void columnWithInvalidEncoding_throwsInvalidConfigurationException() {
         String configString =
@@ -220,6 +235,21 @@ class ConfigMapperTest {
             // Unsupported schema version (using a high value to avoid having to revise this)
             """
             <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="99.0"/>""",
+            // Unsupported converter in char
+            """
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
+                <externalTable>
+                    <columns>
+                        <column name="VALID_COLUMN">
+                            <char length="2" encoding="ISO8859_1">
+                                <converter>
+                                    <parseIntegralNumber radix="16"/>
+                                </converter>
+                            </char>
+                        </column>
+                    </columns>
+                </externalTable>
+            </extTableGenConfig>""",
     })
     void testInvalidXml_throwsInvalidConfigurationException(String configString) {
         assertThrows(InvalidConfigurationException.class, () ->

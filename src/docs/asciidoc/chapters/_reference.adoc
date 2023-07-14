@@ -314,13 +314,21 @@ Name of the column (used for the DDL; required)
 [#ref-xml-datatype]
 ====== datatype
 
-At this time, _ext-table-gen_ supports the following column datatypes:
+A datatype is a placeholder for an element corresponding to a specific Firebird data type.
 
-- <<ref-xml-bigint>>
-- <<ref-xml-char>>
-- <<ref-xml-integer>>
-- <<ref-xml-int128>>
-- <<ref-xml-smallint>>
+.Attributes
+None, though subtypes may define attributes
+
+.Elements, in order
+* <<ref-xml-converter>> -- optional
+
+At this time, _ext-table-gen_ supports the following column data types:
+
+* <<ref-xml-bigint>>
+* <<ref-xml-char>>
+* <<ref-xml-integer>>
+* <<ref-xml-int128>>
+* <<ref-xml-smallint>>
 
 [float#ref-xml-bigint]
 ====== `bigint`
@@ -331,7 +339,7 @@ The `bigint` elements represents the Firebird datatype `BIGINT`.
 None
 
 .Elements
-None
+* <<ref-xml-converter>> -- optional
 
 [float#ref-xml-char]
 ====== `char`
@@ -348,7 +356,7 @@ Encoding (character set) of the column, using Firebird character set names (requ
 The XSD uses an enum-type, `encoding`, with supported names.
 
 .Elements
-None
+* <<ref-xml-converter>> -- optional
 
 [float#ref-xml-integer]
 ====== `integer`
@@ -359,7 +367,7 @@ The `integer` elements represents the Firebird datatype `INTEGER`.
 None
 
 .Elements
-None
+* <<ref-xml-converter>> -- optional
 
 [float#ref-xml-int128]
 ====== `int128`
@@ -370,7 +378,7 @@ The `int128` elements represents the Firebird datatype `INT128`.
 None
 
 .Elements
-None
+* <<ref-xml-converter>> -- optional
 
 [float#ref-xml-smallint]
 ====== `smallint`
@@ -379,6 +387,45 @@ The `smallint` elements represents the Firebird datatype `SMALLINT`.
 
 .Attributes
 None
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
+[#ref-xml-converter]
+===== `converter`
+
+The `converter` element -- if present -- defines a conversion from the CSV string value to a Firebird data type value.
+If absent, a default conversion will be applied, specific to the column data type.
+
+.Attributes
+None
+
+.Elements
+* One of the _converter steps_ listed below -- required
+
+.Available converter steps
+* <<ref-xml-parseintegralnumber>>
+
+[NOTE]
+====
+The name _converter step_ may seem to imply that a converter can consist of multiple steps chained together.
+That is currently not supported, but it is something that may be introduced in a future version.
+
+In the actual program code, a _converter step_ is also called a _converter_, but in this manual we wanted to prevent overloading the term as it already refers to the `converter` element.
+====
+
+[float#ref-xml-parseintegralnumber]
+====== `parseIntegralNumber`
+
+Parses a string using a specified radix to an integral number of the type of the enclosing datatype.
+
+This converter step is only valid in <<ref-xml-bigint>>, <<ref-xml-int128>>, <<ref-xml-integer>> or <<ref-xml-smallint>>.
+
+.Attributes
+[horizontal]
+`radix`::
+Radix for parsing a string to an integral number.
+Default `10`, range [2, 36].
 
 .Elements
 None

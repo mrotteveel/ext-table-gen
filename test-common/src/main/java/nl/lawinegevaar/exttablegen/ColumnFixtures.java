@@ -1,6 +1,8 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
+
+import nl.lawinegevaar.exttablegen.convert.Converter;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -49,57 +51,69 @@ final class ColumnFixtures {
     }
 
     static Column integralNumber(String name, String typeName) {
+        return integralNumber(name, typeName, null);
+    }
+
+    static Column integralNumber(String name, String typeName, Converter<?> converter) {
         return switch (typeName) {
-            case "smallint" -> smallint(name);
-            case "integer" -> integer(name);
-            case "bigint" -> bigint(name);
-            case "int128" -> int128(name);
+            case "smallint" -> smallint(name, converter);
+            case "integer" -> integer(name, converter);
+            case "bigint" -> bigint(name, converter);
+            case "int128" -> int128(name, converter);
             default -> throw new IllegalArgumentException("Unsupported typeName: " + typeName);
         };
     }
 
     /**
-     * Creates a column with {@code name} and data type {@code FbSmallint}.
+     * Creates a column with {@code name}, data type {@code FbSmallint} and {@code converter}.
      *
      * @param name
      *         name of the column
+     * @param converter
+     *         converter, or {@code null} for default
      * @return column
      */
-    static Column smallint(String name) {
-        return new Column(name, new FbSmallint());
+    static Column smallint(String name, Converter<?> converter) {
+        return new Column(name, new FbSmallint().withConverterChecked(converter));
     }
 
     /**
-     * Creates a column with {@code name} and data type {@code FbInteger}.
+     * Creates a column with {@code name}, data type {@code FbInteger} and {@code converter}.
      *
      * @param name
      *         name of the column
+     * @param converter
+     *         converter, or {@code null} for default
      * @return column
      */
-    static Column integer(String name) {
-        return new Column(name, new FbInteger());
+    static Column integer(String name, Converter<?> converter) {
+        return new Column(name, new FbInteger().withConverterChecked(converter));
     }
 
     /**
-     * Creates a column with {@code name} and data type {@code FbBigint}.
+     * Creates a column with {@code name}, data type {@code FbBigint} and {@code converter}.
      *
      * @param name
      *         name of the column
+     * @param converter
+     *         converter, or {@code null} for default
      * @return column
      */
-    static Column bigint(String name) {
-        return new Column(name, new FbBigint());
+    static Column bigint(String name, Converter<?> converter) {
+        return new Column(name, new FbBigint().withConverterChecked(converter));
     }
 
     /**
-     * Creates a column with {@code name} and data type {@code FbInt128}.
+     * Creates a column with {@code name}, data type {@code FbInt128} and {@code converter}.
      *
      * @param name
      *         name of the column
+     * @param converter
+     *         converter, or {@code null} for default
      * @return column
      */
-    static Column int128(String name) {
-        return new Column(name, new FbInt128());
+    static Column int128(String name, Converter<?> converter) {
+        return new Column(name, new FbInt128().withConverterChecked(converter));
     }
 
     /**

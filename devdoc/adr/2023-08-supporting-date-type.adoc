@@ -1,0 +1,104 @@
+= 2023-08 Supporting Date Type
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Draft
+* Proposed for: 2.0
+* Depends on: 2023-06, 2023-07
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+Firebird has a `DATE` data type, which is a 32-bit integer specifying the number of days since 17 November 1858 (as a Modified Julian Date).
+The range is further restricted to only allow dates between 0001-01-01 and 9999-12-31.
+
+In Jaybird (`DataTypeCoder.RawDateTimeStruct`), the encoding of a date is implemented as:
+
+[source,java]
+----
+public int getEncodedDate() {
+    int cpMonth = month;
+    int cpYear = year;
+
+    if (cpMonth > 2) {
+        cpMonth -= 3;
+    } else {
+        cpMonth += 9;
+        cpYear -= 1;
+    }
+
+    int c = cpYear / 100;
+    int ya = cpYear - 100 * c;
+
+    return ((146097 * c) / 4 +
+            (1461 * ya) / 4 +
+            (153 * cpMonth + 2) / 5 +
+            day + 1721119 - 2400001);
+}
+----
+
+Java provides the same calculations using `java.time.temporal.JulianFields.MODIFIED_JULIAN_DAY` (this has been double-checked, see also `DateCalculationTest`).
+
+The storage is endian-sensitive, depending on the platform of the target Firebird server;
+see also https://github.com/mrotteveel/ext-table-gen/blob/main/devdoc/adr/2023-06-supporting-basic-integer-types.adoc[ADR 2023-06^].
+
+Just like an `INTEGER` column, a `DATE` requires an alignment of 4 bytes.
+
+Java has various data types for representing datetime information.
+For our purposes, the `java.time.LocalDate` is the most appropriate type.footnote:[technically this is a _decision_]
+
+The https://www.rfc-editor.org/rfc/rfc4180[RFC 4180 format^] does not specify specific handling or formats for of dates.
+
+The international standard for date formats is https://en.wikipedia.org/wiki/ISO_8601[ISO 8601^], which specifies the basic calendar date format as ``yyyy-MM-dd``footnote:[Using a Java `DateTimeFormatter` format pattern], but also specifies other formats, like week date `YYYY-'W'ww-e` and ordinal date `yyyy-DDD`.
+
+The Java `java.time.format.DateTimeFormatter` accepts custom formats.
+Some formats are locale-sensitive (e.g. with language-specific month names).
+
+A standard for locale language tags is BCP 47.
+Java supports this through `Locale.forLanguageTag`.
+
+ADR https://github.com/mrotteveel/ext-table-gen/blob/main/devdoc/adr/2023-07-configuring-value-parsing.adoc[2023-07] specifies a generic design for configuring parsing of values to a target column type.
+This ADR will use that generic design for configuring parsing of dates.
+
+Other datetime types are not covered by this ADR.
+
+== Decision
+
+_ext-table-gen_ will support the `DATE` data type.
+This type will only be available by editing the configuration file, it will not be derived automatically by parsing the CSV.
+
+In the XML config, the data type will be represented by element `date`.
+
+In Java code, the data type will be represented by the type `FbDate`.
+For flexibility, the Java type will hava a target type of `java.time.temporal.TemporalAccessor` instead of only `java.time.LocalDate`.
+At time of writing a value, an additional requirement exists that this accessor must be able to support `java.time.temporal.ChronoField.EPOCH_DAY`/`java.time.temporal.JulianFields.MODIFIED_JULIAN_DAY`.
+Requirements may be further refined in the future, if introduction of other converters produce new insights.
+
+The default format used for parsing string values to date will be the ISO 8601 calendar date format (`yyyy-MM-dd`, or more specifically `DateTimeFormatter.ISO_LOCAL_DATE`).
+Other parsing or conversion options can be configured using the `converter` element of the datatype, following the ADR 2023-07 design.
+
+Configuration of parsing is available via the converter element `parseDateTime`.
+This element has the following attributes:
+
+* `pattern` (required) -- date format pattern or name of a standard Java pattern
+Uses the https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html[`java.time.format.DateTimeFormatter`^] pattern syntax.
++
+It is not possible to validate ahead of time if the resulting formatter is actually suitable to produce date information.
+Specifying a valid pattern, which does not result in date information (e.g. `HH:mm`) will produce an error when writing an external table file.
++
+Instead of a pattern, the pattern names specified in https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html[`java.time.format.DateTimeFormatter`^] may be specified in `pattern`.
+* `locale` (optional) -- locale for locale-sensitive parsing.
+The BCP 47 language tag of the desired locale.
+If not explicitly specified, the default format locale of the JVM will be used.
+
+== Consequences
+
+The documentation must be updated to explain how to use this new data type, and to describe the configuration changes.
+
+See also previous section for some implementation consequences.

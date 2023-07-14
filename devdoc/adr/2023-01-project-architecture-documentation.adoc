@@ -85,6 +85,11 @@ likely the feature described will never be implemented
 This should be used when updating living documents.
 For other types, it should be used only for textual corrections (i.e. typo fixes), or for (minor) changes which do not affect anything for application versions released after the original publish date.
 Other changes to documents which are not living documents should be performed with a new ADR, and not modify the original ADR except for updating things like `Updated by` and `Replaced by`.
+* Depends on: (comma-separated list of adr-references)
++
+Expresses explicit dependency between ADRs.
+This is mainly intended for informational purposes.
+Use this if realizing an ADR requires a feature which is also more generally usable, and for documentation/specification reasons it makes sense to split it up, instead of specifying it in a single ADR.
 
 The status section should also reference the ADR(s) it updates or replaces:
 

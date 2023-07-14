@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import nl.lawinegevaar.exttablegen.type.FbEncoding;
+
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;

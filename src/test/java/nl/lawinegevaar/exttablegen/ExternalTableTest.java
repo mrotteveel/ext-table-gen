@@ -3,6 +3,7 @@
 package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.EndColumn.Type;
+import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;

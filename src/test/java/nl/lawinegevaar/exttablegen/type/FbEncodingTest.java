@@ -1,6 +1,6 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
-package nl.lawinegevaar.exttablegen;
+package nl.lawinegevaar.exttablegen.type;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -8,7 +8,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FbEncodingTest {
 

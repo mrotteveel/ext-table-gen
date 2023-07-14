@@ -9,6 +9,13 @@ import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 import nl.lawinegevaar.exttablegen.convert.AbstractParseIntegralNumber;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import nl.lawinegevaar.exttablegen.type.FbBigint;
+import nl.lawinegevaar.exttablegen.type.FbChar;
+import nl.lawinegevaar.exttablegen.type.FbDatatype;
+import nl.lawinegevaar.exttablegen.type.FbEncoding;
+import nl.lawinegevaar.exttablegen.type.FbInt128;
+import nl.lawinegevaar.exttablegen.type.FbInteger;
+import nl.lawinegevaar.exttablegen.type.FbSmallint;
 import nl.lawinegevaar.exttablegen.xmlconfig.*;
 
 import java.io.InputStream;

@@ -5,6 +5,7 @@ package nl.lawinegevaar.exttablegen;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import com.opencsv.validators.RowFunctionValidator;
+import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

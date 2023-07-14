@@ -3,13 +3,19 @@
 package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import nl.lawinegevaar.exttablegen.type.FbBigint;
+import nl.lawinegevaar.exttablegen.type.FbChar;
+import nl.lawinegevaar.exttablegen.type.FbEncoding;
+import nl.lawinegevaar.exttablegen.type.FbInt128;
+import nl.lawinegevaar.exttablegen.type.FbInteger;
+import nl.lawinegevaar.exttablegen.type.FbSmallint;
 
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static nl.lawinegevaar.exttablegen.FbEncoding.ISO8859_1;
+import static nl.lawinegevaar.exttablegen.type.FbEncoding.ISO8859_1;
 
 final class ColumnFixtures {
 

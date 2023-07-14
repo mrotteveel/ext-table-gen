@@ -4,6 +4,7 @@ package nl.lawinegevaar.exttablegen;
 
 import com.opencsv.exceptions.CsvValidationException;
 import com.opencsv.validators.RowValidator;
+import nl.lawinegevaar.exttablegen.type.FbChar;
 
 import java.util.List;
 import java.util.stream.IntStream;

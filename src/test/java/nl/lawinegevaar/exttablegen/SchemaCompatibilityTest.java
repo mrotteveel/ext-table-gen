@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import nl.lawinegevaar.exttablegen.xmlconfig.ExtTableGenConfig;
 import org.junit.jupiter.api.Test;
 

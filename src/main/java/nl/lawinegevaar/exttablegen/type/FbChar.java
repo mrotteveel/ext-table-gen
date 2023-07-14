@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
-package nl.lawinegevaar.exttablegen;
+package nl.lawinegevaar.exttablegen.type;
 
+import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 
 import java.io.IOException;

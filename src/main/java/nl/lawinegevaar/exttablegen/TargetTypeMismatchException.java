@@ -3,6 +3,7 @@
 package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import nl.lawinegevaar.exttablegen.type.FbDatatype;
 
 /**
  * Thrown when target types (e.g. between a {@link FbDatatype} and {@link Converter}) do not match (or are

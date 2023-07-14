@@ -3,6 +3,7 @@
 package nl.lawinegevaar.exttablegen;
 
 import jakarta.xml.bind.JAXBException;
+import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import picocli.CommandLine;
 
 import java.io.IOException;

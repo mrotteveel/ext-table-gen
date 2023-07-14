@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 

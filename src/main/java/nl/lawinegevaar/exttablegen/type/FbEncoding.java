@@ -1,6 +1,6 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
-package nl.lawinegevaar.exttablegen;
+package nl.lawinegevaar.exttablegen.type;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;

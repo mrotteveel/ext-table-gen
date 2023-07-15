@@ -76,7 +76,7 @@ public abstract sealed class AbstractParseIntegralNumber<U extends Number> imple
 
     @Override
     public final String toString() {
-        return converterName() + "[radix=" + radix + ']';
+        return converterName() + "{radix=" + radix + '}';
     }
 
 }

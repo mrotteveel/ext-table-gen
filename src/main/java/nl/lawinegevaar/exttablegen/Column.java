@@ -114,9 +114,9 @@ sealed class Column permits EndColumn {
 
     @Override
     public final String toString() {
-        return getClass().getSimpleName() + "[" +
+        return getClass().getSimpleName() + '{' +
                "name=" + name + ", " +
-               "datatype=" + datatype + ']';
+               "datatype=" + datatype + '}';
     }
 
 }

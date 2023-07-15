@@ -258,3 +258,10 @@ int128,   char_1,   integer,  33
 int128,   char_1,   bigint,   33
 int128,   char_1,   int128,   33
 int128,   char_1,   char_1,   33
+# limited case for DATE
+char_1,   date,     bigint,   3
+char_1,   date,     int128,   3
+char_1,   char_1,   date,     3
+char_1,   date,     bigint,   33
+char_1,   date,     int128,   33
+char_1,   char_1,   date,     33

@@ -61,12 +61,13 @@
 
     <xs:element name="datatype" type="DatatypeType" abstract="true"/>
     <xs:element name="char" type="CharType" substitutionGroup="datatype"/>
-    <xs:element name="smallint" type="SmallintType" substitutionGroup="datatype"/>
-    <xs:element name="integer" type="IntegerType" substitutionGroup="datatype"/>
-    <xs:element name="bigint" type="BigintType" substitutionGroup="datatype"/>
-    <xs:element name="int128" type="Int128Type" substitutionGroup="datatype"/>
+    <xs:element name="smallint" type="DatatypeType" substitutionGroup="datatype"/>
+    <xs:element name="integer" type="DatatypeType" substitutionGroup="datatype"/>
+    <xs:element name="bigint" type="DatatypeType" substitutionGroup="datatype"/>
+    <xs:element name="int128" type="DatatypeType" substitutionGroup="datatype"/>
+    <xs:element name="date" type="DatatypeType" substitutionGroup="datatype"/>
 
-    <xs:complexType name="DatatypeType" abstract="true">
+    <xs:complexType name="DatatypeType">
         <xs:sequence>
             <xs:element name="converter" type="ConverterType" minOccurs="0"/>
         </xs:sequence>
@@ -85,30 +86,6 @@
                 </xs:attribute>
                 <xs:attribute name="encoding" type="encoding" use="required"/>
             </xs:extension>
-        </xs:complexContent>
-    </xs:complexType>
-
-    <xs:complexType name="SmallintType">
-        <xs:complexContent>
-            <xs:extension base="DatatypeType"/>
-        </xs:complexContent>
-    </xs:complexType>
-
-    <xs:complexType name="IntegerType">
-        <xs:complexContent>
-            <xs:extension base="DatatypeType"/>
-        </xs:complexContent>
-    </xs:complexType>
-
-    <xs:complexType name="BigintType">
-        <xs:complexContent>
-            <xs:extension base="DatatypeType"/>
-        </xs:complexContent>
-    </xs:complexType>
-
-    <xs:complexType name="Int128Type">
-        <xs:complexContent>
-            <xs:extension base="DatatypeType"/>
         </xs:complexContent>
     </xs:complexType>
 
@@ -182,6 +159,7 @@
 
     <xs:element name="converterStep" type="ConverterStepType" abstract="true"/>
     <xs:element name="parseIntegralNumber" type="ParseIntegralType" substitutionGroup="converterStep"/>
+    <xs:element name="parseDatetime" type="ParseDatetimeType" substitutionGroup="converterStep"/>
 
     <xs:complexType name="ConverterStepType" abstract="true"/>
 
@@ -196,6 +174,15 @@
                         </xs:restriction>
                     </xs:simpleType>
                 </xs:attribute>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="ParseDatetimeType">
+        <xs:complexContent>
+            <xs:extension base="ConverterStepType">
+                <xs:attribute name="pattern" type="xs:normalizedString" use="required"/>
+                <xs:attribute name="locale" type="xs:language"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

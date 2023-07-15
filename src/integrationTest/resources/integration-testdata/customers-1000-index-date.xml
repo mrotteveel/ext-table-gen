@@ -5,7 +5,7 @@
     <externalTable name="CUSTOMERS" byteOrder="AUTO">
         <columns>
             <column name="Index">
-                <bigint/>
+                <integer/>
             </column>
             <column name="Customer Id">
                 <char length="15" encoding="ISO8859_1"/>
@@ -35,7 +35,7 @@
                 <char length="255" encoding="ISO8859_1"/>
             </column>
             <column name="Subscription Date">
-                <char length="10" encoding="ISO8859_1"/>
+                <date/>
             </column>
             <column name="Website">
                 <char length="100" encoding="ISO8859_1"/>
@@ -47,7 +47,7 @@
     <csvFile path="customers-1000.csv" charset="UTF-8" headerRow="true"/>
     <informational>
         <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'customers-1000.dat' (
-  "Index" bigint,
+  "Index" integer,
   "Customer Id" char(15) character set ISO8859_1,
   "First Name" char(20) character set ISO8859_1,
   "Last Name" char(20) character set ISO8859_1,
@@ -57,7 +57,7 @@
   "Phone 1" char(25) character set ISO8859_1,
   "Phone 2" char(25) character set ISO8859_1,
   "Email" char(255) character set ISO8859_1,
-  "Subscription Date" char(10) character set ISO8859_1,
+  "Subscription Date" date,
   "Website" char(100) character set ISO8859_1
 );
 </ddl>

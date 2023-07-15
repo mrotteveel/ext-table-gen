@@ -4,6 +4,8 @@ package nl.lawinegevaar.exttablegen.convert;
 
 import nl.lawinegevaar.exttablegen.TargetTypeMismatchException;
 
+import java.time.temporal.TemporalAccessor;
+import java.util.Locale;
 import java.util.function.Function;
 
 /**
@@ -157,6 +159,32 @@ public interface Converter<T> {
             case "smallint" -> ParseSmallint.ofRadix(radix);
             default -> throw new IllegalArgumentException("Unsupported type name: " + xmlTypeName);
         };
+    }
+
+    /**
+     * Constructs a converter to parse datetime values to a {@link TemporalAccessor}.
+     *
+     * @param pattern
+     *         pattern for {@link java.time.format.DateTimeFormatter}, or the name of one of the pre-defined patterns
+     * @param locale
+     *         locale in a BCP 47 language tag, or {@code null} to use the default locale
+     * @return converter to parse datetime values
+     */
+    static ParseDatetime parseDatetime(String pattern, String locale) {
+        return parseDatetime(pattern, locale != null ? Locale.forLanguageTag(locale) : null);
+    }
+
+    /**
+     * Constructs a converter to parse datetime values to a {@link TemporalAccessor}.
+     *
+     * @param pattern
+     *         pattern for {@link java.time.format.DateTimeFormatter}, or the name of one of the pre-defined patterns
+     * @param locale
+     *         locale, or {@code null} to use the default locale
+     * @return converter to parse datetime values
+     */
+    static ParseDatetime parseDatetime(String pattern, Locale locale) {
+        return new ParseDatetime(pattern, locale);
     }
 
 }

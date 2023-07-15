@@ -6,6 +6,7 @@
 == Status
 
 * Published: 2023-07-14
+* Updated: 2023-07-15
 * Implemented in: 2.0
 
 == Type
@@ -44,7 +45,7 @@ The default conversion for the integral number data types is equivalent to using
 ** `parseIntegralNumber` -- which will restrict values based on the enclosing type. It has one attribute:
 *** `radix` (optional, defaults to `10`) -- with value in range [2, 36]
 
-Other ADRs will define further converters to add, for example ADR 2023-08 will add the `parseDateTime` converter.
+Other ADRs will define further converters to add, for example ADR 2023-08 will add the `parseDatetime` converter.
 
 Given the design of the XML, it is possible to specify incompatible converters.
 For example, using `parseIntegralNumber` for a `char` column:

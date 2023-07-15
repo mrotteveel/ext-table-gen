@@ -46,7 +46,7 @@
     <tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/>
     <csvFile path="customers-1000.csv" charset="UTF-8" headerRow="true"/>
     <informational>
-        <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'D:\Temp\customers-1000.dat' (
+        <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'customers-1000.dat' (
   "Index" integer,
   "Customer Id" char(15) character set ISO8859_1,
   "First Name" char(20) character set ISO8859_1,

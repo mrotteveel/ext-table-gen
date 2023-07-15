@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.date;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.integralNumber;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_1;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_2;
@@ -53,7 +54,7 @@ class ConfigMapperTest {
         }
     }
 
-    // The following tests in all work on the assumption that round tripping from EtgConfig to XML to EtgConfig should
+    // The following tests all work on the assumption that round tripping from EtgConfig to XML to EtgConfig should
     // produce the same output (except for the TableDerivationMode, which will always be NEVER)
 
     @Test
@@ -121,7 +122,7 @@ class ConfigMapperTest {
 
     @ParameterizedTest
     @ValueSource(strings = { "smallint", "integer", "bigint", "int128" })
-    void columnListWithNonDefaultConverter(String typeName) throws Exception {
+    void columnListIntegersWithNonDefaultConverter(String typeName) throws Exception {
         Column integralNumberColumn = integralNumber("COLUMN_IN", typeName,
                 Converter.parseIntegralNumber(typeName, 16));
         EtgConfig originalConfig = testEtgConfig()
@@ -131,6 +132,18 @@ class ConfigMapperTest {
 
         assertEquals(originalConfig, fromXml);
         assertThat(fromXml, tableConfig(tableColumns(hasItem(integralNumberColumn))));
+    }
+
+    @Test
+    void columnListDateWithNonDefaultConverter() throws Exception {
+        Column dateColumn = date("COLUMN_IN", Converter.parseDatetime("dd-MM-yyyy", "nl-NL"));
+        EtgConfig originalConfig = testEtgConfig()
+                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, dateColumn, COLUMN_2)));
+
+        EtgConfig fromXml = roundTripConfig(originalConfig);
+
+        assertEquals(originalConfig, fromXml);
+        assertThat(fromXml, tableConfig(tableColumns(hasItem(dateColumn))));
     }
 
     @Test

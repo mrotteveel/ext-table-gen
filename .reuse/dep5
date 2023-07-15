@@ -46,3 +46,7 @@ License: LicenseRef-Datablist
 Files: src/integrationTest/resources/integration-testdata/id-values-*.csv
 Copyright: 2023 Mark Rotteveel
 License: Apache-2.0
+
+Files: src/integrationTest/resources/integration-testdata/date-values-*.csv
+Copyright: 2023 Mark Rotteveel
+License: Apache-2.0

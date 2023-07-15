@@ -9,6 +9,7 @@ import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.type.FbBigint;
 import nl.lawinegevaar.exttablegen.type.FbChar;
 import nl.lawinegevaar.exttablegen.type.FbDatatype;
+import nl.lawinegevaar.exttablegen.type.FbDate;
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import nl.lawinegevaar.exttablegen.type.FbInt128;
 import nl.lawinegevaar.exttablegen.type.FbInteger;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -37,7 +39,9 @@ import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.JDBCType;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -45,6 +49,8 @@ import java.util.regex.Pattern;
 
 import static java.lang.System.Logger.Level.WARNING;
 import static java.util.Objects.requireNonNull;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.col;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.date;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.integralNumber;
 import static nl.lawinegevaar.exttablegen.IntegrationTestProperties.externalTableFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,13 +64,13 @@ class ExtTableIntegrationTests {
     private static final String TEST_DATA_RESOURCE_ROOT = "/integration-testdata/";
     private static final String CUSTOMERS_1000_PREFIX = "customers-1000";
     private static final String CUSTOMERS_TABLE_NAME = "CUSTOMERS";
-    private static final String CUSTOMERS_1000_RESOURCE = TEST_DATA_RESOURCE_ROOT + csvFilename(CUSTOMERS_1000_PREFIX);
     private static final String ID_VALUES_PREFIX = "id-values";
     private static final String ID_VALUES_DEC_PREFIX = ID_VALUES_PREFIX + "-dec";
-    private static final String ID_VALUES_DEC_RESOURCE = TEST_DATA_RESOURCE_ROOT + csvFilename(ID_VALUES_DEC_PREFIX);
     private static final String ID_VALUES_HEX_PREFIX = ID_VALUES_PREFIX + "-hex";
-    private static final String ID_VALUES_HEX_RESOURCE = TEST_DATA_RESOURCE_ROOT + csvFilename(ID_VALUES_HEX_PREFIX);
     private static final int ID_VALUES_ROW_COUNT = 18;
+    private static final String DATE_VALUES_PREFIX = "date-values";
+    private static final String DATE_VALUES_BASELINE_PREFIX = DATE_VALUES_PREFIX + "-baseline";
+    private static final int DATE_VALUES_ROW_COUNT = 5;
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -77,6 +83,7 @@ class ExtTableIntegrationTests {
     private static Path customers1000CsvFile;
     private static Path idValueDecCsvFile;
     private static Path idValueHexCsvFile;
+    private static Path dateValuesBaselineCsvFile;
     private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
@@ -90,9 +97,14 @@ class ExtTableIntegrationTests {
 
     @BeforeAll
     static void copyTestDataFromResources() throws Exception {
-        customers1000CsvFile = copyForAllResource(CUSTOMERS_1000_RESOURCE, csvFilename(CUSTOMERS_1000_PREFIX));
-        idValueDecCsvFile = copyForAllResource(ID_VALUES_DEC_RESOURCE, csvFilename(ID_VALUES_DEC_PREFIX));
-        idValueHexCsvFile = copyForAllResource(ID_VALUES_HEX_RESOURCE, csvFilename(ID_VALUES_HEX_PREFIX));
+        customers1000CsvFile = copyForAllResource(
+                testDataResource(csvFilename(CUSTOMERS_1000_PREFIX)), csvFilename(CUSTOMERS_1000_PREFIX));
+        idValueDecCsvFile = copyForAllResource(
+                testDataResource(csvFilename(ID_VALUES_DEC_PREFIX)), csvFilename(ID_VALUES_DEC_PREFIX));
+        idValueHexCsvFile = copyForAllResource(
+                testDataResource(csvFilename(ID_VALUES_HEX_PREFIX)), csvFilename(ID_VALUES_HEX_PREFIX));
+        dateValuesBaselineCsvFile = copyForAllResource(
+                testDataResource(csvFilename(DATE_VALUES_BASELINE_PREFIX)), csvFilename(DATE_VALUES_BASELINE_PREFIX));
     }
 
     @AfterAll
@@ -130,55 +142,38 @@ class ExtTableIntegrationTests {
 
     @ParameterizedTest
     @EnumSource(EndColumn.Type.class)
-    void compareOriginalDataWithDataFromFirebird(EndColumn.Type endColumnType) throws Exception {
+    void compareOriginalDataWithDataFromFirebird(EndColumn.Type endColumnType) throws Throwable {
         Path tableFile = registerForCleanup(externalTableFile(tableFilename(CUSTOMERS_1000_PREFIX)));
         Path configFile = forEachTempDir.resolve(configFilename(CUSTOMERS_1000_PREFIX));
         createExternalTableFile(CUSTOMERS_TABLE_NAME, customers1000CsvFile, tableFile, endColumnType, configFile);
-        String ddl = getDdl(configFile);
 
-        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
-             var statement = connection.createStatement()) {
-            statement.execute(ddl);
-
-            try (var rs = statement.executeQuery(
-                    "select * from " + statement.enquoteIdentifier(CUSTOMERS_TABLE_NAME, true))) {
-                assertResultSet(customers1000CsvFile, 1000, rs, endColumnType);
-            }
-        }
+        assertExternalTable(configFile, CUSTOMERS_TABLE_NAME, customers1000CsvFile, 1000, endColumnType);
     }
 
     @ParameterizedTest
     @CsvSource(useHeadersInDisplayName = true, textBlock =
             """
-            configName,                        expectedJdbcType
-            customers-1000-index-smallint.xml, SMALLINT
-            customers-1000-index-integer.xml,  INTEGER
-            customers-1000-index-bigint.xml,   BIGINT
-            customers-1000-index-int128.xml,   NUMERIC
+            configName,                        columnToCheck, expectedJdbcType
+            customers-1000-index-smallint.xml, 1,             SMALLINT
+            customers-1000-index-integer.xml,  1,             INTEGER
+            customers-1000-index-bigint.xml,   1,             BIGINT
+            customers-1000-index-int128.xml,   1,             NUMERIC
+            customers-1000-index-date.xml,     11,            DATE
             """)
-    void integralNumberIntegrationTest_simple(String configName, JDBCType expectedJdbcType) throws Exception {
-        Path configIn = copyForEachResource(TEST_DATA_RESOURCE_ROOT + configName, configName);
+    void testCustomersCustomTypes_simple(String configName, int columnToCheck, JDBCType expectedJdbcType)
+            throws Throwable {
+        Path configIn = copyForEachResource(testDataResource(configName), configName);
         Path tableFile = registerForCleanup(externalTableFile(tableFilename(CUSTOMERS_1000_PREFIX)));
         Path configOutFile = forEachTempDir.resolve(configFilename(CUSTOMERS_1000_PREFIX));
         createExternalTableFileFromExistingConfig(configIn, CUSTOMERS_TABLE_NAME,
                 customers1000CsvFile, tableFile, configOutFile);
-        String ddl = getDdl(configOutFile);
 
-        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
-             var statement = connection.createStatement()) {
-            statement.execute(ddl);
-
-            try (var rs = statement.executeQuery(
-                    "select * from " + statement.enquoteIdentifier(CUSTOMERS_TABLE_NAME, true))) {
-                var rsmd = rs.getMetaData();
-                assertEquals(expectedJdbcType.getVendorTypeNumber(), rsmd.getColumnType(1));
-                assertResultSet(customers1000CsvFile, 1000, rs, EndColumn.Type.NONE);
-            }
-        }
+        assertExternalTable(configOutFile, CUSTOMERS_TABLE_NAME, customers1000CsvFile, 1000, EndColumn.Type.NONE,
+                rsmd -> assertEquals(expectedJdbcType.getVendorTypeNumber(), rsmd.getColumnType(columnToCheck)));
     }
 
     @Test
-    void integralNumberIntegrationTest_boundaries() throws Exception {
+    void integralNumberIntegrationTest_boundaries() throws Throwable {
         Path csvFile = forEachTempDir.resolve("integral-boundary.csv");
         Path tableFile = registerForCleanup(externalTableFile("integral-boundary.dat"));
         Files.writeString(csvFile,
@@ -206,22 +201,14 @@ class ExtTableIntegrationTests {
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
-        String ddl = getDdl(configFile);
 
-        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
-             var statement = connection.createStatement()) {
-            statement.execute(ddl);
-
-            try (var rs = statement.executeQuery(
-                    "select * from " + statement.enquoteIdentifier(tableName, true))) {
-                assertResultSet(csvFile, 5, rs, EndColumn.Type.NONE);
-            }
-        }
+        assertExternalTable(configFile, tableName, csvFile, 5, EndColumn.Type.NONE);
     }
 
+    // TODO Consider pruning testcases to reduce runtime
     @ParameterizedTest
     @CsvFileSource(resources = "/integration-testcases/verify-alignment-testcases.csv", useHeadersInDisplayName = true)
-    void verifyAlignment(String firstType, String secondType, String thirdType, int totalColumnCount) throws Exception {
+    void verifyAlignment(String firstType, String secondType, String thirdType, int totalColumnCount) throws Throwable {
         var columns = new ArrayList<Column>(Math.max(3, totalColumnCount));
         columns.add(createColumn("COLUMN_1", firstType));
         columns.add(createColumn("COLUMN_2", secondType));
@@ -243,38 +230,19 @@ class ExtTableIntegrationTests {
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
-        String ddl = getDdl(configFile);
 
-        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
-             var statement = connection.createStatement()) {
-            statement.execute(ddl);
-
-            try (var rs = statement.executeQuery(
-                    "select * from " + statement.enquoteIdentifier(tableName, true))) {
-                assertResultSet(csvFile, rowCount, rs, EndColumn.Type.NONE);
-            }
-        }
+        assertExternalTable(configFile, tableName, csvFile, rowCount, EndColumn.Type.NONE);
     }
 
     @Test
-    void testWithExplicitConverter_fromFile() throws Exception {
-        Path configFile = copyForEachResource(
-                TEST_DATA_RESOURCE_ROOT + configFilename(ID_VALUES_HEX_PREFIX + "-integer"),
+    void testWithExplicitConverter_fromFile() throws Throwable {
+        Path configFile = copyForEachResource(testDataResource(configFilename(ID_VALUES_HEX_PREFIX + "-integer")),
                 configFilename(ID_VALUES_HEX_PREFIX + "-integer"));
         Path tableFile = registerForCleanup(externalTableFile(tableFilename(ID_VALUES_PREFIX)));
         createExternalTableFileFromExistingConfig(configFile, ID_VALUES_PREFIX, idValueHexCsvFile, tableFile, configFile);
-        String ddl = getDdl(configFile);
 
-        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
-             var statement = connection.createStatement()) {
-            statement.execute(ddl);
-
-            try (var rs = statement.executeQuery(
-                    "select * from " + statement.enquoteIdentifier(ID_VALUES_PREFIX, true))) {
-                // NOTE: We're using the "dec" value for comparison, because we compare as decimal values
-                assertResultSet(idValueDecCsvFile, ID_VALUES_ROW_COUNT, rs, EndColumn.Type.NONE);
-            }
-        }
+        // NOTE: We're using the "dec" value for comparison, because we compare as decimal values
+        assertExternalTable(configFile, ID_VALUES_PREFIX, idValueDecCsvFile, ID_VALUES_ROW_COUNT, EndColumn.Type.NONE);
     }
 
     @ParameterizedTest
@@ -290,11 +258,10 @@ class ExtTableIntegrationTests {
             smallint, 10
             smallint, 16
             """)
-    void testWithExplicitConverter_parseIntegral(String typeName, int radix) throws Exception {
+    void testWithExplicitConverter_parseIntegral(String typeName, int radix) throws Throwable {
         assert radix == 10 || radix == 16 : "Test only works for radix 10 or 16 (due to available test data)";
         Path csvFile = radix == 10 ? idValueDecCsvFile : idValueHexCsvFile;
-        Converter<?> converter = Converter.parseIntegralNumber(typeName, radix);
-        var columns = List.of(integralNumber("Id", typeName, converter));
+        var columns = List.of(integralNumber("Id", typeName, Converter.parseIntegralNumber(typeName, radix)));
         Path tableFile = registerForCleanup(externalTableFile(tableFilename(ID_VALUES_PREFIX)));
         Path configFile = forEachTempDir.resolve(configFilename(ID_VALUES_PREFIX));
         try (var out = Files.newOutputStream(configFile)) {
@@ -305,18 +272,37 @@ class ExtTableIntegrationTests {
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, ID_VALUES_PREFIX, csvFile, tableFile, configFile);
-        String ddl = getDdl(configFile);
 
-        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
-             var statement = connection.createStatement()) {
-            statement.execute(ddl);
+        // NOTE: We're using the "dec" value for comparison, because we compare as decimal values
+        assertExternalTable(configFile, ID_VALUES_PREFIX, idValueDecCsvFile, ID_VALUES_ROW_COUNT, EndColumn.Type.NONE);
+    }
 
-            try (var rs = statement.executeQuery(
-                    "select * from " + statement.enquoteIdentifier(ID_VALUES_PREFIX, true))) {
-                // NOTE: We're using the "dec" value for comparison, because we compare as decimal values
-                assertResultSet(idValueDecCsvFile, ID_VALUES_ROW_COUNT, rs, EndColumn.Type.NONE);
-            }
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            pattern,     locale
+            dd-MM-yyyy,
+            d MMMM yyyy, nl-NL
+            d MMMM yyyy, en
+            """)
+    void testWithExplicitConverter_parseDatetime_date(String pattern, String locale) throws Throwable {
+        String testName = DATE_VALUES_PREFIX + '-' + pattern.replace(' ', '_') + (locale != null ? '-' + locale : "");
+        String testCsvFilename = csvFilename(testName);
+        Path csvFile = copyForEachResource(testDataResource(testCsvFilename), testCsvFilename);
+        var columns = List.of(date("Date", Converter.parseDatetime(pattern, locale)));
+        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        Path configFile = forEachTempDir.resolve(configFilename(testName));
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    new TableConfig(DATE_VALUES_PREFIX, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    TableDerivationConfig.getDefault(),
+                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+            configMapper.write(etgConfig, out);
         }
+        createExternalTableFileFromExistingConfig(configFile, DATE_VALUES_PREFIX, csvFile, tableFile, configFile);
+
+        assertExternalTable(configFile, DATE_VALUES_PREFIX, dateValuesBaselineCsvFile, DATE_VALUES_ROW_COUNT,
+                EndColumn.Type.NONE);
     }
 
     // TODO Maybe some or all of the following methods should be moved to test-common
@@ -327,7 +313,10 @@ class ExtTableIntegrationTests {
         }
         Matcher charMatcher = Holder.CHAR_PATTERN.matcher(columnType);
         if (charMatcher.matches()) {
-            return ColumnFixtures.col(name, Integer.parseInt(charMatcher.group(1)));
+            return col(name, Integer.parseInt(charMatcher.group(1)));
+        }
+        if ("date".equals(columnType)) {
+            return date(name, null);
         }
         return integralNumber(name, columnType);
     }
@@ -379,6 +368,8 @@ class ExtTableIntegrationTests {
             return Integer.toString((int) value);
         } else if (datatype instanceof FbBigint || datatype instanceof FbInt128) {
             return Long.toString(value);
+        } else if (datatype instanceof FbDate) {
+            return LocalDate.now().plusDays(value).toString();
         } else {
             throw new IllegalArgumentException("Unsupported datatype: " + datatype.getClass().getSimpleName());
         }
@@ -419,8 +410,31 @@ class ExtTableIntegrationTests {
         }
     }
 
-    private void assertResultSet(Path csvFile, int expectedRowCount, ResultSet rs, EndColumn.Type endColumnType)
-            throws Exception {
+    private void assertExternalTable(Path configFile, String tableName, Path expectedDataCsvFile, int expectedRowCount,
+            EndColumn.Type expectedEndColumnType) throws Throwable {
+        assertExternalTable(configFile, tableName, expectedDataCsvFile, expectedRowCount, expectedEndColumnType,
+                rsmd -> {});
+    }
+
+    private void assertExternalTable(Path configFile, String tableName, Path expectedDataCsvFile, int expectedRowCount,
+            EndColumn.Type expectedEndColumnType, ThrowingConsumer<ResultSetMetaData> resultSetMetaDataAssertions)
+            throws Throwable {
+        String ddl = getDdl(configFile);
+        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
+             var statement = connection.createStatement()) {
+            statement.execute(ddl);
+
+            try (var rs = statement.executeQuery(
+                    "select * from " + statement.enquoteIdentifier(tableName, true))) {
+                resultSetMetaDataAssertions.accept(rs.getMetaData());
+                // NOTE: We're using the "dec" value for comparison, because we compare as decimal values
+                assertResultSet(expectedDataCsvFile, expectedRowCount, rs, expectedEndColumnType);
+            }
+        }
+    }
+
+    private void assertResultSet(Path expectedDataCsvFile, int expectedRowCount, ResultSet rs,
+            EndColumn.Type endColumnType) throws Exception {
         final int rsColumnCount = rs.getMetaData().getColumnCount();
         final int expectedCsvColumnCount = endColumnType == EndColumn.Type.NONE ? rsColumnCount : rsColumnCount - 1;
         final String expectedEndColumnValue = switch (endColumnType) {
@@ -429,7 +443,7 @@ class ExtTableIntegrationTests {
             case NONE -> null;
         };
 
-        var csvFileDriver = new CsvFile(InputResource.of(csvFile), new CsvFile.Config(StandardCharsets.UTF_8, 0, true));
+        var csvFileDriver = new CsvFile(InputResource.of(expectedDataCsvFile), new CsvFile.Config(StandardCharsets.UTF_8, 0, true));
         try {
             var resultSetVsCsvValidator = new AbstractRowProcessor() {
 
@@ -486,6 +500,10 @@ class ExtTableIntegrationTests {
             Files.copy(in, destinationPath);
             return destinationPath;
         }
+    }
+
+    private static String testDataResource(String filename) {
+        return TEST_DATA_RESOURCE_ROOT + filename;
     }
 
     private static String csvFilename(String prefix) {

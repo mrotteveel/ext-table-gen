@@ -21,7 +21,7 @@ import static java.util.Objects.requireNonNullElse;
  * @since 2
  */
 public sealed abstract class AbstractFbDatatype<T, C extends Converter<T>> implements FbDatatype<T>
-        permits FbBigint, FbChar, FbInt128, FbInteger, FbSmallint {
+        permits FbBigint, FbChar, FbDate, FbInt128, FbInteger, FbSmallint {
 
     private final Class<T> targetType;
     // The configured converter (can be null)
@@ -101,4 +101,10 @@ public sealed abstract class AbstractFbDatatype<T, C extends Converter<T>> imple
         return Objects.equals(this.converter, converter);
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '{' +
+               "converter=" + converter +
+               '}';
+    }
 }

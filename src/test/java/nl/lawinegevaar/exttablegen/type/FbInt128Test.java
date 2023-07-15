@@ -29,7 +29,7 @@ class FbInt128Test {
     @ParameterizedTest
     @MethodSource("inRangeValues")
     void testWriteValue(String bigIntegerString) throws Exception {
-        BigInteger expectedValue = new BigInteger(bigIntegerString);
+        var expectedValue = new BigInteger(bigIntegerString);
 
         assertEquals(expectedValue, writeAndGetValue(bigIntegerString));
     }

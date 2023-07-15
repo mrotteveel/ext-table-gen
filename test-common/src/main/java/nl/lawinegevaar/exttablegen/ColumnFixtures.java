@@ -5,6 +5,7 @@ package nl.lawinegevaar.exttablegen;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.type.FbBigint;
 import nl.lawinegevaar.exttablegen.type.FbChar;
+import nl.lawinegevaar.exttablegen.type.FbDate;
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import nl.lawinegevaar.exttablegen.type.FbInt128;
 import nl.lawinegevaar.exttablegen.type.FbInteger;
@@ -120,6 +121,19 @@ final class ColumnFixtures {
      */
     static Column int128(String name, Converter<?> converter) {
         return new Column(name, new FbInt128().withConverterChecked(converter));
+    }
+
+    /**
+     * Creates a column with {@code name}, data type {@code FbDate} and {@code converter}.
+     *
+     * @param name
+     *         name of the column
+     * @param converter
+     *         converter, or {@code null} for default
+     * @return column
+     */
+    static Column date(String name, Converter<?> converter) {
+        return new Column(name, new FbDate().withConverterChecked(converter));
     }
 
     /**

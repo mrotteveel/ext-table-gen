@@ -1,13 +1,12 @@
 // SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
-package nl.lawinegevaar.exttablegen;
+package nl.lawinegevaar.exttablegen.convert;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoField;
 import java.time.temporal.JulianFields;
 import java.time.temporal.TemporalAccessor;
 

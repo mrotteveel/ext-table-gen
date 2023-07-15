@@ -326,8 +326,9 @@ At this time, _ext-table-gen_ supports the following column data types:
 
 * <<ref-xml-bigint>>
 * <<ref-xml-char>>
-* <<ref-xml-integer>>
+* <<ref-xml-date>>
 * <<ref-xml-int128>>
+* <<ref-xml-integer>>
 * <<ref-xml-smallint>>
 
 [float#ref-xml-bigint]
@@ -358,10 +359,13 @@ The XSD uses an enum-type, `encoding`, with supported names.
 .Elements
 * <<ref-xml-converter>> -- optional
 
-[float#ref-xml-integer]
-====== `integer`
+[float#ref-xml-date]
+====== `date`
 
-The `integer` elements represents the Firebird datatype `INTEGER`.
+The `date` element represents the Firebird datatype `DATE`.
+The Firebird `DATE` type only accepts values between 0001-01-1 and 9999-12-31.
+
+The default conversion parses the string using the ISO 8601 calendar date format (pattern `yyyy-MM-dd`, or named pattern `ISO_LOCAL_DATE`).
 
 .Attributes
 None
@@ -372,7 +376,18 @@ None
 [float#ref-xml-int128]
 ====== `int128`
 
-The `int128` elements represents the Firebird datatype `INT128`.
+The `int128` element represents the Firebird datatype `INT128`.
+
+.Attributes
+None
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
+[float#ref-xml-integer]
+====== `integer`
+
+The `integer` element represents the Firebird datatype `INTEGER`.
 
 .Attributes
 None
@@ -383,7 +398,7 @@ None
 [float#ref-xml-smallint]
 ====== `smallint`
 
-The `smallint` elements represents the Firebird datatype `SMALLINT`.
+The `smallint` element represents the Firebird datatype `SMALLINT`.
 
 .Attributes
 None
@@ -404,6 +419,7 @@ None
 * One of the _converter steps_ listed below -- required
 
 .Available converter steps
+* <<ref-xml-parsedatetime>>
 * <<ref-xml-parseintegralnumber>>
 
 [NOTE]
@@ -413,6 +429,26 @@ That is currently not supported, but it is something that may be introduced in a
 
 In the actual program code, a _converter step_ is also called a _converter_, but in this manual we wanted to prevent overloading the term as it already refers to the `converter` element.
 ====
+
+[float#ref-xml-parsedatetime]
+====== `parseDatetime`
+
+Parses a string using the specified pattern and locale to a datetime value.
+
+This converter step is only valid in <<ref-xml-date>>.
+
+.Attributes
+[horizontal]
+`pattern`::
+Datetime pattern, or one of the pre-defined formatter names (required)
++
+The pattern format uses the syntax described in https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html[`java.time.format.DateTimeFormatter`^].
+The pre-defined formatter names are the constants listed under _Field Summary_ in https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#field-summary[`DateTimeFormatter`^].
+
+`locale`::
+Locale as a https://www.ietf.org/rfc/bcp/bcp47.txt[BCP 47^] language tag (optional)
++
+Generally only relevant to parse datetime strings with localized names for months and days.
 
 [float#ref-xml-parseintegralnumber]
 ====== `parseIntegralNumber`

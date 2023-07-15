@@ -9,9 +9,11 @@ import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 import nl.lawinegevaar.exttablegen.convert.AbstractParseIntegralNumber;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import nl.lawinegevaar.exttablegen.convert.ParseDatetime;
 import nl.lawinegevaar.exttablegen.type.FbBigint;
 import nl.lawinegevaar.exttablegen.type.FbChar;
 import nl.lawinegevaar.exttablegen.type.FbDatatype;
+import nl.lawinegevaar.exttablegen.type.FbDate;
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import nl.lawinegevaar.exttablegen.type.FbInt128;
 import nl.lawinegevaar.exttablegen.type.FbInteger;
@@ -171,37 +173,50 @@ final class ConfigMapper {
     }
 
     private JAXBElement<? extends DatatypeType> createXmlDataTypeElement(FbDatatype<?> datatype) {
-        if (datatype instanceof FbChar fbChar) {
-            CharType charType = factory.createCharType();
-            charType.setLength(fbChar.length());
-            charType.setEncoding(fbChar.encoding().firebirdName());
-            return factory.createChar(charType);
-        } else if (datatype instanceof FbInteger) {
-            return factory.createInteger(factory.createIntegerType());
-        } else if (datatype instanceof FbBigint) {
-            return factory.createBigint(factory.createBigintType());
-        } else if (datatype instanceof FbSmallint) {
-            return factory.createSmallint(factory.createSmallintType());
-        } else if (datatype instanceof FbInt128) {
-            return factory.createInt128(factory.createInt128Type());
-        } else {
-            throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
-        }
+        return switch (datatype.getClass().getSimpleName()) {
+            case "FbChar" -> {
+                FbChar fbChar = (FbChar) datatype;
+                CharType charType = factory.createCharType();
+                charType.setLength(fbChar.length());
+                charType.setEncoding(fbChar.encoding().firebirdName());
+                yield factory.createChar(charType);
+            }
+            case "FbInteger" -> factory.createInteger(factory.createDatatypeType());
+            case "FbBigint" -> factory.createBigint(factory.createDatatypeType());
+            case "FbSmallint" -> factory.createSmallint(factory.createDatatypeType());
+            case "FbInt128" -> factory.createInt128(factory.createDatatypeType());
+            case "FbDate" -> factory.createDate(factory.createDatatypeType());
+            default ->
+                    throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
+        };
     }
 
     private ConverterType toXmlConverterType(Converter<?> converter) {
         String converterName = converter.converterName();
-        JAXBElement<? extends ConverterStepType> stepType;
-        if (converter instanceof AbstractParseIntegralNumber<?> integralNumberConverter) {
-            ParseIntegralType parseIntegralType = factory.createParseIntegralType();
-            parseIntegralType.setRadix(integralNumberConverter.radix());
-            stepType = factory.createParseIntegralNumber(parseIntegralType);
-        } else {
-            throw new InvalidConfigurationException("Unsupported converter: " + converterName);
+        try {
+            JAXBElement<? extends ConverterStepType> stepType = switch (converterName) {
+                case "parseIntegralNumber" -> {
+                    ParseIntegralType parseIntegralType = factory.createParseIntegralType();
+                    parseIntegralType.setRadix(((AbstractParseIntegralNumber<?>) converter).radix());
+                    yield factory.createParseIntegralNumber(parseIntegralType);
+                }
+                case "parseDatetime" -> {
+                    ParseDatetimeType parseDatetimeType = factory.createParseDatetimeType();
+                    ParseDatetime parseDatetime = (ParseDatetime) converter;
+                    parseDatetimeType.setPattern(parseDatetime.pattern());
+                    parseDatetime.locale().ifPresent(locale -> parseDatetimeType.setLocale(locale.toLanguageTag()));
+                    yield factory.createParseDatetime(parseDatetimeType);
+                }
+                default -> throw new InvalidConfigurationException("Unsupported converter: " + converterName);
+            };
+            ConverterType converterType = factory.createConverterType();
+            converterType.setConverterStep(stepType);
+            return converterType;
+        } catch (InvalidConfigurationException e) {
+            throw e;
+        } catch (RuntimeException e) {
+            throw new InvalidConfigurationException("Could not create XML ConverterType for " + converterName, e);
         }
-        ConverterType converterType = factory.createConverterType();
-        converterType.setConverterStep(stepType);
-        return converterType;
     }
 
     private EndColumnType toXmlEndColumnType(EndColumn endColumn) {
@@ -286,19 +301,19 @@ final class ConfigMapper {
     }
 
     private static FbDatatype<?> fromXmlDatatype(JAXBElement<? extends DatatypeType> datatype) {
-        DatatypeType datatypeType = datatype.getValue();
-        if (datatypeType instanceof CharType charType) {
-            return new FbChar(charType.getLength(), FbEncoding.forName(charType.getEncoding()));
-        } else if (datatypeType instanceof IntegerType) {
-            return new FbInteger();
-        } else if (datatypeType instanceof BigintType) {
-            return new FbBigint();
-        } else if (datatypeType instanceof SmallintType) {
-            return new FbSmallint();
-        } else if (datatypeType instanceof Int128Type) {
-            return new FbInt128();
-        }
-        throw new InvalidConfigurationException("Unsupported DatatypeType: " + datatypeType.getClass().getName());
+        return switch (datatype.getName().getLocalPart()) {
+            case "char" -> {
+                CharType charType = (CharType) datatype.getValue();
+                yield new FbChar(charType.getLength(), FbEncoding.forName(charType.getEncoding()));
+            }
+            case "integer" -> new FbInteger();
+            case "bigint" -> new FbBigint();
+            case "smallint" -> new FbSmallint();
+            case "int128" -> new FbInt128();
+            case "date" -> new FbDate();
+            default -> throw new InvalidConfigurationException(
+                    "Unsupported DatatypeType: " + datatype.getDeclaredType().getName());
+        };
     }
 
     private static Converter<?> fromXmlConverter(JAXBElement<? extends DatatypeType> datatype) {
@@ -308,6 +323,8 @@ final class ConfigMapper {
         ConverterStepType converterStep = converterStepElement.getValue();
         if (converterStep instanceof ParseIntegralType parseIntegralType) {
             return fromXmlParseIntegralType(parseIntegralType, datatype);
+        } else if (converterStep instanceof ParseDatetimeType parseDatetimeType) {
+            return Converter.parseDatetime(parseDatetimeType.getPattern(), parseDatetimeType.getLocale());
         } else {
             throw new InvalidConfigurationException("Unsupported element: " + converterStepElement.getName());
         }
@@ -315,9 +332,8 @@ final class ConfigMapper {
 
     private static Converter<?> fromXmlParseIntegralType(ParseIntegralType parseIntegralType,
             JAXBElement<? extends DatatypeType> datatype) {
-        int radix = parseIntegralType.getRadix();
         try {
-            return Converter.parseIntegralNumber(datatype.getName().getLocalPart(), radix);
+            return Converter.parseIntegralNumber(datatype.getName().getLocalPart(), parseIntegralType.getRadix());
         } catch (RuntimeException e) {
             throw new InvalidConfigurationException(
                     "Unsupported ParseIntegralType data type: " + datatype.getName(), e);

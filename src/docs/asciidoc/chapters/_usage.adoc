@@ -329,7 +329,28 @@ This default conversion is not always suitable.
 For example, a CSV with hexadecimal string values for integers cannot be read as a `integer`, because the default conversion uses radix 10.
 
 To address this, the data type elements in the configuration have an optional element, <<ref-xml-converter>>, to specify a conversion using a _converter step_.
-Currently, there is only one _converter step_, <<ref-xml-parseintegralnumber>>, which can be used to specify a different radix for converting CSV values.
+We'll provide examples for each _converter step_ below.
+
+[#usage-config-parsedatetime]
+==== `parseDatetime`
+
+The converter step <<ref-xml-parsedatetime>> can be used to specify a different pattern and locale for converting CSV values to datetime values.
+
+For example, to convert a date in `d MMMM yyyy` format in Dutch (e.g. `15 juli 2023`), use the following data type definition:
+
+[source,xml]
+----
+<date>
+    <converter>
+        <parseDatetime pattern="d MMMM yyyy" locale="nl-NL"/>
+    </converter>
+</date>
+----
+
+[#usage-config-parseintegralnumber]
+==== `parseIntegralNumber`
+
+The converter step <<ref-xml-parseintegralnumber>> can be used to specify a different radix for converting CSV values to integral numbers.
 
 For example, to convert integer values in radix 16 instead of radix 10, use the following data type definition:
 
@@ -341,6 +362,8 @@ For example, to convert integer values in radix 16 instead of radix 10, use the 
     </converter>
 </integer>
 ----
+
+The allowed range of values is restricted by the enclosing data type.
 
 [#usage-workflow]
 == Recommended workflow

@@ -38,7 +38,10 @@ class ParseDatetimeTest {
             pattern,                 languageTag, input,               expectedLocalDate
             ISO_LOCAL_DATE,          ,            2021-12-13,          2021-12-13
             yyyy-MM-dd,              ,            2021-12-13,          2021-12-13
-            YYYY-'W'ww-e,            ,            2022-W52-7,          2023-01-01
+            # ISO 8601 rules with week starting on Monday
+            YYYY-'W'ww-e,            nl-NL,       2022-W52-7,          2023-01-01
+            # US rules with week starting on Sunday
+            YYYY-'W'ww-e,            en-US,       2022-W52-7,          2022-12-24
             E d MMMM yyyy,           nl-NL,       vr 14 april 2023,    2023-04-14
             E d MMMM yyyy,           en-US,       Fri 14 April 2023,   2023-04-14
             yyyy-MM-dd['T'HH:mm:ss], ,            2021-12-13T00:00:00, 2021-12-13

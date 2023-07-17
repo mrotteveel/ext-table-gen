@@ -1,0 +1,110 @@
+= 2023-09: Supporting Time and Timestamp Without Time Zone Types
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Draft
+* Proposed for: 2.0
+* Depends on: 2023-06, 2023-07, 2023-08
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+In addition to `DATE` (covered by https://github.com/mrotteveel/ext-table-gen/blob/main/devdoc/adr/2023-08-supporting-date-type.adoc[ADR 2023-08]), Firebird supports four other datetime types:
+
+. `TIME [WITHOUT TIME ZONE]` -- the optional `WITHOUT TIME ZONE` fragment was introduced in Firebird 4.0
+. `TIMESTAMP [WITHOUT TIME ZONE]` -- the optional `WITHOUT TIME ZONE` fragment was introduced in Firebird 4.0
+. `TIME WITH TIME ZONE` -- introduced in Firebird 4.0
+. `TIMESTAMP WITH TIME ZONE` -- introduced in Firebird 4.0
+
+This ADR only covers the first two `WITHOUT TIME ZONE` types.
+
+These two types represent time of day or date and time of day, without time zone information.
+In Java, these are best represented by `java.time.LocalTime` and `java.time.LocalDateTime`.
+
+A `TIME` is represented as a 32-bit integer with elapsed "`fractions`" since midnight, where "`fractions`" are a unit of 100 microseconds.
+
+In Jaybird, the time is currently encoded as:
+
+[source,java]
+----
+public static final int FRACTIONS_PER_SECOND = 1000 * FRACTIONS_PER_MILLISECOND;
+public static final int FRACTIONS_PER_MINUTE = 60 * FRACTIONS_PER_SECOND;
+public static final int FRACTIONS_PER_HOUR = 60 * FRACTIONS_PER_MINUTE;
+
+public int getEncodedTime() {
+    return hour * FRACTIONS_PER_HOUR
+           + minute * FRACTIONS_PER_MINUTE
+           + second * FRACTIONS_PER_SECOND
+           + fractions;
+}
+----
+
+Where `fractions` is the number of sub-second fractions.
+The resulting `int` is then encoded as a 32-bit integer (same as the `INTEGER` data type).
+
+It is possible that a simpler calculation can be achieved using a custom `TemporalAccessor` implementation.
+
+Just like `INTEGER`, a `TIME` value is aligned at 4 bytes in the external table file.
+
+A `TIMESTAMP` is a composite type, consisting of a `DATE` part (see ADR 2023-08) and a `TIME` part (see above), and is also aligned at 4 bytes.
+
+The https://en.wikipedia.org/wiki/ISO_8601[ISO 8601] standard defines a number of formats for time and date and time.
+
+For time, the most common ISO 8601 format is the extended time format, which specifies (among others) `Thh:mm:ss.sss` and `hh:mm:ss.sss` (using 24-hours), or in Java `DateTimeFormatter` syntax: `['T']HH:mm:ss.SSS`.
+The 3 digits for fractional seconds here are just illustrative, the standard does not specify exactly how many it should use (for Firebird 4 would be the maximum).
+The `T` is specified in the standard, but -- in our experience -- rarely seen in practice for time-only values.
+
+For datetime, the most common ISO 8601 format is a combination of date and time separated by `T`, or -- in Java `DateTimeFormatter` pattern syntax -- `yyyy-MM-dd'T'HH:mm:ss.SSS`.
+
+The SQL standard defines an alternative of ISO 8601 format with a space instead of a `T`: `yyyy-MM-dd HH:mm:ss.SSS`.
+
+The Java `DateTimeFormatter` predefined instances offer more flexibility than the pattern syntax.
+For example, `DateTimeFormatter.ISO_LOCAL_TIME` allows 0 to 9 digits for fractional seconds, while the pattern format only supports a fixed number (corresponding to the number of `S` in the pattern).
+
+ADR 2023-08 defined the `parseDatetime` element for parsing datetime values, and this can be reused for both `TIME` and `TIMESTAMP`.
+
+== Decision
+
+_ext-table-gen_ will support the `TIME` and `TIMESTAMP` data types.
+These types will only be available by editing the configuration file, they will not be derived automatically by parsing the CSV.
+
+=== `TIME`
+
+In the XML config, the data type `TIME` will be represented by element `time`.
+
+In Java, this data type will be represented by the type `FbTime`.
+For flexibility, the Java type will hava a target type of `java.time.temporal.TemporalAccessor` instead of only `java.time.LocalTime`.
+Requirements may be refined in the future.
+
+The default format used for parsing string values to time will be the ISO 8601 extended time format (`++HH:mm[:ss[.SSSS]]++`, or more specifically `DateTimeFormatter.ISO_LOCAL_TIME`, which allows fraction digits between 0 and 9 instead of a fixed number).
+
+=== `TIMESTAMP`
+
+In the XML config, the data type `TIMESTAMP` will be represented by element `timestamp`.
+
+In Java, this data type will be represented by the type `FbTime`.
+For flexibility, the Java type will hava a target type of `java.time.temporal.TemporalAccessor` instead of only `java.time.LocalDateTime`.
+Requirements may be refined in the future.
+
+The default format used for parsing string values to datetime will be the ISO 8601 combined format of date and extended time format (`++yyyy-MM-dd'T'HH:mm[:ss[.SSSS]]++`, or more specifically `DateTimeFormatter.ISO_LOCAL_DATE_TIME`, which allows fraction digits between 0 and 9 instead of a fixed number).
+
+We'll also define an additional named formatter `SQL_TIMESTAMP`, which supports the SQL `TIMESTAMP` syntax (`++yyyy-MM-dd HH:mm[:ss[.SSSS]]++`), but allowing 0 to 9 digits of fractional seconds (again, Firebird only supports 4, but this offers the most flexibility for ingesting source data).
+
+=== Shared Concerns
+
+Other parsing or conversion options can be configured using the `converter` element of the datatype, following the ADR 2023-07 and 2023-08 design.
+Specifically, configuration of parsing is available via the converter element `parseDatetime`.
+
+== Consequences
+
+The documentation must be updated to explain how to use this new data type, and to describe the configuration changes.
+
+See also previous section for some implementation consequences.
+
+As we cannot detect whether a pattern can fulfill the requirements of a data type, any errors for missing information will only be reported when writing the external table file.

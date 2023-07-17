@@ -1,4 +1,4 @@
-= 2023-06 Supporting Basic Integer Types
+= 2023-06: Supporting Basic Integer Types
 
 // SPDX-FileCopyrightText: 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0

@@ -1,4 +1,4 @@
-= 2023-03 Commandline Design
+= 2023-03: Commandline Design
 
 // SPDX-FileCopyrightText: 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0

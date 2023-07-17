@@ -1,4 +1,4 @@
-= 2023-08 Supporting Date Type
+= 2023-08: Supporting Date Type
 
 // SPDX-FileCopyrightText: 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0

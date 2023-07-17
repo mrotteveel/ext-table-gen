@@ -1,4 +1,4 @@
-= 2023-02 Project Initial Goals
+= 2023-02: Project Initial Goals
 
 // SPDX-FileCopyrightText: 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0

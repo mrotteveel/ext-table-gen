@@ -1,4 +1,4 @@
-= 2023-07 Configuring Value Parsing
+= 2023-07: Configuring Value Parsing
 
 // SPDX-FileCopyrightText: 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0

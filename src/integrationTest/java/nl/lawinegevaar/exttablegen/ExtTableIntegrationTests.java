@@ -9,14 +9,15 @@ import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.type.FbBigint;
 import nl.lawinegevaar.exttablegen.type.FbChar;
 import nl.lawinegevaar.exttablegen.type.FbDatatype;
-import nl.lawinegevaar.exttablegen.type.FbDate;
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import nl.lawinegevaar.exttablegen.type.FbInt128;
 import nl.lawinegevaar.exttablegen.type.FbInteger;
 import nl.lawinegevaar.exttablegen.type.FbSmallint;
+import nl.lawinegevaar.exttablegen.type.FbTime;
 import nl.lawinegevaar.exttablegen.xmlconfig.ExtTableGenConfig;
 import nl.lawinegevaar.exttablegen.xmlconfig.InformationalType;
 import org.firebirdsql.management.FBManager;
+import org.firebirdsql.util.FirebirdSupportInfo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,8 +42,12 @@ import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -52,11 +57,14 @@ import static java.util.Objects.requireNonNull;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.col;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.date;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.integralNumber;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.time;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.timestamp;
 import static nl.lawinegevaar.exttablegen.IntegrationTestProperties.externalTableFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @ExtendWith(RequireIntegrationTestConfigurationCondition.class)
 class ExtTableIntegrationTests {
@@ -71,6 +79,12 @@ class ExtTableIntegrationTests {
     private static final String DATE_VALUES_PREFIX = "date-values";
     private static final String DATE_VALUES_BASELINE_PREFIX = DATE_VALUES_PREFIX + "-baseline";
     private static final int DATE_VALUES_ROW_COUNT = 5;
+    private static final String TIME_VALUES_PREFIX = "time-values";
+    private static final String TIME_VALUES_BASELINE_PREFIX = TIME_VALUES_PREFIX + "-baseline";
+    private static final int TIME_VALUES_ROW_COUNT = 7;
+    private static final String TIMESTAMP_VALUES_PREFIX = "timestamp-values";
+    private static final String TIMESTAMP_VALUES_BASELINE_PREFIX = TIMESTAMP_VALUES_PREFIX + "-baseline";
+    private static final int TIMESTAMP_VALUES_ROW_COUNT = 7;
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -80,10 +94,13 @@ class ExtTableIntegrationTests {
     static Path forAllTempDir;
     @TempDir
     Path forEachTempDir;
+    private static FirebirdSupportInfo firebirdSupportInfo;
     private static Path customers1000CsvFile;
     private static Path idValueDecCsvFile;
     private static Path idValueHexCsvFile;
     private static Path dateValuesBaselineCsvFile;
+    private static Path timeValuesBaselineCsvFile;
+    private static Path timestampValuesBaselineCsvFile;
     private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
@@ -93,6 +110,9 @@ class ExtTableIntegrationTests {
         fbManager.setCreateOnStart(true);
         fbManager.setDropOnStop(true);
         fbManager.start();
+        try (Connection connection = IntegrationTestProperties.createConnection(databasePath)) {
+            firebirdSupportInfo = FirebirdSupportInfo.supportInfoFor(connection);
+        }
     }
 
     @BeforeAll
@@ -105,6 +125,11 @@ class ExtTableIntegrationTests {
                 testDataResource(csvFilename(ID_VALUES_HEX_PREFIX)), csvFilename(ID_VALUES_HEX_PREFIX));
         dateValuesBaselineCsvFile = copyForAllResource(
                 testDataResource(csvFilename(DATE_VALUES_BASELINE_PREFIX)), csvFilename(DATE_VALUES_BASELINE_PREFIX));
+        timeValuesBaselineCsvFile = copyForAllResource(
+                testDataResource(csvFilename(TIME_VALUES_BASELINE_PREFIX)), csvFilename(TIME_VALUES_BASELINE_PREFIX));
+        timestampValuesBaselineCsvFile = copyForAllResource(
+                testDataResource(csvFilename(TIMESTAMP_VALUES_BASELINE_PREFIX)),
+                csvFilename(TIMESTAMP_VALUES_BASELINE_PREFIX));
     }
 
     @AfterAll
@@ -162,6 +187,9 @@ class ExtTableIntegrationTests {
             """)
     void testCustomersCustomTypes_simple(String configName, int columnToCheck, JDBCType expectedJdbcType)
             throws Throwable {
+        if (expectedJdbcType == JDBCType.NUMERIC && configName.contains("int128")) {
+            assumeTrue(firebirdSupportInfo.supportsInt128(), "Test requires INT128 support");
+        }
         Path configIn = copyForEachResource(testDataResource(configName), configName);
         Path tableFile = registerForCleanup(externalTableFile(tableFilename(CUSTOMERS_1000_PREFIX)));
         Path configOutFile = forEachTempDir.resolve(configFilename(CUSTOMERS_1000_PREFIX));
@@ -194,7 +222,8 @@ class ExtTableIntegrationTests {
                                     new Column("smallint", new FbSmallint()),
                                     new Column("integer", new FbInteger()),
                                     new Column("bigint", new FbBigint()),
-                                    new Column("int128", new FbInt128())),
+                                    new Column("int128", firebirdSupportInfo.supportsInt128()
+                                            ? new FbInt128() : new FbChar(40, FbEncoding.ASCII))),
                             new TableFile(tableFile, false), ByteOrderType.AUTO),
                     TableDerivationConfig.getDefault(),
                     new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
@@ -209,6 +238,9 @@ class ExtTableIntegrationTests {
     @ParameterizedTest
     @CsvFileSource(resources = "/integration-testcases/verify-alignment-testcases.csv", useHeadersInDisplayName = true)
     void verifyAlignment(String firstType, String secondType, String thirdType, int totalColumnCount) throws Throwable {
+        if (Arrays.asList(firstType, secondType, thirdType).contains("int128")) {
+            assumeTrue(firebirdSupportInfo.supportsInt128(), "Test requires INT128 support");
+        }
         var columns = new ArrayList<Column>(Math.max(3, totalColumnCount));
         columns.add(createColumn("COLUMN_1", firstType));
         columns.add(createColumn("COLUMN_2", secondType));
@@ -259,6 +291,7 @@ class ExtTableIntegrationTests {
             smallint, 16
             """)
     void testWithExplicitConverter_parseIntegral(String typeName, int radix) throws Throwable {
+        assumeTrue("int128".equals(typeName) && firebirdSupportInfo.supportsInt128(), "Test requires INT128 support");
         assert radix == 10 || radix == 16 : "Test only works for radix 10 or 16 (due to available test data)";
         Path csvFile = radix == 10 ? idValueDecCsvFile : idValueHexCsvFile;
         var columns = List.of(integralNumber("Id", typeName, Converter.parseIntegralNumber(typeName, radix)));
@@ -305,6 +338,65 @@ class ExtTableIntegrationTests {
                 EndColumn.Type.NONE);
     }
 
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            pattern,        locale
+            # NOTE: This pattern has 5 fractional digits, while Firebird only supports 4, the file populates the fifth
+            # digit with 1 to show it is ignored
+            HH.mm.ss.SSSSS,
+            h:mm:ss.SSSS a, en-US
+            """)
+    void testWithExplicitConverter_parseDatetime_time(String pattern, String locale) throws Throwable {
+        String testName = TIME_VALUES_PREFIX + '-' + pattern.replace(' ', '_').replace(':', '_')
+                          + (locale != null ? '-' + locale : "");
+        String testCsvFilename = csvFilename(testName);
+        Path csvFile = copyForEachResource(testDataResource(testCsvFilename), testCsvFilename);
+        var columns = List.of(time("Time", Converter.parseDatetime(pattern, locale)));
+        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        Path configFile = forEachTempDir.resolve(configFilename(testName));
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    new TableConfig(TIME_VALUES_PREFIX, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    TableDerivationConfig.getDefault(),
+                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, TIME_VALUES_PREFIX, csvFile, tableFile, configFile);
+
+        assertExternalTable(configFile, TIME_VALUES_PREFIX, timeValuesBaselineCsvFile, TIME_VALUES_ROW_COUNT,
+                EndColumn.Type.NONE);
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            pattern,                    locale
+            SQL_TIMESTAMP,
+            dd-MM-yyyy[ HH:mm:ss.SSSS],
+            d MMMM yyyy h:mm:ss.SSSS a, en-US
+            """)
+    void testWithExplicitConverter_parseDatetime_timestamp(String pattern, String locale) throws Throwable {
+        String testName = TIMESTAMP_VALUES_PREFIX + '-' + pattern.replace(' ', '_').replace(':', '_')
+                          + (locale != null ? '-' + locale : "");
+        String testCsvFilename = csvFilename(testName);
+        Path csvFile = copyForEachResource(testDataResource(testCsvFilename), testCsvFilename);
+        var columns = List.of(timestamp("Time", Converter.parseDatetime(pattern, locale)));
+        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        Path configFile = forEachTempDir.resolve(configFilename(testName));
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    new TableConfig(TIMESTAMP_VALUES_PREFIX, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    TableDerivationConfig.getDefault(),
+                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, TIMESTAMP_VALUES_PREFIX, csvFile, tableFile, configFile);
+
+        assertExternalTable(configFile, TIMESTAMP_VALUES_PREFIX, timestampValuesBaselineCsvFile,
+                TIMESTAMP_VALUES_ROW_COUNT, EndColumn.Type.NONE);
+    }
+
     // TODO Maybe some or all of the following methods should be moved to test-common
 
     private static Column createColumn(String name, String columnType) {
@@ -315,10 +407,12 @@ class ExtTableIntegrationTests {
         if (charMatcher.matches()) {
             return col(name, Integer.parseInt(charMatcher.group(1)));
         }
-        if ("date".equals(columnType)) {
-            return date(name, null);
-        }
-        return integralNumber(name, columnType);
+        return switch (columnType) {
+            case "date" -> date(name, null);
+            case "time" -> time(name, null);
+            case "timestamp" -> timestamp(name, null);
+            default -> integralNumber(name, columnType);
+        };
     }
 
     private static void generateCsvFile(Path csvFile, List<Column> columns, int rowCount) throws IOException {
@@ -362,17 +456,17 @@ class ExtTableIntegrationTests {
         // We use a negative value, so at least for starting rows the sign bit is set, which makes it easier to detect
         // alignment issues
         long value = -1L * row * colIdx;
-        if (datatype instanceof FbSmallint) {
-            return Short.toString((short) value);
-        } else if (datatype instanceof FbInteger) {
-            return Integer.toString((int) value);
-        } else if (datatype instanceof FbBigint || datatype instanceof FbInt128) {
-            return Long.toString(value);
-        } else if (datatype instanceof FbDate) {
-            return LocalDate.now().plusDays(value).toString();
-        } else {
-            throw new IllegalArgumentException("Unsupported datatype: " + datatype.getClass().getSimpleName());
-        }
+        String typeName = datatype.getClass().getSimpleName();
+        return switch (typeName) {
+            case "FbSmallint" -> Short.toString((short) value);
+            case "FbInteger" -> Integer.toString((int) value);
+            case "FbBigint", "FbInt128" -> Long.toString(value);
+            case "FbDate" -> LocalDate.now().plusDays(value).toString();
+            case "FbTime" -> LocalTime.now().plusSeconds(value).truncatedTo(FbTime.FB_TIME_UNIT).toString();
+            case "FbTimestamp" -> LocalDateTime.now().plusDays(Math.abs(value)).plusSeconds(value)
+                    .truncatedTo(FbTime.FB_TIME_UNIT).toString();
+            default -> throw new IllegalArgumentException("Unsupported datatype: " + typeName);
+        };
     }
 
     private static void createExternalTableFile(String tableName, Path csvFile, Path tableFile,
@@ -443,8 +537,10 @@ class ExtTableIntegrationTests {
             case NONE -> null;
         };
 
-        var csvFileDriver = new CsvFile(InputResource.of(expectedDataCsvFile), new CsvFile.Config(StandardCharsets.UTF_8, 0, true));
+        var csvFileDriver =
+                new CsvFile(InputResource.of(expectedDataCsvFile), new CsvFile.Config(StandardCharsets.UTF_8, 0, true));
         try {
+            ResultSetMetaData rsmd = rs.getMetaData();
             var resultSetVsCsvValidator = new AbstractRowProcessor() {
 
                 int count = 0;
@@ -458,9 +554,29 @@ class ExtTableIntegrationTests {
                                 "column count mismatch between result set row and CSV file row " + row.line());
                         for (int idx = 1; idx <= expectedCsvColumnCount; idx++) {
                             String csvValue = row.get(idx - 1).trim();
-                            String dbValue = rs.getString(idx).trim();
-                            assertEquals(csvValue, dbValue,
-                                    "expected equal trimmed values for CSV file row %d, column %d".formatted(row.line(), idx));
+                            switch (rsmd.getColumnType(idx)) {
+                            case Types.TIME -> {
+                                // Handling of TIME defaults to using java.sql.Time, which doesn't have sub-second
+                                // precision and using LocalTime.toString() results in issues with trailing zeroes
+                                LocalTime dbValue = rs.getObject(idx, LocalTime.class);
+                                assertEquals(LocalTime.parse(csvValue), dbValue,
+                                        "expected equal values for CSV file row %d, column %d"
+                                                .formatted(row.line(), idx));
+                            }
+                            case Types.TIMESTAMP -> {
+                                // java.sql.Timestamp.toString() result in issues with trailing zeroes
+                                LocalDateTime dbValue = rs.getObject(idx, LocalDateTime.class);
+                                assertEquals(LocalDateTime.parse(csvValue), dbValue,
+                                        "expected equal values for CSV file row %d, column %d"
+                                                .formatted(row.line(), idx));
+                            }
+                            default -> {
+                                String dbValue = rs.getString(idx).trim();
+                                assertEquals(csvValue, dbValue,
+                                        "expected equal trimmed values for CSV file row %d, column %d"
+                                                .formatted(row.line(), idx));
+                            }
+                            }
                         }
                         if (expectedEndColumnValue != null) {
                             assertEquals(expectedEndColumnValue, rs.getString(rsColumnCount),
@@ -468,7 +584,7 @@ class ExtTableIntegrationTests {
                         }
                         return ProcessingResult.continueProcessing();
                     } catch (SQLException e) {
-                        throw new AssertionFailedError("Unexpected SQLException", e);
+                        throw new AssertionFailedError("Unexpected SQLException for row " + row, e);
                     }
                 }
             };

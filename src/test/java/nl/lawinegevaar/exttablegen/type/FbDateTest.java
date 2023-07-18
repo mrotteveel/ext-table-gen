@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FbDateTest {
 
-    private static final LocalDate MODIFIED_JULIAN_DATE_EPOCH_ZERO = LocalDate.of(1858, 11, 17);
+    static final LocalDate DATE_ZERO = LocalDate.of(1858, 11, 17);
     
     private static final FbDate dateType = new FbDate();
 
@@ -82,20 +82,20 @@ class FbDateTest {
     @ParameterizedTest
     @NullAndEmptySource
     void testWriteValue_nullOrEmpty(String valueToWrite) throws Exception {
-        assertEquals(MODIFIED_JULIAN_DATE_EPOCH_ZERO, writeAndGetValue(valueToWrite));
-    }
-
-    @Test
-    void testWriteValue_callsNonNullConverter() throws Exception {
-        var converter = Converter.parseDatetime("dd-MM-yyyy", (Locale) null);
-        assertEquals(LocalDate.of(2013, 12, 1), writeAndGetValue("01-12-2013", converter));
+        assertEquals(DATE_ZERO, writeAndGetValue(valueToWrite));
     }
 
     @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
         dateType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
-        assertEquals(MODIFIED_JULIAN_DATE_EPOCH_ZERO, toLocalDate(baos.toByteArray()));
+        assertEquals(DATE_ZERO, toLocalDate(baos.toByteArray()));
+    }
+
+    @Test
+    void testWriteValue_callsNonNullConverter() throws Exception {
+        var converter = Converter.parseDatetime("dd-MM-yyyy", (Locale) null);
+        assertEquals(LocalDate.of(2013, 12, 1), writeAndGetValue("01-12-2013", converter));
     }
 
     @Test

@@ -52,7 +52,7 @@ It is possible that a simpler calculation can be achieved using a custom `Tempor
 
 Just like `INTEGER`, a `TIME` value is aligned at 4 bytes in the external table file.
 
-A `TIMESTAMP` is a composite type, consisting of a `DATE` part (see ADR 2023-08) and a `TIME` part (see above), and is also aligned at 4 bytes.
+A `TIMESTAMP` is a composite type, consisting of a `DATE` part (see ADR 2023-08) and a `TIME` part (see above), and is aligned at 8 bytes.
 
 The https://en.wikipedia.org/wiki/ISO_8601[ISO 8601] standard defines a number of formats for time and date and time.
 

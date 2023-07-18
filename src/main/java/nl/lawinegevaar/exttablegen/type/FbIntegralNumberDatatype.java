@@ -7,6 +7,6 @@ package nl.lawinegevaar.exttablegen.type;
  *
  * @since 2
  */
-public sealed interface FbIntegralNumberDatatype<U extends Number> extends FbDatatype<U>
+public sealed interface FbIntegralNumberDatatype<T extends Number> extends FbDatatype<T>
         permits FbBigint, FbInt128, FbInteger, FbSmallint {
 }

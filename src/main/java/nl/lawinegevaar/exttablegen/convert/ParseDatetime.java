@@ -3,7 +3,10 @@
 package nl.lawinegevaar.exttablegen.convert;
 
 import java.lang.reflect.Field;
+import java.time.chrono.IsoChronology;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.ResolverStyle;
 import java.time.temporal.TemporalAccessor;
 import java.util.HashMap;
 import java.util.Locale;
@@ -25,6 +28,9 @@ import static java.util.Objects.requireNonNull;
 public final class ParseDatetime implements Converter<TemporalAccessor> {
 
     private static final ParseDatetime DEFAULT_DATE_INSTANCE = new ParseDatetime(DateTimeFormatter.ISO_LOCAL_DATE);
+    private static final ParseDatetime DEFAULT_TIME_INSTANCE = new ParseDatetime(DateTimeFormatter.ISO_LOCAL_TIME);
+    private static final ParseDatetime DEFAULT_TIMESTAMP_INSTANCE =
+            new ParseDatetime(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
     private final String pattern;
     private final Locale locale;
@@ -62,6 +68,30 @@ public final class ParseDatetime implements Converter<TemporalAccessor> {
      */
     public static ParseDatetime getDefaultDateInstance() {
         return DEFAULT_DATE_INSTANCE;
+    }
+
+    /**
+     * Default instance for parsing dates (uses {@link DateTimeFormatter#ISO_LOCAL_TIME}).
+     * <p>
+     * The returned instance does not have a locale or pattern set.
+     * </p>
+     *
+     * @return instance for parsing times
+     */
+    public static ParseDatetime getDefaultTimeInstance() {
+        return DEFAULT_TIME_INSTANCE;
+    }
+
+    /**
+     * Default instance for parsing timestamps (uses {@link DateTimeFormatter#ISO_LOCAL_DATE_TIME}).
+     * <p>
+     * The returned instance does not have a locale or pattern set.
+     * </p>
+     *
+     * @return instance for parsing timestamps
+     */
+    public static ParseDatetime getDefaultTimestampInstance() {
+        return DEFAULT_TIMESTAMP_INSTANCE;
     }
 
     /**
@@ -142,6 +172,18 @@ public final class ParseDatetime implements Converter<TemporalAccessor> {
         private static final Map<String, DateTimeFormatter> STANDARD_FORMATTERS;
         static {
             Map<String, DateTimeFormatter> formatters = new HashMap<>();
+            // Custom formatters
+            // SQL_TIMESTAMP, defined by ADR 2023-09
+            formatters.put("SQL_TIMESTAMP", new DateTimeFormatterBuilder()
+                    .parseCaseInsensitive()
+                    .append(DateTimeFormatter.ISO_LOCAL_DATE)
+                    .appendLiteral(' ')
+                    .append(DateTimeFormatter.ISO_LOCAL_TIME)
+                    .toFormatter()
+                    .withResolverStyle(ResolverStyle.STRICT)
+                    .withChronology(IsoChronology.INSTANCE));
+
+            // Standard formatters defined in DateTimeFormatter
             Field[] fields = DateTimeFormatter.class.getFields();
             for (Field field : fields) {
                 if (field.getType() != DateTimeFormatter.class) continue;

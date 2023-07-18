@@ -43,10 +43,6 @@ Files: src/integrationTest/resources/integration-testdata/customers-1000.csv
 Copyright: Datablist
 License: LicenseRef-Datablist
 
-Files: src/integrationTest/resources/integration-testdata/id-values-*.csv
-Copyright: 2023 Mark Rotteveel
-License: Apache-2.0
-
-Files: src/integrationTest/resources/integration-testdata/date-values-*.csv
+Files: src/integrationTest/resources/integration-testdata/*-values-*.csv
 Copyright: 2023 Mark Rotteveel
 License: Apache-2.0

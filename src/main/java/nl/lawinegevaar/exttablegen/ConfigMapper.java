@@ -10,14 +10,7 @@ import jakarta.xml.bind.Unmarshaller;
 import nl.lawinegevaar.exttablegen.convert.AbstractParseIntegralNumber;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.ParseDatetime;
-import nl.lawinegevaar.exttablegen.type.FbBigint;
-import nl.lawinegevaar.exttablegen.type.FbChar;
-import nl.lawinegevaar.exttablegen.type.FbDatatype;
-import nl.lawinegevaar.exttablegen.type.FbDate;
-import nl.lawinegevaar.exttablegen.type.FbEncoding;
-import nl.lawinegevaar.exttablegen.type.FbInt128;
-import nl.lawinegevaar.exttablegen.type.FbInteger;
-import nl.lawinegevaar.exttablegen.type.FbSmallint;
+import nl.lawinegevaar.exttablegen.type.*;
 import nl.lawinegevaar.exttablegen.xmlconfig.*;
 
 import java.io.InputStream;
@@ -186,6 +179,8 @@ final class ConfigMapper {
             case "FbSmallint" -> factory.createSmallint(factory.createDatatypeType());
             case "FbInt128" -> factory.createInt128(factory.createDatatypeType());
             case "FbDate" -> factory.createDate(factory.createDatatypeType());
+            case "FbTime" -> factory.createTime(factory.createDatatypeType());
+            case "FbTimestamp" -> factory.createTimestamp(factory.createDatatypeType());
             default ->
                     throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
         };
@@ -311,6 +306,8 @@ final class ConfigMapper {
             case "smallint" -> new FbSmallint();
             case "int128" -> new FbInt128();
             case "date" -> new FbDate();
+            case "time" -> new FbTime();
+            case "timestamp" -> new FbTimestamp();
             default -> throw new InvalidConfigurationException(
                     "Unsupported DatatypeType: " + datatype.getDeclaredType().getName());
         };

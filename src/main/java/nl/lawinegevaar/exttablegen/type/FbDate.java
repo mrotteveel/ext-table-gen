@@ -17,7 +17,7 @@ import java.time.temporal.TemporalAccessor;
  * @since 2
  */
 public final class FbDate extends AbstractFbDatatype<TemporalAccessor, Converter<TemporalAccessor>>
-        implements FbDatatype<TemporalAccessor> {
+        implements FbDatetimeType<TemporalAccessor> {
 
     // Firebird DATE has a minimum of 0001-01-01
     // Derived from JulianFields.MODIFIED_JULIAN_DAY.getFrom(LocalDate.of(1, 1, 1));
@@ -38,7 +38,6 @@ public final class FbDate extends AbstractFbDatatype<TemporalAccessor, Converter
      *
      * @param converter
      *         converter, or {@code null} for the default conversion
-     * @since 2
      */
     public FbDate(Converter<TemporalAccessor> converter) {
         super(TemporalAccessor.class, converter, ParseDatetime.getDefaultDateInstance());
@@ -51,11 +50,7 @@ public final class FbDate extends AbstractFbDatatype<TemporalAccessor, Converter
 
     @Override
     protected void writeValueImpl(TemporalAccessor value, EncoderOutputStream out) throws IOException {
-        long modifiedJulianDate = JulianFields.MODIFIED_JULIAN_DAY.getFrom(value);
-        if (MIN_VALUE > modifiedJulianDate || modifiedJulianDate > MAX_VALUE) {
-            throw new DateTimeException("Value is out of range, date must be in range [0001-01-01, 9999-12-31]");
-        }
-        writeInt((int) modifiedJulianDate, out);
+        writeInt(getInRange(value), out);
     }
 
     private static void writeInt(int modifiedJulianDate, EncoderOutputStream out) throws IOException {
@@ -84,6 +79,23 @@ public final class FbDate extends AbstractFbDatatype<TemporalAccessor, Converter
         if (this == obj) return true;
         return obj instanceof FbDate that
                && this.converter().equals(that.converter());
+    }
+
+    /**
+     * Gets the Modified Julian Date and checks if it is in the range supported by Firebird.
+     *
+     * @param value
+     *         temporal accessor to query
+     * @return the Modified Julian Date value
+     * @throws DateTimeException
+     *         if the value is out of range [0001-01-01, 9999-12-31]
+     */
+    static int getInRange(TemporalAccessor value) {
+        long modifiedJulianDate = JulianFields.MODIFIED_JULIAN_DAY.getFrom(value);
+        if (MIN_VALUE > modifiedJulianDate || modifiedJulianDate > MAX_VALUE) {
+            throw new DateTimeException("Value is out of range, date must be in range [0001-01-01, 9999-12-31]");
+        }
+        return (int) modifiedJulianDate;
     }
 
 }

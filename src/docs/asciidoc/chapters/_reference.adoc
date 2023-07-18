@@ -330,6 +330,8 @@ At this time, _ext-table-gen_ supports the following column data types:
 * <<ref-xml-int128>>
 * <<ref-xml-integer>>
 * <<ref-xml-smallint>>
+* <<ref-xml-time>>
+* <<ref-xml-timestamp>>
 
 [float#ref-xml-bigint]
 ====== `bigint`
@@ -406,6 +408,33 @@ None
 .Elements
 * <<ref-xml-converter>> -- optional
 
+[float#ref-xml-time]
+====== `time`
+
+The `time` elements represents the Firebird datatype `TIME [WITHOUT TIME ZONE]`.
+The Firebird `TIME` type only accepts values between 00:00:00.0000 and 23:59:59.9999.
+
+.Attributes
+None
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
+[float#ref-xml-timestamp]
+====== `timestamp`
+
+The `timestamp` elements represents the Firebird datatype `TIMESTAMP [WITHOUT TIME ZONE]`.
+See also the limitations of <<ref-xml-date>> and <<ref-xml-time>>.
+
+For additional flexibility, the time part is not required.
+For example if you use a `parseDatetime` with a pattern which only provides date information, but doesn't provide time information (e.g. `yyyy-MM-dd`), it will save the date with time set to 00:00:00.0000.
+
+.Attributes
+None
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
 [#ref-xml-converter]
 ===== `converter`
 
@@ -444,6 +473,12 @@ Datetime pattern, or one of the pre-defined formatter names (required)
 +
 The pattern format uses the syntax described in https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html[`java.time.format.DateTimeFormatter`^].
 The pre-defined formatter names are the constants listed under _Field Summary_ in https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#field-summary[`DateTimeFormatter`^].
++
+In addition, the following custom pre-defined formatter names are available:
++
+--
+* `SQL_TIMESTAMP` -- basically the same as `ISO_LOCAL_DATE_TIME`, but uses a space as the separator instead of `T`.
+--
 
 `locale`::
 Locale as a https://www.ietf.org/rfc/bcp/bcp47.txt[BCP 47^] language tag (optional)

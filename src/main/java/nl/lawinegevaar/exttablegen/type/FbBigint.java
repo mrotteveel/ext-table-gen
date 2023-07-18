@@ -30,7 +30,6 @@ public final class FbBigint extends AbstractFbDatatype<Long, LongConverter> impl
      *
      * @param converter
      *         converter, or {@code null} for the default conversion
-     * @since 2
      */
     public FbBigint(Converter<Long> converter) {
         super(Long.class, LongConverter.wrap(converter), DEFAULT_CONVERTER);

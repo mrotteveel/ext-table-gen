@@ -10,6 +10,8 @@ import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import nl.lawinegevaar.exttablegen.type.FbInt128;
 import nl.lawinegevaar.exttablegen.type.FbInteger;
 import nl.lawinegevaar.exttablegen.type.FbSmallint;
+import nl.lawinegevaar.exttablegen.type.FbTime;
+import nl.lawinegevaar.exttablegen.type.FbTimestamp;
 
 import java.util.List;
 import java.util.function.BiFunction;
@@ -134,6 +136,32 @@ final class ColumnFixtures {
      */
     static Column date(String name, Converter<?> converter) {
         return new Column(name, new FbDate().withConverterChecked(converter));
+    }
+
+    /**
+     * Creates a column with {@code name}, data type {@code FbTime} and {@code converter}.
+     *
+     * @param name
+     *         name of the column
+     * @param converter
+     *         converter, or {@code null} for default
+     * @return column
+     */
+    static Column time(String name, Converter<?> converter) {
+        return new Column(name, new FbTime().withConverterChecked(converter));
+    }
+
+    /**
+     * Creates a column with {@code name}, data type {@code FbTimestamp} and {@code converter}.
+     *
+     * @param name
+     *         name of the column
+     * @param converter
+     *         converter, or {@code null} for default
+     * @return column
+     */
+    static Column timestamp(String name, Converter<?> converter) {
+        return new Column(name, new FbTimestamp().withConverterChecked(converter));
     }
 
     /**

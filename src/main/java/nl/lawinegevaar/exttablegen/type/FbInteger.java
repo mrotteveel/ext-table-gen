@@ -31,7 +31,6 @@ public final class FbInteger extends AbstractFbDatatype<Integer, IntConverter>
      *
      * @param converter
      *         converter, or {@code null} for the default conversion
-     * @since 2
      */
     public FbInteger(Converter<Integer> converter) {
         super(Integer.class, IntConverter.wrap(converter), DEFAULT_CONVERTER);

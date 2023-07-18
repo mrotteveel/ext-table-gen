@@ -66,6 +66,8 @@
     <xs:element name="bigint" type="DatatypeType" substitutionGroup="datatype"/>
     <xs:element name="int128" type="DatatypeType" substitutionGroup="datatype"/>
     <xs:element name="date" type="DatatypeType" substitutionGroup="datatype"/>
+    <xs:element name="time" type="DatatypeType" substitutionGroup="datatype"/>
+    <xs:element name="timestamp" type="DatatypeType" substitutionGroup="datatype"/>
 
     <xs:complexType name="DatatypeType">
         <xs:sequence>

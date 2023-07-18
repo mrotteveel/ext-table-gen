@@ -31,7 +31,6 @@ public final class FbSmallint extends AbstractFbDatatype<Short, ShortConverter>
      *
      * @param converter
      *         converter, or {@code null} for the default conversion
-     * @since 2
      */
     public FbSmallint(Converter<Short> converter) {
         super(Short.class, ShortConverter.wrap(converter), DEFAULT_CONVERTER);

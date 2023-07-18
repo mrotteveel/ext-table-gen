@@ -34,7 +34,6 @@ public final class FbInt128 extends AbstractFbDatatype<BigInteger, Converter<Big
      *
      * @param converter
      *         converter, or {@code null} for the default conversion
-     * @since 2
      */
     public FbInt128(Converter<BigInteger> converter) {
         super(BigInteger.class, converter, DEFAULT_CONVERTER);

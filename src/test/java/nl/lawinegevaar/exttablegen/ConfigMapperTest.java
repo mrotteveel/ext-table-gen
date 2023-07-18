@@ -4,9 +4,14 @@ package nl.lawinegevaar.exttablegen;
 
 import jakarta.xml.bind.JAXBException;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import nl.lawinegevaar.exttablegen.convert.ParseBigint;
+import nl.lawinegevaar.exttablegen.convert.ParseInt128;
+import nl.lawinegevaar.exttablegen.convert.ParseInteger;
+import nl.lawinegevaar.exttablegen.convert.ParseSmallint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.ByteArrayInputStream;
@@ -14,10 +19,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.bigint;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.date;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.integralNumber;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.int128;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.integer;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.smallint;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.time;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.timestamp;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_1;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_2;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.testEtgConfig;
@@ -108,42 +119,33 @@ class ConfigMapperTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "smallint", "integer", "bigint", "int128" })
-    void columnListWithIntegralNumberColumn(String typeName) throws Exception {
-        Column integralNumberColumn = integralNumber("COLUMN_IN", typeName);
+    @MethodSource
+    void testRoundTripWithColumn(Column column) throws Exception {
         EtgConfig originalConfig = testEtgConfig()
-                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, integralNumberColumn, COLUMN_2)));
+                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, column, COLUMN_2)));
 
         EtgConfig fromXml = roundTripConfig(originalConfig);
 
         assertEquals(originalConfig, fromXml);
-        assertThat(fromXml, tableConfig(tableColumns(hasItem(integralNumberColumn))));
+        assertThat(fromXml, tableConfig(tableColumns(hasItem(column))));
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = { "smallint", "integer", "bigint", "int128" })
-    void columnListIntegersWithNonDefaultConverter(String typeName) throws Exception {
-        Column integralNumberColumn = integralNumber("COLUMN_IN", typeName,
-                Converter.parseIntegralNumber(typeName, 16));
-        EtgConfig originalConfig = testEtgConfig()
-                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, integralNumberColumn, COLUMN_2)));
-
-        EtgConfig fromXml = roundTripConfig(originalConfig);
-
-        assertEquals(originalConfig, fromXml);
-        assertThat(fromXml, tableConfig(tableColumns(hasItem(integralNumberColumn))));
-    }
-
-    @Test
-    void columnListDateWithNonDefaultConverter() throws Exception {
-        Column dateColumn = date("COLUMN_IN", Converter.parseDatetime("dd-MM-yyyy", "nl-NL"));
-        EtgConfig originalConfig = testEtgConfig()
-                .withTableConfig(cfg -> cfg.withColumns(List.of(COLUMN_1, dateColumn, COLUMN_2)));
-
-        EtgConfig fromXml = roundTripConfig(originalConfig);
-
-        assertEquals(originalConfig, fromXml);
-        assertThat(fromXml, tableConfig(tableColumns(hasItem(dateColumn))));
+    static Stream<Column> testRoundTripWithColumn() {
+        return Stream.of(
+                smallint("COLUMN_IN", null),
+                smallint("COLUMN_IN", ParseSmallint.ofRadix(16)),
+                integer("COLUMN_IN", null),
+                integer("COLUMN_IN", ParseInteger.ofRadix(16)),
+                bigint("COLUMN_IN", null),
+                bigint("COLUMN_IN", ParseBigint.ofRadix(16)),
+                int128("COLUMN_IN", null),
+                int128("COLUMN_IN", ParseInt128.ofRadix(16)),
+                date("COLUMN_IN", null),
+                date("COLUMN_IN", Converter.parseDatetime("dd-MM-yyyy", "nl-NL")),
+                time("COLUMN_IN", null),
+                time("COLUMN_IN", Converter.parseDatetime("h:mm:ss a", "en-US")),
+                timestamp("COLUMN_IN", null),
+                timestamp("COLUMN_IN", Converter.parseDatetime("MM-dd-yyyy h:mm:ss a", "en-US")));
     }
 
     @Test
@@ -263,12 +265,26 @@ class ConfigMapperTest {
                     </columns>
                 </externalTable>
             </extTableGenConfig>""",
+            // Invalid pattern in parseDatetime
+            """
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
+                <externalTable>
+                    <columns>
+                        <column name="VALID_COLUMN">
+                            <date>
+                                <converter>
+                                    <parseDatetime pattern="NOT_A_VALID_PATTERN"/>
+                                </converter>
+                            </date>
+                        </column>
+                    </columns>
+                </externalTable>
+            </extTableGenConfig>""",
     })
     void testInvalidXml_throwsInvalidConfigurationException(String configString) {
         assertThrows(InvalidConfigurationException.class, () ->
                 configMapper.read(new ByteArrayInputStream(configString.getBytes(UTF_8))));
     }
-
 
     private EtgConfig roundTripConfig(EtgConfig originalConfig) throws JAXBException {
         // 3KiB rounded up from testdata/happypath-config.xml size

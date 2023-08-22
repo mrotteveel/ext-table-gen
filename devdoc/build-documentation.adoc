@@ -43,7 +43,7 @@ test.db.ext-table-dir=E:\\DB\\exttables\\test-data
 ----
 
 The `test.db.user` must have the `CREATE DATABASE` privilege.
-Firebird server must be able to create database in the path of `test.db.root-path`.
+Firebird server must be able to create databases in the path of `test.db.root-path`.
 The `ExternalFileAccess` setting of Firebird server must allow access to the path of `test.db.ext-table-dir`.
 
 In theory, a remote Firebird server could also work, but due to the configuration of _ext-table-gen_ and the tests, this would require the `test.db.ext-table-dir` to be a local path which maps to the remote file system, while for the Firebird server, that path is the same value locally.

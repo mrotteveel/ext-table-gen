@@ -9,25 +9,25 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         libs {
-            version('picocli', '4.7.3')
+            version('picocli', '4.7.4')
 
             library('picocli-core', 'info.picocli', 'picocli').versionRef('picocli')
             library('picocli-codegen', 'info.picocli', 'picocli-codegen').versionRef('picocli')
             library('opencsv', 'com.opencsv', 'opencsv').version('5.7.1')
             library('jaxb-api', 'jakarta.xml.bind', 'jakarta.xml.bind-api').version('4.0.0')
-            library('jaxb-runtime', 'org.glassfish.jaxb', 'jaxb-runtime').version('4.0.2')
-            library('commons-lang3', 'org.apache.commons', 'commons-lang3').version('3.12.0')
+            library('jaxb-runtime', 'org.glassfish.jaxb', 'jaxb-runtime').version('4.0.3')
+            library('commons-lang3', 'org.apache.commons', 'commons-lang3').version('3.13.0')
 
             bundle('jaxb', ['jaxb-api', 'jaxb-runtime'])
         }
 
         testLibs {
-            version('junit', '5.9.3')
+            version('junit', '5.10.0')
 
             library('junit-bom', 'org.junit', 'junit-bom').versionRef('junit')
             library('junit-jupiter', 'org.junit.jupiter', 'junit-jupiter').withoutVersion()
             library('hamcrest', 'org.hamcrest', 'hamcrest').version('2.2')
-            library('hamcrest-optional', 'com.spotify', 'hamcrest-optional').version('1.3.1')
+            library('hamcrest-optional', 'com.spotify', 'hamcrest-optional').version('1.3.2')
             library('jaybird', 'org.firebirdsql.jdbc', 'jaybird').version('5.0.2.java11')
 
             bundle('junit', ['junit-jupiter'])

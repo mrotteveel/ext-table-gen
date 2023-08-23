@@ -1,0 +1,114 @@
+= 2023-09: Supporting Numeric and Decimal Types
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Draft
+* Proposed for: 2.0
+* Depends on: 2023-06, 2023-07
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+Firebird provides two data types for exact numeric, fixed point values:
+
+* `NUMERIC[(__precision__ [, __scale__])]`
+* `DECIMAL[(__precision__ [, __scale__])]`
+
+Both _precision_ and _scale_ are optional, though _precision_ is required if _scale_ is specified.
+For both, the default _precision_ is 9, and default _scale_ is 0.
+
+The _precision_ specifies the minimum supported digits.footnote:[This is the SQL standard behaviour for `DECIMAL`, for `NUMERIC`, the SQL standard defines that _precision_ is the maximum allowed digits]
+
+In practice, in Firebird, these types behave virtually identical, except there is a difference in the backing data type for small values of _precision_:
+
+* `NUMERIC`
+** 1 ++<=++ precision ++<=++ 4 -> `SHORT`
+** 5 ++<=++ precision ++<=++ 9 -> `INTEGER`
+** 10 ++<=++ precision ++<=++ 18 -> ``BIGINT``footnote:dl1bigint[In dialect 1, `DOUBLE PRECISION`]
+** 19 ++<=++ precision ++<=++ 38 -> `INT128` (since Firebird 4.0)
+* `DECIMAL`
+** 1 ++<=++ precision ++<=++ 9 -> `INTEGER`
+** 10 ++<=++ precision ++<=++ 18 -> ``BIGINT``footnote:dl1bigint[]
+** 19 ++<=++ precision ++<=++ 38 -> `INT128` (since Firebird 4.0)
+
+Although Firebird records the precision, it does not constrain values by that precision.
+Instead, the limits of the backing data type are used.
+So, `NUMERIC(1)` -- `NUMERIC(4)` all behave the same, as do `NUMERIC(5)` -- `NUMERIC(9)` and `DECIMAL(1)` -- `DECIMAL(9)`, etc.
+
+The actual precision is slightly higher than listed, because Firebird allows the full range of values supported by the backing datatype.
+That means a `NUMERIC(4)` can actually store 5 digits, as long as the value is between -32,768 and 32,767, etc.
+
+The _scale_ specifies the number of fractional digits (or, digits after the decimal point), and is constrained by _precision_.
+In other words, _scale_ ++<=++ _precision_.
+
+The decimal value is stored by shifting the decimal point by the __scale__ to an unscaled integer, and on load it shifts the decimal point by -_scale_ to obtain the decimal value.
+
+When rounding (e.g. when casting a `NUMERIC(9,3)` to a `NUMERIC(9,2)`), Firebird applies "`half up`" rounding.
+
+In external tables, the `NUMERIC` and `DECIMAL` types follow the alignment rules of their backing data type (i.e. `SHORT` -- 2 bytes, `INTEGER` -- 4 bytes, `BIGINT` and `INT128` -- 8 bytes).
+
+The https://www.rfc-editor.org/rfc/rfc4180[RFC 4180 format^] does not specify specific handling for or formats of dates.
+
+Formats of numbers are (or can be) locale-sensitive, especially for things like decimal separator and grouping symbols.
+
+Java provides the `java.text.NumberFormat` class (or more specifically, `java.text.DecimalFormat`) for parsing numbers in a locale-sensitive manner.
+A locale-specific instance can be obtained with `NumberFormat.getInstance(Locale)`.
+
+A standard for locale language tags is https://www.ietf.org/rfc/bcp/bcp47.txt[BCP 47^].
+Java supports this through `Locale.forLanguageTag(String)` and `Locale.toLanguageTag()`.
+
+== Decision
+
+_ext-table-gen_ will add support for `NUMERIC` and `DECIMAL`.
+This type will only be available by editing the configuration file, it will not be derived automatically by parsing the CSV.
+
+In the XML config, the data type will be represented by elements `numeric` and `decimal`.
+These elements will have the following attributes:
+
+* `precision` (required) -- allowed value between 1 and 38
++
+The implementation will apply the same rules as Firebird and ignore precision other than to use it to infer the backing data type and validate _scale_.
+Actual imposed value range depends on the backing data type.
+* `scale` (required) -- allowed value between 0 and _precision_ (not enforced by XSD)
+* `roundingMode` (optional) -- specifies the rounding mode to apply for numbers with a higher scale than _scale_;
+defaults to `HALF_UP`
++
+Supported rounding modes are those provided by Java's `java.math.RoundingMode` as of Java 17 (i.e. `CEILING`, `DOWN`, `FLOOR`, `HALF_DOWN`, `HALF_EVEN`, `HALF_UP`, `UNNECESSARY`, `UP`).
+Use of rounding mode `UNNECESSARY` will reject values with a higher scale than _scale_ if rounding is needed.
+
+In Java code, the types will be represented by `FbNumeric` and `FbDecimal`.
+
+The default conversion applied will use the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^], meaning the format is not locale-sensitive.
+Other parsing or conversion options can be configured using the `converter` element of the datatype, following the ADR 2023-07 design.
+
+Configuration of parsing is available via the converter element `parseBigDecimal`.
+This element has the following attribute:
+
+* `locale` (required) -- locale for locale-sensitive parsing.
+The BCP 47 language tag of the desired locale.
++
+Contrary to parsing of dates, we decided to make the locale required to avoid ambiguity when running the same configuration on different machines.
+The locale is not relevant for a lot of datetime patterns, but is relevant for parsing numbers.
+
+At this time, we have decided not to provide a way to specify a pattern, and instead we'll use the default patterns provided by Java.
+This decision may be revisited at a later time.
+
+Empty or blank values from the CSV will be interpreted as value `0`.
+Other values not matching the rules of `BigDecimal(String)` or the locale-specific `NumberFormat` will produce an error.
+Unscaled values outside the range of the backing data type will produce an error.
+Validation of format and range will only happen while writing the external table.
+
+We will not implement support for the dialect 1 variant of `NUMERIC`/`DECIMAL` with precision between 10 and 18 (i.e. backed by a scaled `DOUBLE PRECISION` instead of a `BIGINT`).
+Dialect 1 has been deprecated for 20+ years.
+
+== Consequences
+
+The documentation must be updated to explain how to use this new data type, and to describe the configuration changes.
+
+See also previous section for some implementation consequences.

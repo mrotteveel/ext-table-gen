@@ -8,6 +8,7 @@
 * Published: 2023-07-15
 * Implemented in: 2.0
 * Depends on: 2023-06, 2023-07
+* Updated: 2023-08-23
 
 == Type
 
@@ -53,7 +54,7 @@ Just like an `INTEGER` column, a `DATE` requires an alignment of 4 bytes.
 Java has various data types for representing datetime information.
 For our purposes, the Java type `java.time.LocalDate` is the most appropriate type.
 
-The https://www.rfc-editor.org/rfc/rfc4180[RFC 4180 format^] does not specify specific handling or formats for of dates.
+The https://www.rfc-editor.org/rfc/rfc4180[RFC 4180 format^] does not specify specific handling for or formats of dates.
 
 The international standard for date formats is https://en.wikipedia.org/wiki/ISO_8601[ISO 8601^], which specifies the basic calendar date format as ``yyyy-MM-dd``footnote:[Using a Java `DateTimeFormatter` pattern], but also specifies other formats, like week date `YYYY-'W'ww-e` and ordinal date `yyyy-DDD`.
 

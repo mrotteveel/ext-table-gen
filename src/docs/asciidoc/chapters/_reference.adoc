@@ -327,8 +327,10 @@ At this time, _ext-table-gen_ supports the following column data types:
 * <<ref-xml-bigint>>
 * <<ref-xml-char>>
 * <<ref-xml-date>>
+* <<ref-xml-decimal>>
 * <<ref-xml-int128>>
 * <<ref-xml-integer>>
+* <<ref-xml-numeric>>
 * <<ref-xml-smallint>>
 * <<ref-xml-time>>
 * <<ref-xml-timestamp>>
@@ -375,6 +377,65 @@ None
 .Elements
 * <<ref-xml-converter>> -- optional
 
+[float#ref-xml-decimal]
+====== `decimal`
+
+// NOTE: keep in-sync with ref-xml-numeric
+
+The `decimal` element represents the Firebird datatype `DECIMAL`.
+
+The default conversion parses the string using the rules described in the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^].
+Contrary to the `parseBigDecimal` converter, this converter can also parse strings in scientific notation.
+
+.Attributes
+[horizontal]
+`precision`::
+Integer in the range [1, 38] for the precision in decimal digits (required). +
+Precision greater than 19 requires Firebird 4.0 and higher.
+`scale`::
+Integer in the range [0, _scale_] for the scale in decimal digits (required). +
+The XSD does not enforce that _scale_ must be less than or equal to _precision_.
+`roundingMode`::
+Rounding mode applied when reducing the scale of a parsed number with more digits after the decimal point than allowed by _scale_ (optional, defaults to `HALF_UP`). +
+The XSD uses an enum-type, `roundingMode`, with supported names. +
+Possible values are:
++
+--
+[horizontal]
+`CEILING`:::
+Round towards positive infinity.
+`DOWN`:::
+Round towards zero.
+`FLOOR`:::
+Round towards negative infinity.
+`HALF_DOWN`:::
+Round towards "`nearest neighbor`" unless both neighbors are equidistant, in which case round down.
+`HALF_EVEN`:::
+Round towards the "`nearest neighbor`" unless both neighbors are equidistant, in which case, round towards the even neighbor.
+`HALF_UP`:::
+(default) Round towards "`nearest neighbor`" unless both neighbors are equidistant, in which case round up.
+`UNNECESSARY`:::
+Asserts that the requested operation has an exact result, hence no rounding is necessary. +
+Using this rounding mode will reject values with more non-zero digits after the decimal point than _scale_.
+`UP`:::
+Round away from zero.
+--
+
+The _precision_ is used only to determine the backing datatype, and is not used to enforce length limits.
+Just like in Firebird itself, the allowed range of values is determined by the backing datatype.
+For `DECIMAL`, that means:
+
+[horizontal]
+`1 {lt}= precision {lt}= 9`::
+`INTEGER`, unscaled range [-2147483648, 2147483647]
+`10 {lt}= precision {lt}= 18`::
+`BIGINT`, unscaled range [-9223372036854775808, 9223372036854775807]
+`19 {lt}= precision {lt}= 38`::
+`INT128`, unscaled range [-170141183460469231731687303715884105728, 170141183460469231731687303715884105727]
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
 [float#ref-xml-int128]
 ====== `int128`
 
@@ -393,6 +454,67 @@ The `integer` element represents the Firebird datatype `INTEGER`.
 
 .Attributes
 None
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
+[float#ref-xml-numeric]
+====== `numeric`
+
+// NOTE: keep in-sync with ref-xml-decimal
+
+The `numeric` element represents the Firebird datatype `NUMERIC`.
+
+The default conversion parses the string using the rules described in the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^].
+Contrary to the `parseBigDecimal` converter, this converter can also parse strings in scientific notation.
+
+.Attributes
+[horizontal]
+`precision`::
+Integer in the range [1, 38] for the precision in decimal digits (required). +
+Precision greater than 19 requires Firebird 4.0 and higher.
+`scale`::
+Integer in the range [0, _scale_] for the scale in decimal digits (required). +
+The XSD does not enforce that _scale_ must be less than or equal to _precision_.
+`roundingMode`::
+Rounding mode applied when reducing the scale of a parsed number with more digits after the decimal point than allowed by _scale_ (optional, defaults to `HALF_UP`). +
+The XSD uses an enum-type, `roundingMode`, with supported names. +
+Possible values are:
++
+--
+[horizontal]
+`CEILING`:::
+Round towards positive infinity.
+`DOWN`:::
+Round towards zero.
+`FLOOR`:::
+Round towards negative infinity.
+`HALF_DOWN`:::
+Round towards "`nearest neighbor`" unless both neighbors are equidistant, in which case round down.
+`HALF_EVEN`:::
+Round towards the "`nearest neighbor`" unless both neighbors are equidistant, in which case, round towards the even neighbor.
+`HALF_UP`:::
+(default) Round towards "`nearest neighbor`" unless both neighbors are equidistant, in which case round up.
+`UNNECESSARY`:::
+Asserts that the requested operation has an exact result, hence no rounding is necessary. +
+Using this rounding mode will reject values with more non-zero digits after the decimal point than _scale_.
+`UP`:::
+Round away from zero.
+--
+
+The _precision_ is used only to determine the backing datatype, and is not used to enforce length limits.
+Just like in Firebird itself, the allowed range of values is determined by the backing datatype.
+For `NUMERIC`, that means:
+
+[horizontal]
+`1 {lt}= precision {lt}= 4`::
+`SMALLINT`, unscaled range [-32768, 32767]
+`5 {lt}= precision {lt}= 9`::
+`INTEGER`, unscaled range [-2147483648, 2147483647]
+`10 {lt}= precision {lt}= 18`::
+`BIGINT`, unscaled range [-9223372036854775808, 9223372036854775807]
+`19 {lt}= precision {lt}= 38`::
+`INT128`, unscaled range [-170141183460469231731687303715884105728, 170141183460469231731687303715884105727]
 
 .Elements
 * <<ref-xml-converter>> -- optional
@@ -448,6 +570,7 @@ None
 * One of the _converter steps_ listed below -- required
 
 .Available converter steps
+* <<ref-xml-parsebigdecimal>>
 * <<ref-xml-parsedatetime>>
 * <<ref-xml-parseintegralnumber>>
 
@@ -459,12 +582,28 @@ That is currently not supported, but it is something that may be introduced in a
 In the actual program code, a _converter step_ is also called a _converter_, but in this manual we wanted to prevent overloading the term as it already refers to the `converter` element.
 ====
 
+[float#ref-xml-parsebigdecimal]
+====== `parseBigDecimal`
+
+Parses a string using the Java `NumberFormat` instance for the specified locale to a `BigDecimal`.
+
+This converter step is only valid in <<ref-xml-decimal>> and <<ref-xml-numeric>>.
+Contrary to the default converter of `numeric` and `decimal`, this converter does not parse strings in scientific notation.
+
+.Attributes
+[horizontal]
+`locale`::
+Locale as a https://www.ietf.org/rfc/bcp/bcp47.txt[BCP 47^] language tag (required)
+
+.Elements
+None
+
 [float#ref-xml-parsedatetime]
 ====== `parseDatetime`
 
 Parses a string using the specified pattern and locale to a datetime value.
 
-This converter step is only valid in <<ref-xml-date>>.
+This converter step is only valid in <<ref-xml-date>>, <<ref-xml-time>>, and <<ref-xml-timestamp>>.
 
 .Attributes
 [horizontal]
@@ -485,12 +624,15 @@ Locale as a https://www.ietf.org/rfc/bcp/bcp47.txt[BCP 47^] language tag (option
 +
 Generally only relevant to parse datetime strings with localized names for months and days.
 
+.Elements
+None
+
 [float#ref-xml-parseintegralnumber]
 ====== `parseIntegralNumber`
 
 Parses a string using a specified radix to an integral number of the type of the enclosing datatype.
 
-This converter step is only valid in <<ref-xml-bigint>>, <<ref-xml-int128>>, <<ref-xml-integer>> or <<ref-xml-smallint>>.
+This converter step is only valid in <<ref-xml-bigint>>, <<ref-xml-integer>>, <<ref-xml-int128>>, and <<ref-xml-smallint>>.
 
 .Attributes
 [horizontal]

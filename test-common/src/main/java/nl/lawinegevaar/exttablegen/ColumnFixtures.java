@@ -3,16 +3,9 @@
 package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.convert.Converter;
-import nl.lawinegevaar.exttablegen.type.FbBigint;
-import nl.lawinegevaar.exttablegen.type.FbChar;
-import nl.lawinegevaar.exttablegen.type.FbDate;
-import nl.lawinegevaar.exttablegen.type.FbEncoding;
-import nl.lawinegevaar.exttablegen.type.FbInt128;
-import nl.lawinegevaar.exttablegen.type.FbInteger;
-import nl.lawinegevaar.exttablegen.type.FbSmallint;
-import nl.lawinegevaar.exttablegen.type.FbTime;
-import nl.lawinegevaar.exttablegen.type.FbTimestamp;
+import nl.lawinegevaar.exttablegen.type.*;
 
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
@@ -162,6 +155,76 @@ final class ColumnFixtures {
      */
     static Column timestamp(String name, Converter<?> converter) {
         return new Column(name, new FbTimestamp().withConverterChecked(converter));
+    }
+
+    /**
+     * Creates a column with {@code name}, data type {@code FbNumeric} with {@code precision} and {@code scale}.
+     *
+     * @param name
+     *         name of the column
+     * @param precision
+     *         precision
+     * @param scale
+     *         scale
+     * @return column
+     */
+    static Column numeric(String name, int precision, int scale) {
+        return numeric(name, precision, scale, null, null);
+    }
+
+    /**
+     * Creates a column with {@code name}, data type {@code FbNumeric} with {@code precision}, {@code scale} and
+     * {@code roundingMode}, and {@code converter}.
+     *
+     * @param name
+     *         name of the column
+     * @param precision
+     *         precision
+     * @param scale
+     *         scale
+     * @param roundingMode
+     *         rounding mode ({@code null} will apply {@link RoundingMode#HALF_UP})
+     * @param converter
+     *         converter, or {@code null} for default
+     * @return column
+     */
+    static Column numeric(String name, int precision, int scale, RoundingMode roundingMode, Converter<?> converter) {
+        return new Column(name, new FbNumeric(precision, scale, roundingMode).withConverterChecked(converter));
+    }
+
+    /**
+     * Creates a column with {@code name}, data type {@code FbDecimal} with {@code precision} and {@code scale}.
+     *
+     * @param name
+     *         name of the column
+     * @param precision
+     *         precision
+     * @param scale
+     *         scale
+     * @return column
+     */
+    static Column decimal(String name, int precision, int scale) {
+        return decimal(name, precision, scale, null, null);
+    }
+
+    /**
+     * Creates a column with {@code name}, data type {@code FbDecimal} with {@code precision}, {@code scale} and
+     * {@code roundingMode}, and {@code converter}.
+     *
+     * @param name
+     *         name of the column
+     * @param precision
+     *         precision
+     * @param scale
+     *         scale
+     * @param roundingMode
+     *         rounding mode ({@code null} will apply {@link RoundingMode#HALF_UP})
+     * @param converter
+     *         converter, or {@code null} for default
+     * @return column
+     */
+    static Column decimal(String name, int precision, int scale, RoundingMode roundingMode, Converter<?> converter) {
+        return new Column(name, new FbDecimal(precision, scale, roundingMode).withConverterChecked(converter));
     }
 
     /**

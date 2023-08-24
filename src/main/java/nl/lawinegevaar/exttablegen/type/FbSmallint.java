@@ -55,7 +55,7 @@ public final class FbSmallint extends AbstractFbDatatype<Short, ShortConverter>
         writeShort(value, out);
     }
 
-    private static void writeShort(short value, EncoderOutputStream out) throws IOException {
+    static void writeShort(short value, EncoderOutputStream out) throws IOException {
         out.align(2);
         out.writeShort(value);
     }

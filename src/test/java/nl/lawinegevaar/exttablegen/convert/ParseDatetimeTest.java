@@ -49,7 +49,7 @@ class ParseDatetimeTest {
             yyyy-MM-dd['T'HH:mm:ss], ,            2021-12-13T00:00:00, 2021-12-13
             yyyy-MM-dd['T'HH:mm:ss], ,            2021-12-13,          2021-12-13
             """)
-    void testWithPatternAndLocale_localDate(String pattern, String languageTag, String input, String expectedLocalDate) {
+    void testWithPatternAndLocale_localDate(String pattern, String languageTag, String input, LocalDate expectedLocalDate) {
         Locale locale = languageTag != null ? Locale.forLanguageTag(languageTag) : null;
         var parseDateTime = new ParseDatetime(pattern, locale);
         assertEquals(pattern, parseDateTime.pattern());
@@ -58,7 +58,7 @@ class ParseDatetimeTest {
         TemporalAccessor temporalAccessor = parseDateTime.convert(input);
         var localDate = LocalDate.from(temporalAccessor);
 
-        assertEquals(LocalDate.parse(expectedLocalDate), localDate);
+        assertEquals(expectedLocalDate, localDate);
     }
 
     @ParameterizedTest

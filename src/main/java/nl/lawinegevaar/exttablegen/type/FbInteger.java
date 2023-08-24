@@ -55,7 +55,7 @@ public final class FbInteger extends AbstractFbDatatype<Integer, IntConverter>
         writeInt(value, out);
     }
 
-    private static void writeInt(int value, EncoderOutputStream out) throws IOException {
+    static void writeInt(int value, EncoderOutputStream out) throws IOException {
         out.align(4);
         out.writeInt(value);
     }

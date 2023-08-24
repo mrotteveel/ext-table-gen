@@ -68,6 +68,8 @@
     <xs:element name="date" type="DatatypeType" substitutionGroup="datatype"/>
     <xs:element name="time" type="DatatypeType" substitutionGroup="datatype"/>
     <xs:element name="timestamp" type="DatatypeType" substitutionGroup="datatype"/>
+    <xs:element name="numeric" type="FixedPointType" substitutionGroup="datatype"/>
+    <xs:element name="decimal" type="FixedPointType" substitutionGroup="datatype"/>
 
     <xs:complexType name="DatatypeType">
         <xs:sequence>
@@ -153,6 +155,48 @@
         </xs:restriction>
     </xs:simpleType>
 
+    <xs:complexType name="FixedPointType">
+        <xs:complexContent>
+            <xs:extension base="DatatypeType">
+                <xs:attribute name="precision" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:int">
+                            <xs:minInclusive value="1"/>
+                            <xs:maxInclusive value="38"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+                <xs:attribute name="scale" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:int">
+                            <xs:minInclusive value="0"/>
+                            <xs:maxInclusive value="38"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+                <xs:attribute name="roundingMode" type="roundingMode" default="HALF_UP"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="roundingMode">
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:typesafeEnumClass map="false"/>
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="CEILING"/>
+            <xs:enumeration value="DOWN"/>
+            <xs:enumeration value="FLOOR"/>
+            <xs:enumeration value="HALF_DOWN"/>
+            <xs:enumeration value="HALF_EVEN"/>
+            <xs:enumeration value="HALF_UP"/>
+            <xs:enumeration value="UNNECESSARY"/>
+            <xs:enumeration value="UP"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:complexType name="ConverterType">
         <xs:sequence>
             <xs:element ref="converterStep"/>
@@ -162,6 +206,7 @@
     <xs:element name="converterStep" type="ConverterStepType" abstract="true"/>
     <xs:element name="parseIntegralNumber" type="ParseIntegralType" substitutionGroup="converterStep"/>
     <xs:element name="parseDatetime" type="ParseDatetimeType" substitutionGroup="converterStep"/>
+    <xs:element name="parseBigDecimal" type="ParseBigDecimalType" substitutionGroup="converterStep"/>
 
     <xs:complexType name="ConverterStepType" abstract="true"/>
 
@@ -185,6 +230,14 @@
             <xs:extension base="ConverterStepType">
                 <xs:attribute name="pattern" type="xs:normalizedString" use="required"/>
                 <xs:attribute name="locale" type="xs:language"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="ParseBigDecimalType">
+        <xs:complexContent>
+            <xs:extension base="ConverterStepType">
+                <xs:attribute name="locale" type="xs:language" use="required"/>
             </xs:extension>
         </xs:complexContent>
     </xs:complexType>

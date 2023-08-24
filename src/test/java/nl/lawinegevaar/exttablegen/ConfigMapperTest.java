@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -24,8 +25,10 @@ import java.util.stream.Stream;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.bigint;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.date;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.decimal;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.int128;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.integer;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.numeric;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.smallint;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.time;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.timestamp;
@@ -145,7 +148,13 @@ class ConfigMapperTest {
                 time("COLUMN_IN", null),
                 time("COLUMN_IN", Converter.parseDatetime("h:mm:ss a", "en-US")),
                 timestamp("COLUMN_IN", null),
-                timestamp("COLUMN_IN", Converter.parseDatetime("MM-dd-yyyy h:mm:ss a", "en-US")));
+                timestamp("COLUMN_IN", Converter.parseDatetime("MM-dd-yyyy h:mm:ss a", "en-US")),
+                numeric("COLUMN_IN", 4, 1),
+                numeric("COLUMN_IN", 9, 1, RoundingMode.CEILING, null),
+                numeric("COLUMN_IN", 18, 1, null, Converter.parseBigDecimal("nl-NL")),
+                decimal("COLUMN_IN", 9, 1),
+                decimal("COLUMN_IN", 18, 1, RoundingMode.CEILING, null),
+                decimal("COLUMN_IN", 38, 1, null, Converter.parseBigDecimal("nl-NL")));
     }
 
     @Test

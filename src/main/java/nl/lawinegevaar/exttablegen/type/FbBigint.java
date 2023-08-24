@@ -54,7 +54,7 @@ public final class FbBigint extends AbstractFbDatatype<Long, LongConverter> impl
         writeLong(value, out);
     }
 
-    private static void writeLong(long value, EncoderOutputStream out) throws IOException {
+    static void writeLong(long value, EncoderOutputStream out) throws IOException {
         out.align(8);
         out.writeLong(value);
     }

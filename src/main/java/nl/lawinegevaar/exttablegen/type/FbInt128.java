@@ -46,6 +46,10 @@ public final class FbInt128 extends AbstractFbDatatype<BigInteger, Converter<Big
 
     @Override
     protected void writeValueImpl(BigInteger value, EncoderOutputStream out) throws IOException {
+        writeBigInteger(value, out);
+    }
+
+    static void writeBigInteger(BigInteger value, EncoderOutputStream out) throws IOException {
         out.align(8);
         out.writeInt128(value);
     }

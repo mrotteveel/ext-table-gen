@@ -187,4 +187,26 @@ public interface Converter<T> {
         return new ParseDatetime(pattern, locale);
     }
 
+    /**
+     * Constructs a converter to parse to {@link java.math.BigDecimal} values.
+     *
+     * @param locale
+     *         locale in a BCP 47 language tag (cannot be {@code null})
+     * @return converter to parse big decimal values
+     */
+    static ParseBigDecimal parseBigDecimal(String locale) {
+        return parseBigDecimal(locale != null ? Locale.forLanguageTag(locale) : null);
+    }
+
+    /**
+     * Constructs a converter to parse to {@link java.math.BigDecimal} values.
+     *
+     * @param locale
+     *         locale (cannot be {@code null})
+     * @return converter to parse big decimal values
+     */
+    static ParseBigDecimal parseBigDecimal(Locale locale) {
+        return new ParseBigDecimal(locale);
+    }
+
 }

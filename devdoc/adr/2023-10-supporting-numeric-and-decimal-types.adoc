@@ -5,8 +5,8 @@
 
 == Status
 
-* Draft
-* Proposed for: 2.0
+* Published: 2023-08-24
+* Implemented in: 2.0
 * Depends on: 2023-06, 2023-07
 
 == Type
@@ -98,6 +98,8 @@ The locale is not relevant for a lot of datetime patterns, but is relevant for p
 
 At this time, we have decided not to provide a way to specify a pattern, and instead we'll use the default patterns provided by Java.
 This decision may be revisited at a later time.
+
+The `parseBigDecimal` converter in its current incarnation cannot parse numbers in scientific notation (this would require explicit configuration with a pattern, which we don't support), while the _default_ converter does.
 
 Empty or blank values from the CSV will be interpreted as value `0`.
 Other values not matching the rules of `BigDecimal(String)` or the locale-specific `NumberFormat` will produce an error.

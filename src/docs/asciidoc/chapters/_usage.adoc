@@ -324,10 +324,28 @@ See <<ref-xml-externaltable>> for more information on `byteOrder`.
 
 Each data type has a default conversion from the CSV string value to a Firebird data type value.
 This default conversion is not always suitable.
-For example, a CSV with hexadecimal string values for integers cannot be read as a `integer`, because the default conversion uses radix 10.
+For example, a CSV with hexadecimal string values for integers cannot be read as an `integer`, because the default conversion uses radix 10.
 
 To address this, the data type elements in the configuration have an optional element, <<ref-xml-converter>>, to specify a conversion using a _converter step_.
 We'll provide examples for each _converter step_ below.
+
+[#usage-config-parsebigdecimal]
+==== `parseBigDecimal`
+
+The converter step <<ref-xml-parsebigdecimal>> can be used to specify a locale for converter CSV values to exact numeric values.
+
+For example, to convert a number with `.` as the grouping symbol and `,` as the decimal separator (e.g. `"12.345,67"`), use the following data type definition:
+
+[source,xml]
+----
+<decimal precision="9" scale="2">
+    <converter>
+        <parseBigDecimal locale="nl-NL"/>
+    </converter>
+</decimal>
+----
+
+The allowed range of values is restricted by the enclosing data type and its precision (or more precisely, the backing datatype derived from the precision).
 
 [#usage-config-parsedatetime]
 ==== `parseDatetime`

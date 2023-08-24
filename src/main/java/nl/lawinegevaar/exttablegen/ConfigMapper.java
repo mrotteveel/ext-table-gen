@@ -9,12 +9,14 @@ import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
 import nl.lawinegevaar.exttablegen.convert.AbstractParseIntegralNumber;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import nl.lawinegevaar.exttablegen.convert.ParseBigDecimal;
 import nl.lawinegevaar.exttablegen.convert.ParseDatetime;
 import nl.lawinegevaar.exttablegen.type.*;
 import nl.lawinegevaar.exttablegen.xmlconfig.*;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -181,6 +183,19 @@ final class ConfigMapper {
             case "FbDate" -> factory.createDate(factory.createDatatypeType());
             case "FbTime" -> factory.createTime(factory.createDatatypeType());
             case "FbTimestamp" -> factory.createTimestamp(factory.createDatatypeType());
+            case "FbNumeric", "FbDecimal" -> {
+                FbFixedPointDatatype fbFixedPoint = (FbFixedPointDatatype) datatype;
+                FixedPointType fixedPointType = factory.createFixedPointType();
+                fixedPointType.setPrecision(fbFixedPoint.precision());
+                fixedPointType.setScale(fbFixedPoint.scale());
+                fixedPointType.setRoundingMode(fbFixedPoint.roundingMode().name());
+                yield switch (datatype.getClass().getSimpleName()) {
+                    case "FbNumeric" -> factory.createNumeric(fixedPointType);
+                    case "FbDecimal" -> factory.createDecimal(fixedPointType);
+                    default -> throw new IllegalArgumentException(
+                            "Unsupported Datatype class: " + datatype.getClass().getName());
+                };
+            }
             default ->
                     throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
         };
@@ -201,6 +216,12 @@ final class ConfigMapper {
                     parseDatetimeType.setPattern(parseDatetime.pattern());
                     parseDatetime.locale().ifPresent(locale -> parseDatetimeType.setLocale(locale.toLanguageTag()));
                     yield factory.createParseDatetime(parseDatetimeType);
+                }
+                case "parseBigDecimal" -> {
+                    ParseBigDecimalType parseBigDecimalType = factory.createParseBigDecimalType();
+                    ParseBigDecimal parseBigDecimal = (ParseBigDecimal) converter;
+                    parseBigDecimalType.setLocale(parseBigDecimal.locale().toLanguageTag());
+                    yield factory.createParseBigDecimal(parseBigDecimalType);
                 }
                 default -> throw new InvalidConfigurationException("Unsupported converter: " + converterName);
             };
@@ -308,6 +329,16 @@ final class ConfigMapper {
             case "date" -> new FbDate();
             case "time" -> new FbTime();
             case "timestamp" -> new FbTimestamp();
+            case "numeric" -> {
+                FixedPointType fixedPointType = (FixedPointType) datatype.getValue();
+                yield new FbNumeric(fixedPointType.getPrecision(), fixedPointType.getScale(),
+                        RoundingMode.valueOf(fixedPointType.getRoundingMode()));
+            }
+            case "decimal" -> {
+                FixedPointType fixedPointType = (FixedPointType) datatype.getValue();
+                yield new FbDecimal(fixedPointType.getPrecision(), fixedPointType.getScale(),
+                        RoundingMode.valueOf(fixedPointType.getRoundingMode()));
+            }
             default -> throw new InvalidConfigurationException(
                     "Unsupported DatatypeType: " + datatype.getDeclaredType().getName());
         };
@@ -322,6 +353,8 @@ final class ConfigMapper {
             return fromXmlParseIntegralType(parseIntegralType, datatype);
         } else if (converterStep instanceof ParseDatetimeType parseDatetimeType) {
             return Converter.parseDatetime(parseDatetimeType.getPattern(), parseDatetimeType.getLocale());
+        } else if (converterStep instanceof ParseBigDecimalType parseBigDecimalType) {
+            return Converter.parseBigDecimal(parseBigDecimalType.getLocale());
         } else {
             throw new InvalidConfigurationException("Unsupported element: " + converterStepElement.getName());
         }

@@ -6,14 +6,7 @@ import com.opencsv.CSVWriterBuilder;
 import com.opencsv.ICSVWriter;
 import com.opencsv.RFC4180Parser;
 import nl.lawinegevaar.exttablegen.convert.Converter;
-import nl.lawinegevaar.exttablegen.type.FbBigint;
-import nl.lawinegevaar.exttablegen.type.FbChar;
-import nl.lawinegevaar.exttablegen.type.FbDatatype;
-import nl.lawinegevaar.exttablegen.type.FbEncoding;
-import nl.lawinegevaar.exttablegen.type.FbInt128;
-import nl.lawinegevaar.exttablegen.type.FbInteger;
-import nl.lawinegevaar.exttablegen.type.FbSmallint;
-import nl.lawinegevaar.exttablegen.type.FbTime;
+import nl.lawinegevaar.exttablegen.type.*;
 import nl.lawinegevaar.exttablegen.xmlconfig.ExtTableGenConfig;
 import nl.lawinegevaar.exttablegen.xmlconfig.InformationalType;
 import org.firebirdsql.management.FBManager;
@@ -34,6 +27,8 @@ import org.opentest4j.AssertionFailedError;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,7 +51,9 @@ import static java.lang.System.Logger.Level.WARNING;
 import static java.util.Objects.requireNonNull;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.col;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.date;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.decimal;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.integralNumber;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.numeric;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.time;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.timestamp;
 import static nl.lawinegevaar.exttablegen.IntegrationTestProperties.externalTableFile;
@@ -85,6 +82,8 @@ class ExtTableIntegrationTests {
     private static final String TIMESTAMP_VALUES_PREFIX = "timestamp-values";
     private static final String TIMESTAMP_VALUES_BASELINE_PREFIX = TIMESTAMP_VALUES_PREFIX + "-baseline";
     private static final int TIMESTAMP_VALUES_ROW_COUNT = 7;
+    private static final String FIXED_POINT_VALUES_BASELINE_PREFIX = "fixed-point-values-baseline";
+    private static final int FIXED_POINT_VALUES_ROW_COUNT = 7;
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -101,6 +100,7 @@ class ExtTableIntegrationTests {
     private static Path dateValuesBaselineCsvFile;
     private static Path timeValuesBaselineCsvFile;
     private static Path timestampValuesBaselineCsvFile;
+    private static Path fixedPointValuesBaselineCsvFile;
     private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
@@ -130,6 +130,9 @@ class ExtTableIntegrationTests {
         timestampValuesBaselineCsvFile = copyForAllResource(
                 testDataResource(csvFilename(TIMESTAMP_VALUES_BASELINE_PREFIX)),
                 csvFilename(TIMESTAMP_VALUES_BASELINE_PREFIX));
+        fixedPointValuesBaselineCsvFile = copyForAllResource(
+                testDataResource(csvFilename(FIXED_POINT_VALUES_BASELINE_PREFIX)),
+                csvFilename(FIXED_POINT_VALUES_BASELINE_PREFIX));
     }
 
     @AfterAll
@@ -178,12 +181,14 @@ class ExtTableIntegrationTests {
     @ParameterizedTest
     @CsvSource(useHeadersInDisplayName = true, textBlock =
             """
-            configName,                        columnToCheck, expectedJdbcType
-            customers-1000-index-smallint.xml, 1,             SMALLINT
-            customers-1000-index-integer.xml,  1,             INTEGER
-            customers-1000-index-bigint.xml,   1,             BIGINT
-            customers-1000-index-int128.xml,   1,             NUMERIC
-            customers-1000-index-date.xml,     11,            DATE
+            configName,                           columnToCheck, expectedJdbcType
+            customers-1000-index-smallint.xml,    1,             SMALLINT
+            customers-1000-index-integer.xml,     1,             INTEGER
+            customers-1000-index-bigint.xml,      1,             BIGINT
+            customers-1000-index-int128.xml,      1,             NUMERIC
+            customers-1000-index-decimal_9_0.xml, 1,             DECIMAL
+            customers-1000-index-numeric_9_0.xml, 1,             NUMERIC
+            customers-1000-index-date.xml,        11,            DATE
             """)
     void testCustomersCustomTypes_simple(String configName, int columnToCheck, JDBCType expectedJdbcType)
             throws Throwable {
@@ -397,15 +402,103 @@ class ExtTableIntegrationTests {
                 TIMESTAMP_VALUES_ROW_COUNT, EndColumn.Type.NONE);
     }
 
+    @Test
+    void fixedPointIntegrationTest_boundaries() throws Throwable {
+        Path csvFile = forEachTempDir.resolve("fixed-point-boundary.csv");
+        Path tableFile = registerForCleanup(externalTableFile("fixed-point-boundary.dat"));
+        Files.writeString(csvFile,
+                """
+                name,numeric_4_2,numeric_9_2,numeric_18_2,numeric_38_2,decimal_9_2,decimal_18_2,decimal_38_2
+                minimum,-327.68,-21474836.48,-92233720368547758.08,-1701411834604692317316873037158841057.28,-21474836.48,-92233720368547758.08,-1701411834604692317316873037158841057.28
+                minus one,-1.00,-1.00,-1.00,-1.00,-1.00,-1.00,-1.00
+                minus 1/100,-0.01,-0.01,-0.01,-0.01,-0.01,-0.01,-0.01
+                zero,0.00,0.00,0.00,0.00,0.00,0.00,0.00
+                plus 1/100,0.01,0.01,0.01,0.01,0.01,0.01,0.01
+                plus one,1.00,1.00,1.00,1.00,1.00,1.00,1.00
+                maximum,327.67,21474836.47,92233720368547758.07,1701411834604692317316873037158841057.27,21474836.47,92233720368547758.07,1701411834604692317316873037158841057.27
+                """);
+        String tableName = "FIXED_POINT_BOUNDARY";
+        Path configFile = forEachTempDir.resolve("fixed-point-boundary.xml");
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    new TableConfig(tableName,
+                            List.of(new Column("name", new FbChar(15, FbEncoding.ASCII)),
+                                    new Column("numeric_4_2", new FbNumeric(4, 2, null)),
+                                    new Column("numeric_9_2", new FbNumeric(9, 2, null)),
+                                    new Column("numeric_18_2", new FbNumeric(18, 2, null)),
+                                    new Column("numeric_38_2", firebirdSupportInfo.supportsDecimalPrecision(38)
+                                            ? new FbNumeric(38, 2, null) : new FbChar(41, FbEncoding.ASCII)),
+                                    new Column("decimal_9_2", new FbDecimal(9, 2, null)),
+                                    new Column("decimal_18_2", new FbDecimal(18, 2, null)),
+                                    new Column("decimal_38_2", firebirdSupportInfo.supportsDecimalPrecision(38)
+                                            ? new FbDecimal(38, 2, null) : new FbChar(41, FbEncoding.ASCII))),
+                            new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    TableDerivationConfig.getDefault(),
+                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
+
+        assertExternalTable(configFile, tableName, csvFile, 7, EndColumn.Type.NONE);
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            type,    locale
+            numeric, en-US
+            numeric, nl-NL
+            numeric, en-US
+            decimal, nl-NL
+            """)
+    void testWithExplicitConverter_parseBigDecimal(String type, String locale) throws Throwable {
+        String prefix = type + "-values";
+        String testName = prefix + '-' + locale;
+        String testCsvFilename = csvFilename(testName);
+        Path csvFile = copyForEachResource(testDataResource(testCsvFilename), testCsvFilename);
+        var converter = Converter.parseBigDecimal(locale);
+        Column column = switch (type) {
+            case "numeric" -> numeric("Value", 9, 2, null, converter);
+            case "decimal" -> decimal("Value", 9, 2, null, converter);
+            default -> throw new AssertionError("Unsupported type: " + type);
+        };
+        var columns = List.of(column);
+        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        Path configFile = forEachTempDir.resolve(configFilename(testName));
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    new TableConfig(prefix, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    TableDerivationConfig.getDefault(),
+                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, prefix, csvFile, tableFile, configFile);
+
+        assertExternalTable(configFile, prefix, fixedPointValuesBaselineCsvFile,
+                FIXED_POINT_VALUES_ROW_COUNT, EndColumn.Type.NONE);
+    }
+
     // TODO Maybe some or all of the following methods should be moved to test-common
 
     private static Column createColumn(String name, String columnType) {
         class Holder {
             static final Pattern CHAR_PATTERN = Pattern.compile("char_(\\d+)");
+            static final Pattern FIXED_POINT_PATTERN = Pattern.compile("(decimal|numeric)_(\\d+)_(\\d+)");
         }
         Matcher charMatcher = Holder.CHAR_PATTERN.matcher(columnType);
         if (charMatcher.matches()) {
             return col(name, Integer.parseInt(charMatcher.group(1)));
+        }
+        Matcher fixedPointMatcher = Holder.FIXED_POINT_PATTERN.matcher(columnType);
+        if (fixedPointMatcher.matches()) {
+            String type = fixedPointMatcher.group(1);
+            int precision = Integer.parseInt(fixedPointMatcher.group(2));
+            int scale = Integer.parseInt(fixedPointMatcher.group(3));
+            return switch (type) {
+                case "decimal" -> decimal(name, precision, scale);
+                case "numeric" -> numeric(name, precision, scale);
+                default -> throw new AssertionError("invalid type: " + type);
+            };
         }
         return switch (columnType) {
             case "date" -> date(name, null);
@@ -465,6 +558,15 @@ class ExtTableIntegrationTests {
             case "FbTime" -> LocalTime.now().plusSeconds(value).truncatedTo(FbTime.FB_TIME_UNIT).toString();
             case "FbTimestamp" -> LocalDateTime.now().plusDays(Math.abs(value)).plusSeconds(value)
                     .truncatedTo(FbTime.FB_TIME_UNIT).toString();
+            case "FbNumeric", "FbDecimal" -> {
+                FbFixedPointDatatype fixedPoint = (FbFixedPointDatatype) datatype;
+                if (typeName.equals("FbNumeric") && fixedPoint.precision() <= 4) {
+                    value = (short) value;
+                } else if (fixedPoint.precision() <= 9) {
+                    value = (int) value;
+                }
+                yield new BigDecimal(BigInteger.valueOf(value), fixedPoint.scale()).toPlainString();
+            }
             default -> throw new IllegalArgumentException("Unsupported datatype: " + typeName);
         };
     }

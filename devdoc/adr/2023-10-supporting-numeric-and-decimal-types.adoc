@@ -1,4 +1,4 @@
-= 2023-09: Supporting Numeric and Decimal Types
+= 2023-10: Supporting Numeric and Decimal Types
 
 // SPDX-FileCopyrightText: 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0

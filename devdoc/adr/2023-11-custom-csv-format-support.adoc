@@ -1,0 +1,164 @@
+= 2023-11: Custom CSV Format Support
+
+// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Draft
+* Proposed for: 2.0
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+The project initially implemented support for https://www.rfc-editor.org/rfc/rfc4180[RFC 4180^] CSV format only.
+However, there are a lot of other CSV formats out there, and offering more flexibility will be useful for people who need to import CSVs from sources which don't comply with RFC 4180.
+
+The OpenCSV library used by the project offers two CSV parsers, `RFC4180Parser` and `CSVParser`.
+The project currently uses `RFC4180Parser` with the default configuration.
+
+The `RFC4180Parser` (through `RFC4180ParserBuilder`) supports the following configuration options:
+
+* `quoteChar` -- the character used to quote CSV values, and to escape itself within a quoted value (default is `"`)
+* `separator` -- the character used to separate CSV values (default is `,`)
+* `fieldAsNull` a.k.a. `nullFieldIndicator` -- if empty or empty quoted values should be considered `null` instead of empty string (default is `NEITHER`)
+
+The `CSVParser` (through `CSVParserBuilder`) supports the following configuration options:
+
+* `escapeChar` -- the character used to escape characters in a CSV value (default is `\`)
+* `quoteChar` -- the character used to quote CSV values (default is `"`)
+* `separator` -- the character used to separate CSV values (default is `,`)
+* `ignoreLeadingWhiteSpace` -- if true, ignores spaces in front of a quote (default is `true`)
+* `ignoreQuotations` -- if true, quotes are ignored (default is `false`)
+* `strictQuotes` -- if true, characters outside quotes are ignored (default is `false`)
+* `errorLocale` -- the locale for error messages (default is JVM default locale)
+* `fieldAsNull` a.k.a. `nullFieldIndicator` -- if empty or empty quoted values should be considered `null` instead of empty string (default is `NEITHER`)
+
+Given _ext-table-gen_ treats null and empty values the same -- as Firebird external tables do not support SQL `NULL` -- the `fieldAsNull` setting is not relevant for us.
+
+In addition, a `CSVReader` can have additional configuration, mostly surrounding multi-line CSV records, but we'll ignore that for now (though we internally use its `skipLines` setting for testing purposes).
+
+Some characters are not easily representable on the command line (e.g. tab, and backslash, or double/single quotes can have their own problems depending on the commandline interpreter or shell).
+
+== Decision
+
+_ext-table-gen_ will allow configuration of the `quoteChar` and `separator` for the default RFC 4180 parser.
+
+In addition, _ext-table-gen_ will allow selecting the more general CSV parser, allowing configuration of the properties `escapeChar`, `quoteChar`, `separator`, `ignoreLeadingWhiteSpace`, `ignoreQuotations`, and `strictQuotes`.
+
+The parsers can be selected and configured both on the commandline and in the XML.
+
+When overriding the parser from the XML through the commandline, applicable properties are copied from the original parser configuration to the new parser configuration.
+
+== Consequences
+
+The XML configuration is extended, as are the available commandline options.
+
+The documentation needs to be updated to include the new configuration options.
+
+=== XML Configuration
+
+// TODO Is nesting in csvFile the 'right' solution?
+
+For XML configuration, the `csvFile` element adds an optional child element, which is either `rfc4180CsvParser` or `customCsvParser`.
+Absence of this child element implies `rfc4180CsvParser` with its default configuration.
+
+The element `rfc4180CsvParser` supports the following attributes:
+
+[horizontal]
+`quoteChar`:: quote character (single character, mnemonic, or Unicode escape)
+`separator`:: separator (single character, mnemonic, or Unicode escape)
+
+The element `customCsvParser` supports the following attributes:
+
+[horizontal]
+`escapeChar`:: escape character (single character, mnemonic, or Unicode escape)
+`quoteChar`:: quote character (single character, mnemonic, or Unicode escape)
+`separator`:: separator (single character, mnemonic, or Unicode escape)
+`ignoreLeadingWhiteSpace`:: ignore leading white space (boolean)
+`ignoreQuotations`:: ignore quotation (boolean)
+`strictQuotes`:: strict quotes (boolean)
+
+All attributes are optional, and the XSD will not define default values.
+Absence of an attribute means the property will not be explicitly configured, applying the default of OpenCSV.
+
+For the character attributes, any value that is not a single character, a mnemonic or a Unicode escape will be rejected with an error.
+This will not be enforced by the XSD.
+
+=== Commandline Configuration
+
+The following commandline options are added:
+
+`--csv-parser=++{RFC_4180|CUSTOM}++`::
+Specifies the desired parser, case-insensitive.
+Default value is `RFC_4180` if `--config-in` is not specified.
+
+`--csv-quote-char=__CHARACTER__`::
+Specifies the quote character.
+Default defers to OpenCSV default of the parser (`"`), unless specified in XML config.
+
+`--csv-separator=__CHARACTER__`::
+Specifies the separator character.
+Default defers to OpenCSV default of the parser (`,`), unless specified in XML config.
+
+`--csv-escape-char=__CHARACTER__`::
+Specifies the escape character (`CUSTOM` only).
+Default defers to the OpenCSV default of the parser (`\` for `CUSTOM` only), unless specified in XML config.
+
+`--[no-]csv-ignore-leading-white-space`::
+Specifies to ignore leading white space (`CUSTOM` only)
+Default defers to the OpenCSV default of the parser (`true` for `CUSTOM` only), unless specified in XML config.
+
+`--[no-]csv-ignore-quotations`::
+Specifies to ignore quotations or not (`CUSTOM` only).
+Default defers to the OpenCSV default of the parser (`false` for `CUSTOM` only), unless specified in XML config.
+
+`--[no-]csv-strict-quotes`::
+Specifies strict quotes behaviour (`CUSTOM` only).
+Default -- when not specified -- defers to the OpenCSV default of the parser (`false` for `CUSTOM` only)
+
+Where __CHARACTER__ is either a single character, a mnemonic, or a Unicode escape.
+
+Options which are not supported by the selected parser will log a warning, but will not terminate the application.
+
+=== Mnemonics
+
+Mnemonics are names for characters that are not -- or not easily -- representable in the commandline or in XML (or both).
+All mnemonics listed below (or added at a later time) are supported both by the commandline and the XML config.
+They will be handled case-insensitive.
+
+The supported mnemonics are:
+
+[horizontal]
+`TAB`:: horizontal tab (Unicode U+0009)
+`SPACE`:: space (Unicode U+0020)
+`QUOT`:: quotation mark/double quote (``"``, Unicode U+0022)
+`APOS`:: apostrophe/single quote (``'``, Unicode U+0027)
+`GRAVE`:: grave accent/back tick (``{backtick}``, Unicode U+0060)
+
+Mnemonics are derived from the well-known ASCII name of the character, or the XML or HTML entity names, if such an entity exists for a character.
+Mnemonics must be at least two characters long, and cannot start with `U+`.
+For characters not in ASCII or without an HTML entity name, we'll need to come up with a rule if and when we add such a mnemonic.
+
+The mnemonics are preserved in the configuration.
+That is, if a mnemonic is specified on the commandline, that mnemonic will be stored in the XML config.
+If the XML config has a mnemonic, it will be stored when the XML config is written out again.
+
+=== Unicode Escape
+
+The Unicode escape allows any Unicode codepoint to be encoded.
+
+The syntax is `++U+hhhh++` (e.g. `U+0020` for space).
+We don't support 5 hex digit escapes, as OpenCSV expects a `char`, which by its very nature only supports Unicode code points which can be represented by 16-bit values.
+
+The escape is case-insensitive (so, it can also be u+0020, and hex digits A-F can be uppercase or lowercase).
+
+Same as for mnemonics, the Unicode escape is preserved in the configuration.
+
+=== XML Escape
+
+In addition, XML by specification supports XML numeric character references (e.g. `++&#xhhhh;++` and `++&#nnnn;++`), and the following five character entities `++&amp;++`, `++&lt;++`, `++&gt;++`, `++&apos;++`, and `++&quot;++`.
+These are only available in XML as they are supported/provided by XML itself.

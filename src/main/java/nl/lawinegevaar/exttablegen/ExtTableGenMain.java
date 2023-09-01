@@ -52,19 +52,52 @@ final class ExtTableGenMain implements Runnable {
     private static final TableDerivationMode DEFAULT_TABLE_DERIVATION_MODE = TableDerivationMode.INCOMPLETE;
     private static final Charset DEFAULT_CSV_CHARSET = StandardCharsets.UTF_8;
 
-    @CommandLine.Option(names = "--csv-file", paramLabel = "CSV", description = "CSV file (RFC 4180 format)",
-            order = 100)
-    Path csvFile;
+    @CommandLine.ArgGroup(exclusive = false, order = 100)
+    CsvOptions csvOptions;
 
-    @CommandLine.Option(names = "--csv-charset", paramLabel = "CHARSET",
-            description = "Character set of the CSV file (Java character set name). Default: UTF-8", order = 110)
-    Charset csvCharset;
+    static class CsvOptions {
+        @CommandLine.Option(names = "--csv-file", paramLabel = "CSV", description = "CSV file",
+                order = 100)
+        Path file;
 
-    @CommandLine.Option(names = "--csv-header", negatable = true, fallbackValue = "true",
-            description = "First row of CSV file is a header. Default: true", order = 120)
-    Boolean csvHeader;
+        @CommandLine.Option(names = "--csv-charset", paramLabel = "CHARSET",
+                description = "Character set of the CSV file (Java character set name). Default: UTF-8", order = 110)
+        Charset charset;
 
-    @CommandLine.ArgGroup(exclusive = false)
+        @CommandLine.Option(names = "--csv-header", negatable = true, fallbackValue = "true",
+                description = "First row of CSV file is a header. Default: true", order = 120)
+        Boolean header;
+
+        @CommandLine.Option(names = "--csv-parser", paramLabel = "PARSER",
+                description = "CSV parser type ({RFC_4180 | CUSTOM}). Default: RFC_4180", order = 130)
+        CsvType type;
+
+        @CommandLine.Option(names = "--csv-quote-char", paramLabel = "CHAR", converter = CharValueConverter.class,
+                description = "CSV quote character, mnemonic or Unicode escape.", order = 131)
+        CharValue quoteChar;
+
+        @CommandLine.Option(names = "--csv-separator", paramLabel = "CHAR", converter = CharValueConverter.class,
+                description = "CSV separator character, mnemonic or Unicode escape.", order = 132)
+        CharValue separator;
+
+        @CommandLine.Option(names = "--csv-escape-char", paramLabel = "CHAR", converter = CharValueConverter.class,
+                description = "CSV escape character, mnemonic or Unicode escape (only for CUSTOM parser).", order = 133)
+        CharValue escapeChar;
+
+        @CommandLine.Option(names = "--csv-ignore-leading-white-space", negatable = true,
+                description = "Ignore white space before quote (only for CUSTOM parser).", order = 134)
+        Boolean ignoreLeadingWhiteSpace;
+
+        @CommandLine.Option(names = "--csv-ignore-quotations", negatable = true,
+                description = "Ignore quotation marks (only for CUSTOM parser).", order = 135)
+        Boolean ignoreQuotations;
+
+        @CommandLine.Option(names = "--csv-strict-quotes", negatable = true,
+                description = "Strict quotes behaviour (only for CUSTOM parser).", order = 136)
+        Boolean strictQuotes;
+    }
+
+    @CommandLine.ArgGroup(exclusive = false, order = 200)
     TableFileOptions tableFileOptions;
 
     static class TableFileOptions {
@@ -105,7 +138,7 @@ final class ExtTableGenMain implements Runnable {
             description = "Configuration file to read (command-line options take precedence)", order = 400)
     Path configIn;
 
-    @CommandLine.ArgGroup(exclusive = false)
+    @CommandLine.ArgGroup(exclusive = false, order = 400)
     ConfigOutOptions configOutOptions;
 
     static class ConfigOutOptions {
@@ -131,6 +164,7 @@ final class ExtTableGenMain implements Runnable {
 
     static int parseAndExecute(String... args) {
         return new CommandLine(new ExtTableGenMain())
+                .setCaseInsensitiveEnumValuesAllowed(true)
                 .setExecutionExceptionHandler(new LogExceptionMessageHandler())
                 .execute(args);
     }
@@ -226,14 +260,61 @@ final class ExtTableGenMain implements Runnable {
         config = config.withCsvFileConfig(
                 cfg -> {
                     CsvFileConfig csvFileConfig = cfg;
-                    if (csvFile != null) {
-                        csvFileConfig = csvFileConfig.withPath(csvFile);
-                    }
-                    if (csvCharset != null) {
-                        csvFileConfig = csvFileConfig.withCharset(csvCharset);
-                    }
-                    if (csvHeader != null) {
-                        csvFileConfig = csvFileConfig.withHeaderRow(csvHeader);
+                    if (csvOptions != null) {
+                        if (csvOptions.file != null) {
+                            csvFileConfig = csvFileConfig.withPath(csvOptions.file);
+                        }
+                        if (csvOptions.charset != null) {
+                            csvFileConfig = csvFileConfig.withCharset(csvOptions.charset);
+                        }
+                        if (csvOptions.header != null) {
+                            csvFileConfig = csvFileConfig.withHeaderRow(csvOptions.header);
+                        }
+                        csvFileConfig = csvFileConfig.withParserConfig(parserConfig -> {
+                            if (csvOptions.type != null) {
+                                parserConfig = parserConfig.withType(csvOptions.type);
+                            }
+                            if (csvOptions.quoteChar != null) {
+                                parserConfig = parserConfig.withQuoteChar(csvOptions.quoteChar);
+                            }
+                            if (csvOptions.separator != null) {
+                                parserConfig = parserConfig.withSeparator(csvOptions.separator);
+                            }
+
+                            boolean noCustomProps = parserConfig.type() != CsvType.CUSTOM;
+                            if (csvOptions.escapeChar != null) {
+                                if (noCustomProps) {
+                                    log.log(WARNING, "Option --csv-escape-char not supported by parser {0}",
+                                            parserConfig.type());
+                                }
+                                parserConfig = parserConfig.withEscapeChar(csvOptions.escapeChar);
+                            }
+                            if (csvOptions.ignoreLeadingWhiteSpace != null) {
+                                if (noCustomProps) {
+                                    log.log(WARNING,
+                                            "Option --csv-ignore-leading-white-space not supported by parser {0}",
+                                            parserConfig.type());
+                                }
+                                parserConfig = parserConfig
+                                        .withIgnoreLeadingWhiteSpace(csvOptions.ignoreLeadingWhiteSpace);
+                            }
+                            if (csvOptions.ignoreQuotations != null) {
+                                if (noCustomProps) {
+                                    log.log(WARNING, "Option --csv-ignore-quotations not supported by parser {0}",
+                                            parserConfig.type());
+                                }
+                                parserConfig = parserConfig.withIgnoreQuotations(csvOptions.ignoreQuotations);
+                            }
+                            if (csvOptions.strictQuotes != null) {
+                                if (noCustomProps) {
+                                    log.log(WARNING, "Option --csv-strict-quotes not supported by parser {0}",
+                                            parserConfig.type());
+                                }
+                                parserConfig = parserConfig.withStrictQuotes(csvOptions.strictQuotes);
+                            }
+
+                            return parserConfig;
+                        });
                     }
                     return csvFileConfig;
                 },
@@ -259,16 +340,50 @@ final class ExtTableGenMain implements Runnable {
                 createCsvFileConfig());
     }
 
+    private Optional<CsvOptions> csvOptions() {
+        return Optional.ofNullable(csvOptions);
+    }
+
     private CsvFileConfig createCsvFileConfig() {
-        return csvFile != null ? new CsvFileConfig(csvFile, csvCharsetOrDefault(), csvHeaderOrDefault()) : null;
+        return csvOptions()
+                .map(o -> o.file)
+                .map(f -> new CsvFileConfig(f, csvCharsetOrDefault(), csvHeaderOrDefault(), csvParserConfigOrDefault()))
+                .orElse(null);
     }
 
     private Charset csvCharsetOrDefault() {
-        return requireNonNullElse(csvCharset, DEFAULT_CSV_CHARSET);
+        return csvOptions().map(o -> o.charset).orElse(DEFAULT_CSV_CHARSET);
     }
 
     boolean csvHeaderOrDefault() {
-        return requireNonNullElse(csvHeader, Boolean.TRUE);
+        return csvOptions().map(o -> o.header).orElse(Boolean.TRUE);
+    }
+
+    CsvParserConfig csvParserConfigOrDefault() {
+        return csvOptions()
+                .map(ExtTableGenMain::createCsvParserConfig)
+                .orElse(CsvParserConfig.of());
+    }
+
+    private static CsvParserConfig createCsvParserConfig(CsvOptions options) {
+        CsvType type = options.type != null ? options.type : CsvType.RFC_4180;
+        if (options.type != CsvType.CUSTOM) {
+            if (options.escapeChar != null) {
+                log.log(WARNING, "Option --csv-escape-char not supported by parser {0}", type);
+            }
+            if (options.ignoreLeadingWhiteSpace != null) {
+                log.log(WARNING, "Option --csv-ignore-leading-white-space not supported by parser {0}", type);
+            }
+            if (options.ignoreQuotations != null) {
+                log.log(WARNING, "Option --csv-ignore-quotations not supported by parser {0}", type);
+            }
+            if (options.strictQuotes != null) {
+                log.log(WARNING, "Option --csv-strict-quotes not supported by parser {0}", type);
+            }
+        }
+
+        return new CsvParserConfig(type, options.quoteChar, options.separator, options.escapeChar,
+                options.ignoreLeadingWhiteSpace, options.ignoreQuotations, options.strictQuotes);
     }
 
     ByteOrderType byteOrderOrDefault() {
@@ -374,6 +489,18 @@ final class ExtTableGenMain implements Runnable {
 
     }
 
+    /**
+     * Converter to create {@link CharValue} from string.
+     */
+    static final class CharValueConverter implements CommandLine.ITypeConverter<CharValue> {
+
+        @Override
+        public CharValue convert(String value) {
+            return CharValue.of(value);
+        }
+
+    }
+
     static final class VersionProvider implements CommandLine.IVersionProvider {
 
         private static final String version;
@@ -406,7 +533,16 @@ final class ExtTableGenMain implements Runnable {
 
         @Override
         public int handleExecutionException(Exception ex, CommandLine cmd, CommandLine.ParseResult parseResult) {
-            log.log(ERROR, ex.toString());
+            var sb = new StringBuilder();
+            Throwable current = ex;
+            while (current != null) {
+                if (!sb.isEmpty()) {
+                    sb.append("; caused by: ");
+                }
+                sb.append(current);
+                current = current.getCause();
+            }
+            log.log(ERROR, sb.toString());
             log.log(DEBUG, "Exception terminating ext-table-gen", ex);
             return cmd.getExitCodeExceptionMapper() != null
                     ? cmd.getExitCodeExceptionMapper().getExitCode(ex)

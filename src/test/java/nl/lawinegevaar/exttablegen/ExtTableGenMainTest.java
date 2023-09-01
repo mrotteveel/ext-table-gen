@@ -11,6 +11,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import picocli.CommandLine;
 
 import java.io.IOException;
 import java.lang.invoke.MethodHandle;
@@ -19,6 +20,7 @@ import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -36,6 +38,7 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("HttpUrlsUsage")
@@ -66,7 +69,7 @@ class ExtTableGenMainTest {
         assertEquals(0,
                 ExtTableGenMain.parseAndExecute(
                         "--csv-file", csvFilePath.toString(),
-                        "--table-file",  tableFilePath.toString(),
+                        "--table-file", tableFilePath.toString(),
                         "--config-out", outConfigFile.toString()));
 
         assertConfigFile(
@@ -75,9 +78,10 @@ class ExtTableGenMainTest {
                                 customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
                                 new TableFile(tableFilePath, false), ByteOrderType.LITTLE_ENDIAN),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
-                        new CsvFileConfig(csvFilePath, UTF_8, true)),
+                        new CsvFileConfig(csvFilePath, UTF_8, true, CsvParserConfig.of())),
                 outConfigFile);
-        assertEquals("""
+        assertEquals(
+                """
                 1 DD37Cf93aecA6DcSheryl  Baxter   Rasmussen Group                East Leonard     Chile                     229.077.5154          397.884.0519x718     zunigavanessa@smith.info   2020-08-24http://www.stephenson.com/\s
                 2 1Ef7b82A4CAAD10Preston Lozano   Vega-Gentry                    East JimmychesterDjibouti                  5153435776            686-620-1820x944     vmata@colon.com            2021-04-23http://www.hobbs.com/     \s
                 3 6F94879bDAfE5a6Roy     Berry    Murillo-Perry                  Isabelborough    Antigua and Barbuda       +1-539-402-0259       (496)978-3969x58947  beckycarr@hogan.com        2020-03-25http://www.lawrence.com/  \s
@@ -110,9 +114,10 @@ class ExtTableGenMainTest {
                         TableDerivationConfig.getDefault()
                                 .withEndColumnType(EndColumn.Type.NONE)
                                 .withMode(TableDerivationMode.NEVER),
-                        new CsvFileConfig(csvFilePath, UTF_8, true)),
+                        new CsvFileConfig(csvFilePath, UTF_8, true, CsvParserConfig.of())),
                 outConfigFile);
-        assertEquals("""
+        assertEquals(
+                """
                 1 DD37Cf93aecA6DcSheryl  Baxter   Rasmussen Group                East Leonard     Chile                     229.077.5154          397.884.0519x718     zunigavanessa@smith.info   2020-08-24http://www.stephenson.com/\s
                 2 1Ef7b82A4CAAD10Preston Lozano   Vega-Gentry                    East JimmychesterDjibouti                  5153435776            686-620-1820x944     vmata@colon.com            2021-04-23http://www.hobbs.com/     \s
                 3 6F94879bDAfE5a6Roy     Berry    Murillo-Perry                  Isabelborough    Antigua and Barbuda       +1-539-402-0259       (496)978-3969x58947  beckycarr@hogan.com        2020-03-25http://www.lawrence.com/  \s
@@ -152,13 +157,14 @@ class ExtTableGenMainTest {
                                 customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
                                 new TableFile(tableFilePath, false), ByteOrderType.LITTLE_ENDIAN),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
-                        new CsvFileConfig(csvFilePath, UTF_8, true)),
+                        new CsvFileConfig(csvFilePath, UTF_8, true, CsvParserConfig.of())),
                 outConfigFile);
         String newConfigFile = Files.readString(outConfigFile);
         //System.out.println(newConfigFile);
         assertEquals(originalConfigFile, newConfigFile);
 
-        assertEquals("""
+        assertEquals(
+                """
                 1 DD37Cf93aecA6DcSheryl  Baxter   Rasmussen Group                East Leonard     Chile                     229.077.5154          397.884.0519x718     zunigavanessa@smith.info   2020-08-24http://www.stephenson.com/\s
                 2 1Ef7b82A4CAAD10Preston Lozano   Vega-Gentry                    East JimmychesterDjibouti                  5153435776            686-620-1820x944     vmata@colon.com            2021-04-23http://www.hobbs.com/     \s
                 3 6F94879bDAfE5a6Roy     Berry    Murillo-Perry                  Isabelborough    Antigua and Barbuda       +1-539-402-0259       (496)978-3969x58947  beckycarr@hogan.com        2020-03-25http://www.lawrence.com/  \s
@@ -174,7 +180,8 @@ class ExtTableGenMainTest {
 
     @Test
     void defaultDisallowsOverwriteOfTableFile() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 efg,h
@@ -194,7 +201,7 @@ class ExtTableGenMainTest {
                                         EndColumn.Type.LF.getEndColumn().orElseThrow()),
                                 new TableFile(tableFilePath, false), ByteOrderType.LITTLE_ENDIAN),
                         TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
-                        new CsvFileConfig(csvFilePath, UTF_8, true)),
+                        new CsvFileConfig(csvFilePath, UTF_8, true, CsvParserConfig.of())),
                 outConfigFile);
         assertEquals(DUMMY, Files.readString(tableFilePath, ISO_8859_1),
                 "Expected external table file not overwritten");
@@ -202,7 +209,8 @@ class ExtTableGenMainTest {
 
     @Test
     void allowsOverwriteOfTableFile() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 efg,h
@@ -215,7 +223,8 @@ class ExtTableGenMainTest {
                         "--table-file", tableFilePath.toString(),
                         "--overwrite-table-file"));
 
-        assertEquals("""
+        assertEquals(
+                """
                 ab cd
                 efgh\s
                 """, Files.readString(tableFilePath, ISO_8859_1));
@@ -223,7 +232,8 @@ class ExtTableGenMainTest {
 
     @Test
     void defaultDisallowOverwriteConfig() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 efg,h
@@ -237,7 +247,8 @@ class ExtTableGenMainTest {
                         "--config-out", outConfigFile.toString()));
 
         assertEquals(DUMMY, Files.readString(outConfigFile), "Expected config file not overwritten");
-        assertEquals("""
+        assertEquals(
+                """
                 ab cd
                 efgh\s
                 """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
@@ -245,7 +256,8 @@ class ExtTableGenMainTest {
 
     @Test
     void allowOverwriteConfig() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 efg,h
@@ -260,7 +272,8 @@ class ExtTableGenMainTest {
                         "--overwrite-config"));
 
         assertNotEquals(DUMMY, Files.readString(outConfigFile), "Expected config file overwritten");
-        assertEquals("""
+        assertEquals(
+                """
                 ab cd
                 efgh\s
                 """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
@@ -268,7 +281,8 @@ class ExtTableGenMainTest {
 
     @Test
     void endColumnLF() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 efg,h
@@ -280,7 +294,8 @@ class ExtTableGenMainTest {
                         "--table-file", tableFilePath.toString(),
                         "--end-column=LF"));
 
-        assertEquals("""
+        assertEquals(
+                """
                 ab cd
                 efgh\s
                 """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
@@ -288,7 +303,8 @@ class ExtTableGenMainTest {
 
     @Test
     void endColumnCRLF() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 efg,h
@@ -300,7 +316,8 @@ class ExtTableGenMainTest {
                         "--table-file", tableFilePath.toString(),
                         "--end-column=CRLF"));
 
-        assertEquals("""
+        assertEquals(
+                """
                 ab cd\r
                 efgh \r
                 """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
@@ -308,7 +325,8 @@ class ExtTableGenMainTest {
 
     @Test
     void endColumnNONE() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 efg,h
@@ -326,7 +344,8 @@ class ExtTableGenMainTest {
 
     @Test
     void noCsvHeader() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 ab,cd
                 efg,h
                 """);
@@ -337,7 +356,8 @@ class ExtTableGenMainTest {
                         "--table-file", tableFilePath.toString(),
                         "--no-csv-header"));
 
-        assertEquals("""
+        assertEquals(
+                """
                 ab cd
                 efgh\s
                 """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
@@ -345,7 +365,8 @@ class ExtTableGenMainTest {
 
     @Test
     void csvHeader() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 efg,h
@@ -357,7 +378,8 @@ class ExtTableGenMainTest {
                         "--table-file", tableFilePath.toString(),
                         "--csv-header"));
 
-        assertEquals("""
+        assertEquals(
+                """
                 ab cd
                 efgh\s
                 """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
@@ -365,7 +387,8 @@ class ExtTableGenMainTest {
 
     @Test
     void csvCharset() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 éfg,h
@@ -377,7 +400,8 @@ class ExtTableGenMainTest {
                         "--table-file", tableFilePath.toString(),
                         "--csv-charset=iso-8859-1"));
 
-        assertEquals("""
+        assertEquals(
+                """
                 ab cd
                 éfgh\s
                 """, Files.readString(tableFilePath, ISO_8859_1), "Expected external table file to have been written");
@@ -385,7 +409,8 @@ class ExtTableGenMainTest {
 
     @Test
     void columnEncoding() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1,column2
                 ab,cd
                 éfg,h
@@ -399,7 +424,8 @@ class ExtTableGenMainTest {
                         "--column-encoding", "UTF8",
                         "--config-out", outConfigFile.toString()));
 
-        assertEquals("""
+        assertEquals(
+                """
                 ab          cd     \s
                 éfg        h      \s
                 """, Files.readString(tableFilePath, UTF_8), "Expected external table file to have been written");
@@ -412,13 +438,14 @@ class ExtTableGenMainTest {
                                         EndColumn.require(EndColumn.Type.LF)),
                                 new TableFile(tableFilePath, false), ByteOrderType.LITTLE_ENDIAN),
                         new TableDerivationConfig(FbEncoding.UTF8, EndColumn.Type.LF, TableDerivationMode.NEVER),
-                        new CsvFileConfig(csvFilePath, UTF_8, true)),
+                        new CsvFileConfig(csvFilePath, UTF_8, true, CsvParserConfig.of())),
                 outConfigFile);
     }
 
     @Test
     void failOnColumnCountOverflow() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1, column2
                 ab,cd
                 ab,cd,ef
@@ -435,7 +462,8 @@ class ExtTableGenMainTest {
 
     @Test
     void failOnColumnCountUnderflow() throws Exception {
-        Files.writeString(csvFilePath, """
+        Files.writeString(csvFilePath,
+                """
                 column1, column2, column3
                 ab,cd,ef
                 ab,cd
@@ -501,7 +529,8 @@ class ExtTableGenMainTest {
     }
 
     @ParameterizedTest
-    @CsvSource(useHeadersInDisplayName = true, textBlock = """
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
             COLUMN_ENCODING, END_COLUMN_TYPE, TABLE_DERIVATION_MODE
             UTF8, ,
             ,     NONE,
@@ -530,7 +559,8 @@ class ExtTableGenMainTest {
     }
 
     @ParameterizedTest
-    @CsvSource(useHeadersInDisplayName = true, textBlock = """
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
             CSV_FILE,  CSV_CHARSET, CSV_HEADER
             other.dat, ,
             ,          ISO-8859-1,
@@ -544,9 +574,11 @@ class ExtTableGenMainTest {
         var main = new ExtTableGenMain();
         EtgConfig originalConfig = testEtgConfig();
 
-        main.csvFile = csvFile;
-        main.csvCharset = csvCharset;
-        main.csvHeader = csvHeader;
+        var csvOptions = new ExtTableGenMain.CsvOptions();
+        csvOptions.file = csvFile;
+        csvOptions.charset = csvCharset;
+        csvOptions.header = csvHeader;
+        main.csvOptions = csvOptions;
 
         assertThat(PrivateAccess.invokeMergeConfig(main, originalConfig), allOf(
                 tableConfig(is(testTableConfig())),
@@ -555,6 +587,112 @@ class ExtTableGenMainTest {
                         csvFilePath(is(requireNonNullElse(csvFile, CSV_FILE_PATH))),
                         EtgConfigMatchers.csvCharset(is(requireNonNullElse(csvCharset, US_ASCII))),
                         csvHeaderRow(requireNonNullElse(csvHeader, CSV_FILE_HEADER))))));
+    }
+
+    // NOTE: This test checks if our understanding/expectations of PicoCLI argument parsing is correct.
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, nullValues = "null", textBlock =
+            """
+            quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace, ignoreQuotations, strictQuotes
+            null,      null,      null,       null,                    null,             null
+            QUOT,      ',',       \\,         false,                   true,             true
+            null,      TAB,       null,       true,                    false,            null
+            """)
+    void testCsvParserConfigOptions(String quoteChar, String separator, String escapeChar,
+            Boolean ignoreLeadingWhiteSpace, Boolean ignoreQuotations, Boolean strictQuotes) {
+        var options = new ArrayList<>(
+                List.of("--csv-file", "path1", "--table-file", "path2", "--csv-parser", "CUSTOM"));
+        if (quoteChar != null) {
+            options.addAll(List.of("--csv-quote-char", quoteChar));
+        }
+        if (separator != null) {
+            options.addAll(List.of("--csv-separator", separator));
+        }
+        if (escapeChar != null) {
+            options.addAll(List.of("--csv-escape-char", escapeChar));
+        }
+        if (Boolean.TRUE.equals(ignoreLeadingWhiteSpace)) {
+            options.add("--csv-ignore-leading-white-space");
+        } else if (Boolean.FALSE.equals(ignoreLeadingWhiteSpace)) {
+            options.add("--no-csv-ignore-leading-white-space");
+        }
+        if (Boolean.TRUE.equals(ignoreQuotations)) {
+            options.add("--csv-ignore-quotations");
+        } else if (Boolean.FALSE.equals(ignoreQuotations)) {
+            options.add("--no-csv-ignore-quotations");
+        }
+        if (Boolean.TRUE.equals(strictQuotes)) {
+            options.add("--csv-strict-quotes");
+        } else if (Boolean.FALSE.equals(strictQuotes)) {
+            options.add("--no-csv-strict-quotes");
+        }
+
+        var main = new ExtTableGenMain();
+        new CommandLine(main)
+                .setCaseInsensitiveEnumValuesAllowed(true)
+                .parseArgs(options.toArray(String[]::new));
+
+        ExtTableGenMain.CsvOptions csvOptions = main.csvOptions;
+        assertNotNull(csvOptions, "csvOptions");
+        assertEquals(CharValue.of(quoteChar), csvOptions.quoteChar, "quoteChar");
+        assertEquals(CharValue.of(separator), csvOptions.separator, "separator");
+        assertEquals(CharValue.of(escapeChar), csvOptions.escapeChar, "escapeChar");
+        assertEquals(ignoreLeadingWhiteSpace, csvOptions.ignoreLeadingWhiteSpace, "ignoreLeadingWhiteSpace");
+        assertEquals(ignoreQuotations, csvOptions.ignoreQuotations, "ignoreQuotations");
+        assertEquals(strictQuotes, csvOptions.strictQuotes, "strictQuotes");
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, nullValues = "null", textBlock =
+            """
+            type,     quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace, ignoreQuotations, strictQuotes
+            null,     null,      null,      null,       null,                    null,             null
+            RFC_4180, '''',      TAB,       null,       null,                    null,             null
+            CUSTOM,   APOS,      TAB,       \\,         false,                   true,             false
+            RFC_4180, APOS,      TAB,       \\,         true,                    true,             true
+            CUSTOM,   APOS,      TAB,       \\,         true,                    false,            true
+            """)
+    void mergeConfig_csvParserConfig(CsvType type, CharValue quoteChar, CharValue separator, CharValue escapeChar,
+            Boolean ignoreLeadingWhiteSpace, Boolean ignoreQuotations, Boolean strictQuotes) {
+        var main = new ExtTableGenMain();
+        var defType = CsvType.CUSTOM;
+        var defQuoteChar = CharValue.of("\"");
+        var defSeparator = CharValue.of(",");
+        var defEscapeChar = CharValue.of("\\");
+        boolean defIgnoreLeadingWS = true;
+        boolean defIgnoreQuotations = false;
+        boolean defStrictQuotes = true;
+        EtgConfig originalConfig = testEtgConfig()
+                .withCsvFileConfig(cfg -> cfg.withParserConfig(pcfg -> new CsvParserConfig(defType, defQuoteChar,
+                                defSeparator, defEscapeChar, defIgnoreLeadingWS, defIgnoreQuotations, defStrictQuotes)),
+                        EtgConfigFixtures::testCsvFileConfig);
+
+        var csvOptions = new ExtTableGenMain.CsvOptions();
+        csvOptions.type = type;
+        csvOptions.quoteChar = quoteChar;
+        csvOptions.separator = separator;
+        csvOptions.escapeChar = escapeChar;
+        csvOptions.ignoreLeadingWhiteSpace = ignoreLeadingWhiteSpace;
+        csvOptions.ignoreQuotations = ignoreQuotations;
+        csvOptions.strictQuotes = strictQuotes;
+        main.csvOptions = csvOptions;
+
+        assertThat(PrivateAccess.invokeMergeConfig(main, originalConfig), allOf(
+                tableConfig(is(testTableConfig())),
+                tableDerivationConfig(is(testDerivationConfig())),
+                csvFileConfig(allOf(
+                        csvFilePath(is(CSV_FILE_PATH)),
+                        EtgConfigMatchers.csvCharset(is(US_ASCII)),
+                        csvHeaderRow(CSV_FILE_HEADER),
+                        csvParserConfig(is(new CsvParserConfig(
+                                requireNonNullElse(type, defType),
+                                requireNonNullElse(quoteChar, defQuoteChar),
+                                requireNonNullElse(separator, defSeparator),
+                                requireNonNullElse(escapeChar, defEscapeChar),
+                                requireNonNullElse(ignoreLeadingWhiteSpace, defIgnoreLeadingWS),
+                                requireNonNullElse(ignoreQuotations, defIgnoreQuotations),
+                                requireNonNullElse(strictQuotes, defStrictQuotes))))
+                        ))));
     }
 
     static EtgConfig readConfig(Path configFile) throws IOException, JAXBException {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
-    <externalTable name="DEFAULT_EXTERNAL_TABLE_NAME">
+    <externalTable name="DEFAULT_EXTERNAL_TABLE_NAME" byteOrder="LITTLE_ENDIAN">
         <columns>
             <column name="ID">
                 <char length="1" encoding="ISO8859_1"/>
@@ -19,7 +19,9 @@
         <tableFile path="C:\FirebirdData\exttables\persons.dat" overwrite="true"/>
     </externalTable>
     <tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/>
-    <csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"/>
+    <csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true">
+        <rfc4180CsvParser/>
+    </csvFile>
     <informational>
         <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\FirebirdData\exttables\persons.dat' (
   "ID" char(1) character set ISO8859_1,

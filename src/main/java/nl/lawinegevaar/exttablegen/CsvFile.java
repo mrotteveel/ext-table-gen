@@ -4,7 +4,6 @@ package nl.lawinegevaar.exttablegen;
 
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
-import com.opencsv.RFC4180Parser;
 import com.opencsv.exceptions.CsvException;
 
 import java.io.Reader;
@@ -228,7 +227,7 @@ final class CsvFile {
         var builder = new CSVReaderBuilder(reader);
         config.builderCustomizer.accept(builder);
         return builder
-                .withCSVParser(new RFC4180Parser())
+                .withCSVParser(config.parserConfig.createParser())
                 .withSkipLines(config.skipLines)
                 .build();
     }
@@ -251,14 +250,23 @@ final class CsvFile {
      * @param headerRow
      *         {@code true} read the first line after {@code skipLines} as header, {@code false} read the first line
      *         after {@code skipLines} as row data
+     * @param parserConfig
+     *         CSV parser config
      * @param builderCustomizer
      *         additional customization of the CSV reader builder
-     * @see #Config(Charset, int, boolean)
+     * @see #Config(Charset, int, boolean, CsvParserConfig)
      */
-    record Config(Charset charset, int skipLines, boolean headerRow, Consumer<CSVReaderBuilder> builderCustomizer) {
+    record Config(Charset charset, int skipLines, boolean headerRow, CsvParserConfig parserConfig,
+            Consumer<CSVReaderBuilder> builderCustomizer) {
 
         private static final Consumer<CSVReaderBuilder> VOID_CUSTOMIZER = i -> {
         };
+
+        Config {
+            requireNonNull(charset, "charset");
+            requireNonNull(parserConfig, "parserConfig");
+            requireNonNull(builderCustomizer, "builderCustomizer");
+        }
 
         /**
          * @param charset
@@ -268,9 +276,11 @@ final class CsvFile {
          * @param headerRow
          *         {@code true} read the first line after {@code skipLines} as header, {@code false} read the first line
          *         after {@code skipLines} as row data
+         * @param parserConfig
+         *         CSV parser config
          */
-        Config(Charset charset, int skipLines, boolean headerRow) {
-            this(charset, skipLines, headerRow, VOID_CUSTOMIZER);
+        Config(Charset charset, int skipLines, boolean headerRow, CsvParserConfig parserConfig) {
+            this(charset, skipLines, headerRow, parserConfig, VOID_CUSTOMIZER);
         }
 
         /**
@@ -285,7 +295,7 @@ final class CsvFile {
          * @return new {@code Config} derived from this instance with {@code builderCustomizer} replaced
          */
         Config withBuilderCustomizer(Consumer<CSVReaderBuilder> builderCustomizer) {
-            return new Config(charset, skipLines, headerRow, builderCustomizer);
+            return new Config(charset, skipLines, headerRow, parserConfig, builderCustomizer);
         }
 
     }

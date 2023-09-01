@@ -89,16 +89,19 @@ record EtgConfig(TableConfig tableConfig, TableDerivationConfig tableDerivationC
  *         character set of the CSV file
  * @param headerRow
  *         CSV file has a header row
+ * @param parserConfig
+ *         CSV parser config
  */
-record CsvFileConfig(Path path, Charset charset, boolean headerRow) {
+record CsvFileConfig(Path path, Charset charset, boolean headerRow, CsvParserConfig parserConfig) {
 
     CsvFileConfig {
-        requireNonNull(path);
-        requireNonNull(charset);
+        requireNonNull(path, "path");
+        requireNonNull(charset, "charset");
+        requireNonNull(parserConfig, "parserConfig");
     }
 
-    CsvFileConfig(String path, String charset, boolean headerRow) {
-        this(Path.of(path), Charset.forName(charset), headerRow);
+    CsvFileConfig(String path, String charset, boolean headerRow, CsvParserConfig parserConfig) {
+        this(Path.of(path), Charset.forName(charset), headerRow, parserConfig);
     }
 
     /**
@@ -116,22 +119,31 @@ record CsvFileConfig(Path path, Charset charset, boolean headerRow) {
      * @return csv file instance
      */
     CsvFile toCsvFile() {
-        return new CsvFile(toInputResource(), new CsvFile.Config(charset, 0, headerRow));
+        return new CsvFile(toInputResource(), new CsvFile.Config(charset, 0, headerRow, parserConfig));
     }
 
     CsvFileConfig withPath(Path path) {
         if (this.path.equals(path)) return this;
-        return new CsvFileConfig(path, charset, headerRow);
+        return new CsvFileConfig(path, charset, headerRow, parserConfig);
     }
 
     CsvFileConfig withCharset(Charset charset) {
         if (this.charset.equals(charset)) return this;
-        return new CsvFileConfig(path, charset, headerRow);
+        return new CsvFileConfig(path, charset, headerRow, parserConfig);
     }
 
     CsvFileConfig withHeaderRow(boolean headerRow) {
         if (this.headerRow == headerRow) return this;
-        return new CsvFileConfig(path, charset, headerRow);
+        return new CsvFileConfig(path, charset, headerRow, parserConfig);
+    }
+
+    CsvFileConfig withParserConfig(CsvParserConfig parserConfig) {
+        if (this.parserConfig.equals(parserConfig)) return this;
+        return new CsvFileConfig(path, charset, headerRow, parserConfig);
+    }
+
+    CsvFileConfig withParserConfig(UnaryOperator<CsvParserConfig> parserConfigGenerator) {
+        return withParserConfig(parserConfigGenerator.apply(parserConfig));
     }
 
 }

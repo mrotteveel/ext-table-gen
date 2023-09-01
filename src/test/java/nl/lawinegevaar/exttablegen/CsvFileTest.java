@@ -5,13 +5,10 @@ package nl.lawinegevaar.exttablegen;
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import com.opencsv.validators.RowFunctionValidator;
-import nl.lawinegevaar.exttablegen.type.FbEncoding;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,7 +30,8 @@ class CsvFileTest {
     void readFile_happyPath(boolean readHeader) {
         var inputResource = InputResource.fromClasspath("/testdata/customers-10.csv");
 
-        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, readHeader ? 0 : 1, readHeader));
+        var csvFile = new CsvFile(inputResource,
+                new CsvFile.Config(ISO_8859_1, readHeader ? 0 : 1, readHeader, CsvParserConfig.of()));
         var consumer = new TestConsumer(Set.of(1, 10));
         ProcessingResult result = csvFile.readFile(consumer);
 
@@ -66,7 +64,8 @@ class CsvFileTest {
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     void readFile_empty(boolean readHeader) {
-        var csvFile = new CsvFile(InputResource.of(new byte[0]), new CsvFile.Config(ISO_8859_1, 0, readHeader));
+        var csvFile = new CsvFile(InputResource.of(new byte[0]),
+                new CsvFile.Config(ISO_8859_1, 0, readHeader, CsvParserConfig.of()));
         var consumer = new TestConsumer(Set.of(1));
         ProcessingResult result = csvFile.readFile(consumer);
 
@@ -83,12 +82,13 @@ class CsvFileTest {
 
     @Test
     void readFile_onlyHeader() {
-        var inputResource = InputResource.of("""
+        var inputResource = InputResource.of(
+                """
                 column1,column2
                 """,
                 ISO_8859_1);
 
-        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, true));
+        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, true, CsvParserConfig.of()));
         var consumer = new TestConsumer(Set.of(1));
         ProcessingResult result = csvFile.readFile(consumer);
 
@@ -103,7 +103,8 @@ class CsvFileTest {
 
     @Test
     void readFile_continueOnException() {
-        var inputResource = InputResource.of("""
+        var inputResource = InputResource.of(
+                """
                 column1,column2
                 triggerError,row1value2
                 row2value1,row2value2
@@ -111,7 +112,8 @@ class CsvFileTest {
                 ISO_8859_1);
 
         var csvFile = new CsvFile(inputResource,
-                new CsvFile.Config(ISO_8859_1, 0, true, addValidatorForErrorOnWord("triggerError")));
+                new CsvFile.Config(ISO_8859_1, 0, true, CsvParserConfig.of(),
+                        addValidatorForErrorOnWord("triggerError")));
         var consumer = new TestConsumer(Set.of(1, 2));
         ProcessingResult result = csvFile.readFile(consumer);
 
@@ -130,14 +132,16 @@ class CsvFileTest {
 
     @Test
     void readFile_incorrectlyQuotedRow() {
-        var inputResource = InputResource.of("""
+        var inputResource = InputResource.of(
+                """
                 column1,column2
                 "no end quote,row1value2
                 row2value1,row2value2
                 """,
                 ISO_8859_1);
         var csvFile = new CsvFile(inputResource,
-                new CsvFile.Config(ISO_8859_1, 0, true, addValidatorForErrorOnWord("triggerError")));
+                new CsvFile.Config(ISO_8859_1, 0, true, CsvParserConfig.of(),
+                        addValidatorForErrorOnWord("triggerError")));
         var consumer = new TestConsumer(Set.of(1, 2));
         assertThrows(FatalRowProcessingException.class, () -> csvFile.readFile(consumer));
         assertTrue(consumer.receivedOnComplete, "onComplete not received");
@@ -153,14 +157,16 @@ class CsvFileTest {
 
     @Test
     void readFile_incorrectlyQuotedHeader() {
-        var inputResource = InputResource.of("""
+        var inputResource = InputResource.of(
+                """
                 "column1,column2
                 row1value1,row1value2
                 row2value1,row2value2
                 """,
                 ISO_8859_1);
         var csvFile = new CsvFile(inputResource,
-                new CsvFile.Config(ISO_8859_1, 0, true, addValidatorForErrorOnWord("triggerError")));
+                new CsvFile.Config(ISO_8859_1, 0, true, CsvParserConfig.of(),
+                        addValidatorForErrorOnWord("triggerError")));
         var consumer = new TestConsumer(Set.of(1, 2));
         assertThrows(FatalRowProcessingException.class, () -> csvFile.readFile(consumer));
         assertTrue(consumer.receivedOnComplete, "onComplete not received");
@@ -174,28 +180,33 @@ class CsvFileTest {
         assertTrue(consumer.sampledRows.isEmpty(), "expected no sampled rows");
     }
 
-    /**
-     * Not really a test, but intended to generate a test file to check on a real Firebird system.
-     */
-    @Disabled
     @Test
-    void createTestData() throws Exception {
-        // NOTE: The following paths are specific to one of my systems (mrotteveel)
-        var inputResource = InputResource.fromClasspath("D:/Development/data/testdata-csv/customers-100.csv");
-        Path outputFile = Path.of("E:/DB/exttables/test-customers.dat");
-        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, true));
-        var externalTable = ExternalTable.deriveFrom(csvFile,
-                new ExternalTable.Config("TEST_CUSTOMERS", outputFile, FbEncoding.forName("WIN1252"),
-                        EndColumn.Type.LF, ByteOrderType.AUTO));
-        System.out.println(externalTable.toCreateTableStatement());
+    void readFile_customFormat() {
+        var inputResource = InputResource.of(
+                """
+                'COLUMN_1'\t'COLUMN_2'
+                VAL_1_1\tVAL_1_2
+                'VAL_2_1'\t'VAL_2_2'
+                'VAL_3#'_1'\t'VAL"3_2'
+                """,
+                ISO_8859_1);
 
-        try (var writer = new ExternalTableWriter(externalTable, OutputResource.of(outputFile, true))) {
-            ProcessingResult result = csvFile.readFile(writer);
-            if (result instanceof ProcessingResult.StopWithException swe) {
-                throw swe.exception();
-            }
-            writer.getLastException().ifPresent(Throwable::printStackTrace);
-        }
+        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, true,
+                CsvParserConfig.custom(CharValue.of('\''), CharValue.of('\t'), CharValue.of('#'), true, false,
+                        false)));
+        var consumer = new TestConsumer(Set.of(1, 2, 3));
+        ProcessingResult result = csvFile.readFile(consumer);
+
+        assertInstanceOf(ProcessingResult.Done.class, result, "expected Done signal");
+        assertTrue(consumer.receivedOnComplete, "onComplete not received");
+        assertEquals(3, consumer.currentRow, "unexpected number of rows read");
+        assertTrue(consumer.receivedExceptions.isEmpty(),
+                () -> "unexpected exception received: " + consumer.receivedExceptions);
+        assertEquals(new Row(1, List.of("COLUMN_1", "COLUMN_2")), consumer.header, "unexpected header");
+        assertEquals(3, consumer.sampleRows.size(), "expected three sample rows");
+        assertEquals(new Row(2, List.of("VAL_1_1", "VAL_1_2")), consumer.sampledRows.get(0), "unexpected row 1");
+        assertEquals(new Row(3, List.of("VAL_2_1", "VAL_2_2")), consumer.sampledRows.get(1), "unexpected row 2");
+        assertEquals(new Row(4, List.of("VAL_3'_1", "VAL\"3_2")), consumer.sampledRows.get(2), "unexpected row 3");
     }
 
     private Consumer<CSVReaderBuilder> addValidatorForErrorOnWord(String word) {

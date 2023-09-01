@@ -34,7 +34,8 @@ class ExternalTableTest {
     }
 
     @ParameterizedTest
-    @CsvSource(textBlock = """
+    @CsvSource(textBlock =
+            """
             tablename, tablename, "tablename"
             "tablename", "tablename", "tablename"
             # name is trimmed
@@ -56,7 +57,8 @@ class ExternalTableTest {
     }
 
     @ParameterizedTest
-    @CsvSource(textBlock = """
+    @CsvSource(textBlock =
+            """
             true,  false, false
             false, true,  false
             true,  false, true
@@ -85,14 +87,14 @@ class ExternalTableTest {
                         col("COLUMN3", 50, FbEncoding.UTF8)),
                 outputResource, ByteOrderType.AUTO);
 
-        String expectedCreateTable = """
+        String expectedCreateTable =
+                """
                 create table "EXAMPLE_TABLE" external file %s (
                   "COLUMN1" char(10) character set ASCII,
                   "COLUMN2" char(25) character set WIN1252,
                   "COLUMN3" char(50) character set UTF8
                 );
-                """
-                .formatted(outputResource.path()
+                """.formatted(outputResource.path()
                         .map(Object::toString)
                         .map(SqlSyntaxUtils::enquoteLiteral)
                         .orElse("'##REPLACE_ME##'"));
@@ -103,20 +105,22 @@ class ExternalTableTest {
     @Test
     void deriveFromWithHeader(@TempDir Path tempDir) {
         Path extTablePath = tempDir.resolve("deriveFromWithHeader.dat");
-        var inputResource = InputResource.of("""
-                        first column,second column
-                        12,1234
-                        123,12
-                        1234,12345
-                        """,
+        var inputResource = InputResource.of(
+                """
+                first column,second column
+                12,1234
+                123,12
+                1234,12345
+                """,
                 ISO_8859_1);
-        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, true));
+        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, true, CsvParserConfig.of()));
         var tableConfig = new ExternalTable.Config("WITH_HEADER", extTablePath, FbEncoding.ISO8859_1, Type.CRLF,
                 ByteOrderType.AUTO);
 
         var externalTable = ExternalTable.deriveFrom(csvFile, tableConfig);
 
-        String expectedCreateTable = """
+        String expectedCreateTable =
+                """
                 create table "WITH_HEADER" external file %s (
                   "first column" char(4) character set ISO8859_1,
                   "second column" char(5) character set ISO8859_1,
@@ -130,19 +134,21 @@ class ExternalTableTest {
     @Test
     void deriveFromWithoutHeader(@TempDir Path tempDir) {
         Path extTablePath = tempDir.resolve("deriveFromWithoutHeader.dat");
-        var inputResource = InputResource.of("""
-                        12,1234
-                        123,12
-                        1234,12345
-                        """,
+        var inputResource = InputResource.of(
+                """
+                12,1234
+                123,12
+                1234,12345
+                """,
                 ISO_8859_1);
-        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, false));
+        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, false, CsvParserConfig.of()));
         var tableConfig = new ExternalTable.Config("WITHOUT_HEADER", extTablePath, FbEncoding.ISO8859_1, Type.NONE,
                 ByteOrderType.AUTO);
 
         var externalTable = ExternalTable.deriveFrom(csvFile, tableConfig);
 
-        String expectedCreateTable = """
+        String expectedCreateTable =
+                """
                 create table "WITHOUT_HEADER" external file %s (
                   "COLUMN_1" char(4) character set ISO8859_1,
                   "COLUMN_2" char(5) character set ISO8859_1
@@ -156,7 +162,7 @@ class ExternalTableTest {
     void deriveFromEmptyFile(@TempDir Path tempDir) {
         Path extTablePath = tempDir.resolve("deriveFromEmptyFile.dat");
         var inputResource = InputResource.of(new byte[0]);
-        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, false));
+        var csvFile = new CsvFile(inputResource, new CsvFile.Config(ISO_8859_1, 0, false, CsvParserConfig.of()));
         var tableConfig = new ExternalTable.Config("WITHOUT_HEADER", extTablePath, FbEncoding.ISO8859_1, Type.CRLF,
                 ByteOrderType.AUTO);
 

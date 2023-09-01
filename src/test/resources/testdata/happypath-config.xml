@@ -43,7 +43,9 @@
         <tableFile path="output.dat" overwrite="false"/>
     </externalTable>
     <tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/>
-    <csvFile path="input.csv" charset="UTF-8" headerRow="true"/>
+    <csvFile path="input.csv" charset="UTF-8" headerRow="true">
+        <rfc4180CsvParser/>
+    </csvFile>
     <informational>
         <ddl>create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'output.dat' (
   "Index" char(2) character set ISO8859_1,

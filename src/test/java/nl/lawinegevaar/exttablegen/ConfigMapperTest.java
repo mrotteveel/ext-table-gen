@@ -10,6 +10,7 @@ import nl.lawinegevaar.exttablegen.convert.ParseInteger;
 import nl.lawinegevaar.exttablegen.convert.ParseSmallint;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -289,10 +290,60 @@ class ConfigMapperTest {
                     </columns>
                 </externalTable>
             </extTableGenConfig>""",
+            // Invalid mnemonic in parser
+            """
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
+                <csvFile path="somepath" charset="UTF-8">
+                    <rfc4180CsvParser quoteChar="does not exist"/>
+                </csvFile>
+            </extTableGenConfig>""",
+            // Invalid Unicode escape in parser
+            """
+            <extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0">
+                <csvFile path="somepath" charset="UTF-8">
+                    <customCsvParser escapeChar="u+5c"/>
+                </csvFile>
+            </extTableGenConfig>""",
     })
     void testInvalidXml_throwsInvalidConfigurationException(String configString) {
         assertThrows(InvalidConfigurationException.class, () ->
                 configMapper.read(new ByteArrayInputStream(configString.getBytes(UTF_8))));
+    }
+
+    @Test
+    void testRoundTripWithRfc4180CsvParser() throws Exception {
+        EtgConfig originalConfig = testEtgConfig()
+                .withCsvFileConfig(
+                        cfg -> cfg.withParserConfig(CsvParserConfig.rfc4180(CharValue.of('\''), CharValue.of("TAB"))),
+                        () -> { throw new IllegalStateException("Expected existing config"); });
+
+        EtgConfig fromXml = roundTripConfig(originalConfig);
+
+        assertEquals(originalConfig, fromXml);
+    }
+
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, nullValues = "null", textBlock =
+            """
+            ignoreLeadingWhiteSpace, ignoreQuotations, strictQuotes
+            true,                    false,            false
+            false,                   true,             false
+            false,                   false,            true
+            null,                    true,             false
+            false,                   null,             true
+            true,                    false,            null
+            """)
+    void testRoundTripWithCustomCsvParser(Boolean ignoreLeadingWhiteSpace, Boolean ignoreQuotations, Boolean strictQuotes)
+            throws Exception {
+        EtgConfig originalConfig = testEtgConfig()
+                .withCsvFileConfig(
+                        cfg -> cfg.withParserConfig(CsvParserConfig.custom(CharValue.of('\''), CharValue.of("TAB"),
+                                CharValue.of("U+005C"), ignoreLeadingWhiteSpace, ignoreQuotations, strictQuotes)),
+                        () -> { throw new IllegalStateException("Expected existing config"); });
+
+        EtgConfig fromXml = roundTripConfig(originalConfig);
+
+        assertEquals(originalConfig, fromXml);
     }
 
     private EtgConfig roundTripConfig(EtgConfig originalConfig) throws JAXBException {

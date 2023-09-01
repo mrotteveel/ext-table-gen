@@ -24,8 +24,9 @@ For (Linux) shells, use `++\++`.
 [#usage-notes]
 == General notes
 
-_ext-table-gen_ can only read CSV files in {link-rfc4180}[RFC 4180^] format, with or without a header line.
-At this time, _ext-table-gen_ does not support other CSV formats, and it does not offer any way to configure things like quote, escape or separator characters.
+_ext-table-gen_ by defaults reads CSV files in {link-rfc4180}[RFC 4180^] format, with or without a header line.
+The commandline and XML file support configuring a different quote character and separator for the RFC 4180 parser (`com.opencsv.RFC4180Parser`), and configuring a different parser with more options (`com.opencsv.CSVParser`).
+See <<usage-csv-format>> for more information.
 
 CSV files are assumed to be encoded in UTF-8.
 The character set can be explicitly configured using <<#ref-cmd-csv-charset,`--csv-charset=CHARSET`>>, where `CHARSET` is a Java character set name (e.g. `--csv-charset=windows-1252`).
@@ -35,7 +36,7 @@ This can be overridden by specifying <<ref-cmd-column-encoding,`--column-encodin
 Alternatively, an existing configuration file can be edited to change the column encoding.
 The configuration file allows you to configure the character set _per column_, and also allows you to use data types other than `CHAR`.
 
-Given the overhead of using `UTF8` columns (e.g. a `CHAR(1000) CHARACTER SET UTF8` column will occupy 4000 bytes in an external table), we recommend to use a single-byte character set where possible, and only define columns as `UTF8` when absolutely necessary.
+Given the overhead of using `UTF8` columns (e.g. a `CHAR(1000) CHARACTER SET UTF8` column will occupy 4000 bytes in an external table), we recommend using a single-byte character set where possible, and only defining columns as `UTF8` when absolutely necessary.
 
 .Naming external table files
 [NOTE]
@@ -49,7 +50,7 @@ In this manual, we use the `dat` extension, as that is a generally accepted exte
 
 The following demonstrates how you can use _ext-table-gen_ to derive an external table definition and generate an external table file matching that definition.
 
-This example use a very simple CSV file, shown below.
+This example uses a very simple CSV file, shown below.
 
 .Example CSV file, persons.csv
 [listing]
@@ -179,7 +180,7 @@ Compared to the <<usage-ex-persons-dat,original persons.dat>>, you'll notice tha
 Keep in mind that external table files are a _binary_ data format.
 The examples up-to-now use only `CHAR` columns with the same character set, so these examples effectively behave as a fixed width text format.
 
-This changes once we start using multiple character sets, and -- hopefully -- in the future support other data types.
+This changes once we start using multiple character sets, or other data types.
 ====
 
 [#usage-config-regen]
@@ -273,13 +274,13 @@ If you try to trick the server, by manually editing the contents of such a colum
 
 Again, it is important to keep in mind, that by using two different and incompatible character sets in the external table file, it is now truly a _binary_ file.
 In our example it just happens to work OK when shown as text, because all other characters are in ASCII, which is a subset of both ISO-8859-1 and UTF-8.
-If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would have been rendered as Unicode replacement characters (because the AsciiDoctor tool used to create this manual also reads our example data as UTF-8).
+If some other column had ISO-8859-1 characters beyond 0x7f, they would have been rendered as Unicode replacement characters (because the AsciiDoctor tool used to create this manual also reads our example data as UTF-8).
 
 [#usage-config-datatype]
 === Using a different column data type
 
 The default configuration file derived from a CSV file only uses `CHAR` columns.
-It can be more efficient -- both in terms of storage space and for performance loading the data into Firebird -- to use a different datatype.
+It can be more efficient -- both in terms of storage space and for performance of loading the data into Firebird -- to use a different datatype.
 
 In this example, we'll change the data type of the `ID` column from a `CHAR(1)`
 
@@ -313,9 +314,9 @@ include::{includedir}/chapters/data/persons-type-modified.xml[]
 ----
 
 For data types other than `char` the `byteOrder` is important for determining how to write out data.
-The default setting of `byteOrder="AUTO"` is generally sufficient;
-it will use the endianness of the system where _ext-table-gen_ is run.
-However, if you generate the table file on a little-endian machine, while your Firebird server runs on a big-endian machine (or vice-versa), you'll need to set the `byteOrder` appropriately to match the endianness of the Firebird server.
+Absence of `byteOrder` will use `AUTO`, but when writing the configuration file, it will report the byte-order of the system that created the file.
+Specify `byteOrder="AUTO"` to use the endianness of the system where _ext-table-gen_ is run.
+However, if you generate the table file on a little-endian machine, while your Firebird server runs on a big-endian machine (or vice-versa), you'll need to set the `byteOrder` to match the endianness of the Firebird server.
 
 See <<ref-xml-externaltable>> for more information on `byteOrder`.
 
@@ -389,12 +390,12 @@ The previous examples are all that -- we think -- you'll need to create usable e
 For one-shot imports, the second example from <<usage-basic-csv>> can be sufficient.
 You may need to use <<ref-cmd-column-encoding,`--column-encoding`>> if you need something other than `ISO8859_1` for the external table columns, and <<ref-cmd-csv-charset,`--csv-charset`>> if the CSV file is not encoded in ASCII or UTF-8.
 
-For repeated imports, or where multiple character sets are needed, we recommend the following steps:
+For repeated imports, or where multiple character sets or other data types are needed, we recommend the following steps:
 
 . Generate a config file using <<usage-basic-csv>>,
 . Increase columns lengths to expected maximums (see <<usage-config-length>>),
 . If needed, change the encoding of columns (see <<usage-config-charset>>),
-. Determine if there are more appropriate types for columns and change the type if needed (see <<usage-config-datatype>>),
+. Determine if there are more appropriate data types for columns and change the type if needed (see <<usage-config-datatype>>),
 . Determine if a custom converter is needed (see <<usage-config-converter>>),
 . Finally, regenerate the config file (see <<usage-config-regen>>) for up-to-date DDL.
 
@@ -423,6 +424,68 @@ ext-table-gen --config-in=C:\FirebirdData\csv\persons.xml ^
 ----
 
 If a CSV file changes incompatibly (e.g. too wide columns, or different number of columns) or has inconsistent column counts, the import will fail, but the external table file will have been overwritten with valid row data before the failing row.
+
+[#usage-csv-format]
+== Customizing the CSV Format
+
+By default, _ext-table-gen_ reads CSV files in {link-rfc4180}[RFC 4180^] format.
+
+It is possible to configure the RFC 4180 parser with the following options:
+
+* Quote character (used to enclose values, and to escape itself, default is `"`)
+** Commandline -- <<ref-cmd-csv-quote-char,`--csv-quote-char=CHAR`>>
+** XML -- attribute `quoteChar="CHAR"` on element <<ref-xml-rfc4180CsvParser>>
+* Separator (used to separate values, default is `,`)
+** Commandline -- <<ref-cmd-csv-separator,`--csv-separator=CHAR`>>
+** XML -- attribute `separator="CHAR"` on element <<ref-xml-rfc4180CsvParser>>
+
+The `CHAR` option accepts any single character value, a <<ref-common-char-mnemonic,character mnemonic>>, or a <<ref-common-unicode-escape,Unicode escape>>.
+
+You can also select a different CSV parser (default is `RFC_4180`, or the parser specified in `--config-in`):
+
+* Commandline: <<ref-cmd-csv-parser,`--csv-parser=++{RFC_4180|CUSTOM}++`>>
+* XML: element <<ref-xml-rfc4180CsvParser>> or <<ref-xml-customCsvParser>> in <<ref-xml-csvfile>>
+
+The custom parser supports more options:
+
+* Quote character (used to enclose values, default is `"`)
+** Commandline -- <<ref-cmd-csv-quote-char,`--csv-quote-char=CHAR`>>
+** XML -- attribute `quoteChar="CHAR"` on element <<ref-xml-customCsvParser>>
+* Separator (used to separate values, default is `,`)
+** Commandline -- <<ref-cmd-csv-separator,`--csv-separator=CHAR`>>
+** XML -- attribute `separator="CHAR"` on element <<ref-xml-customCsvParser>>
+* Escape character (used to escape characters, default is `\`)
+** Commandline -- <<ref-cmd-csv-escape-char,`--csv-escape-char=CHAR`>>
+** XML -- attribute `escapeChar="CHAR"` on element <<ref-xml-customCsvParser>>
+* Ignore leading white space (ignores/skips white space before a value, default is `true`)
+** Commandline -- <<ref-cmd-csv-ignore-leading-ws,`--[no-]ignore-leading-white-space`>>
+** XML -- attribute `ignoreLeadingWhiteSpace=++"{true|false}"++` on element <<ref-xml-customCsvParser>>
+* Ignore quotations (quotation marks are ignored, default is `false`)
+** Commandline -- <<ref-cmd-csv-ignore-quotations,`--[no-]ignore-quotations`>>
+** XML -- attribute `ignoreQuotations=++"{true|false}"++` on element <<ref-xml-customCsvParser>>
+* Strict quotes (OpenCSV strict quotes behaviour, default is `false`)
+** Commandline -- <<ref-cmd-csv-strict-quotes,`--[no-]strict-quotes`>>
+** XML -- attribute `strictQuotes=++"{true|false}"++` on element <<ref-xml-customCsvParser>>`
+
+For example, to import a custom CSV with single quotes, tab as a separator and `#` as the escape symbol.
+
+On the commandline:
+
+[listing]
+----
+ext-table-gen --csv-file=persons.csv --table-file=persons.dat ^
+  --csv-parser=CUSTOM --csv-quote-char=APOS
+  --csv-separator=TAB --csv-escape-char=#
+----
+
+In the configuration file:
+
+[source,xml]
+----
+<csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true">
+  <customCsvParser quoteChar="APOS" separator="TAB" escapeChar="#"/>
+</csvFile>
+----
 
 // needed to make it render correctly within IntelliJ
 ifeval::["{includedir}" == ".."]

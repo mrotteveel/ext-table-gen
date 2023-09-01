@@ -5,8 +5,8 @@
 
 == Status
 
-* Draft
-* Proposed for: 2.0
+* Published: 2023-09-01
+* Implemented in: 2.0
 
 == Type
 
@@ -28,9 +28,9 @@ The `RFC4180Parser` (through `RFC4180ParserBuilder`) supports the following conf
 
 The `CSVParser` (through `CSVParserBuilder`) supports the following configuration options:
 
-* `escapeChar` -- the character used to escape characters in a CSV value (default is `\`)
 * `quoteChar` -- the character used to quote CSV values (default is `"`)
 * `separator` -- the character used to separate CSV values (default is `,`)
+* `escapeChar` -- the character used to escape characters in a CSV value (default is `\`)
 * `ignoreLeadingWhiteSpace` -- if true, ignores spaces in front of a quote (default is `true`)
 * `ignoreQuotations` -- if true, quotes are ignored (default is `false`)
 * `strictQuotes` -- if true, characters outside quotes are ignored (default is `false`)
@@ -60,8 +60,6 @@ The XML configuration is extended, as are the available commandline options.
 The documentation needs to be updated to include the new configuration options.
 
 === XML Configuration
-
-// TODO Is nesting in csvFile the 'right' solution?
 
 For XML configuration, the `csvFile` element adds an optional child element, which is either `rfc4180CsvParser` or `customCsvParser`.
 Absence of this child element implies `rfc4180CsvParser` with its default configuration.
@@ -143,9 +141,12 @@ Mnemonics are derived from the well-known ASCII name of the character, or the XM
 Mnemonics must be at least two characters long, and cannot start with `U+`.
 For characters not in ASCII or without an HTML entity name, we'll need to come up with a rule if and when we add such a mnemonic.
 
-The mnemonics are preserved in the configuration.
+The mnemonics are preserved in the configuration, but may be normalized.
 That is, if a mnemonic is specified on the commandline, that mnemonic will be stored in the XML config.
 If the XML config has a mnemonic, it will be stored when the XML config is written out again.
+Mnemonics will be normalized to their uppercase variant when the XML config is written out.
+
+If the parser type is switched from _CUSTOM_ to _RFC_4180_, only the properties applicable to _RFC_4180_ will be stored.
 
 === Unicode Escape
 
@@ -153,10 +154,12 @@ The Unicode escape allows any Unicode codepoint to be encoded.
 
 The syntax is `++U+hhhh++` (e.g. `U+0020` for space).
 We don't support 5 hex digit escapes, as OpenCSV expects a `char`, which by its very nature only supports Unicode code points which can be represented by 16-bit values.
-
 The escape is case-insensitive (so, it can also be u+0020, and hex digits A-F can be uppercase or lowercase).
 
 Same as for mnemonics, the Unicode escape is preserved in the configuration.
+A Unicode escape may be normalized to the uppercase variant when writing the XML config.footnote:[
+The current implementation preserves case, but this may change in a future release.
+In other words, the current case-preserving behaviour is not guaranteed under this specification.]
 
 === XML Escape
 

@@ -222,16 +222,16 @@ class ExtTableIntegrationTests {
         Path configFile = forEachTempDir.resolve("integral-boundary.xml");
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
-                    new TableConfig(tableName,
+                    createTableConfig(tableName,
                             List.of(new Column("name", new FbChar(15, FbEncoding.ASCII)),
                                     new Column("smallint", new FbSmallint()),
                                     new Column("integer", new FbInteger()),
                                     new Column("bigint", new FbBigint()),
                                     new Column("int128", firebirdSupportInfo.supportsInt128()
                                             ? new FbInt128() : new FbChar(40, FbEncoding.ASCII))),
-                            new TableFile(tableFile, false), ByteOrderType.AUTO),
+                            tableFile),
                     TableDerivationConfig.getDefault(),
-                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+                    createCsvFileConfig(csvFile));
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
@@ -261,9 +261,9 @@ class ExtTableIntegrationTests {
         Path configFile = forEachTempDir.resolve("verify-alignment.xml");
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
-                    new TableConfig(tableName, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    createTableConfig(tableName, columns, tableFile),
                     TableDerivationConfig.getDefault(),
-                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+                    createCsvFileConfig(csvFile));
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
@@ -296,7 +296,9 @@ class ExtTableIntegrationTests {
             smallint, 16
             """)
     void testWithExplicitConverter_parseIntegral(String typeName, int radix) throws Throwable {
-        assumeTrue("int128".equals(typeName) && firebirdSupportInfo.supportsInt128(), "Test requires INT128 support");
+        if ("int128".equals(typeName)) {
+            assumeTrue(firebirdSupportInfo.supportsInt128(), "Test requires INT128 support");
+        }
         assert radix == 10 || radix == 16 : "Test only works for radix 10 or 16 (due to available test data)";
         Path csvFile = radix == 10 ? idValueDecCsvFile : idValueHexCsvFile;
         var columns = List.of(integralNumber("Id", typeName, Converter.parseIntegralNumber(typeName, radix)));
@@ -304,9 +306,9 @@ class ExtTableIntegrationTests {
         Path configFile = forEachTempDir.resolve(configFilename(ID_VALUES_PREFIX));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
-                    new TableConfig(ID_VALUES_PREFIX, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    createTableConfig(ID_VALUES_PREFIX, columns, tableFile),
                     TableDerivationConfig.getDefault(),
-                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+                    createCsvFileConfig(csvFile));
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, ID_VALUES_PREFIX, csvFile, tableFile, configFile);
@@ -332,9 +334,9 @@ class ExtTableIntegrationTests {
         Path configFile = forEachTempDir.resolve(configFilename(testName));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
-                    new TableConfig(DATE_VALUES_PREFIX, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    createTableConfig(DATE_VALUES_PREFIX, columns, tableFile),
                     TableDerivationConfig.getDefault(),
-                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+                    createCsvFileConfig(csvFile));
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, DATE_VALUES_PREFIX, csvFile, tableFile, configFile);
@@ -362,9 +364,9 @@ class ExtTableIntegrationTests {
         Path configFile = forEachTempDir.resolve(configFilename(testName));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
-                    new TableConfig(TIME_VALUES_PREFIX, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    createTableConfig(TIME_VALUES_PREFIX, columns, tableFile),
                     TableDerivationConfig.getDefault(),
-                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+                    createCsvFileConfig(csvFile));
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, TIME_VALUES_PREFIX, csvFile, tableFile, configFile);
@@ -391,9 +393,9 @@ class ExtTableIntegrationTests {
         Path configFile = forEachTempDir.resolve(configFilename(testName));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
-                    new TableConfig(TIMESTAMP_VALUES_PREFIX, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    createTableConfig(TIMESTAMP_VALUES_PREFIX, columns, tableFile),
                     TableDerivationConfig.getDefault(),
-                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+                    createCsvFileConfig(csvFile));
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, TIMESTAMP_VALUES_PREFIX, csvFile, tableFile, configFile);
@@ -421,7 +423,7 @@ class ExtTableIntegrationTests {
         Path configFile = forEachTempDir.resolve("fixed-point-boundary.xml");
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
-                    new TableConfig(tableName,
+                    createTableConfig(tableName,
                             List.of(new Column("name", new FbChar(15, FbEncoding.ASCII)),
                                     new Column("numeric_4_2", new FbNumeric(4, 2, null)),
                                     new Column("numeric_9_2", new FbNumeric(9, 2, null)),
@@ -432,9 +434,9 @@ class ExtTableIntegrationTests {
                                     new Column("decimal_18_2", new FbDecimal(18, 2, null)),
                                     new Column("decimal_38_2", firebirdSupportInfo.supportsDecimalPrecision(38)
                                             ? new FbDecimal(38, 2, null) : new FbChar(41, FbEncoding.ASCII))),
-                            new TableFile(tableFile, false), ByteOrderType.AUTO),
+                            tableFile),
                     TableDerivationConfig.getDefault(),
-                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+                    createCsvFileConfig(csvFile));
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
@@ -467,9 +469,9 @@ class ExtTableIntegrationTests {
         Path configFile = forEachTempDir.resolve(configFilename(testName));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
-                    new TableConfig(prefix, columns, new TableFile(tableFile, false), ByteOrderType.AUTO),
+                    createTableConfig(prefix, columns, tableFile),
                     TableDerivationConfig.getDefault(),
-                    new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true));
+                    createCsvFileConfig(csvFile));
             configMapper.write(etgConfig, out);
         }
         createExternalTableFileFromExistingConfig(configFile, prefix, csvFile, tableFile, configFile);
@@ -478,7 +480,46 @@ class ExtTableIntegrationTests {
                 FIXED_POINT_VALUES_ROW_COUNT, EndColumn.Type.NONE);
     }
 
+    @Test
+    void testWithCustomCsvParser() throws Throwable {
+        Path csvFile = forEachTempDir.resolve("custom-csv-format.csv");
+        Path tableFile = registerForCleanup(externalTableFile("custom-csv-format.dat"));
+        Files.writeString(csvFile,
+                """
+                'COLUMN_1'\t'COLUMN_2'
+                VAL_1_1\tVAL_1_2
+                'VAL_2_1'\t'VAL_2_2'
+                'VAL_3#'_1'\t'VAL"3_2'
+                """);
+        var parserConfig = CsvParserConfig.custom(CharValue.of("APOS"), CharValue.of("TAB"), CharValue.of('#'), true,
+                false, false);
+        String tableName = "CUSTOM_CSV_FORMAT";
+        Path configFile = forEachTempDir.resolve("custom-csv-format.xml");
+
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    createTableConfig(tableName,
+                            List.of(new Column("COLUMN_1", new FbChar(15, FbEncoding.ASCII)),
+                                    new Column("COLUMN_2", new FbChar(15, FbEncoding.ASCII))),
+                            tableFile),
+                    TableDerivationConfig.getDefault(),
+                    createCsvFileConfig(csvFile).withParserConfig(parserConfig));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
+
+        assertExternalTable(configFile, tableName, csvFile, parserConfig, 3, EndColumn.Type.NONE);
+    }
+
     // TODO Maybe some or all of the following methods should be moved to test-common
+
+    private static CsvFileConfig createCsvFileConfig(Path csvFile) {
+        return new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true, CsvParserConfig.of());
+    }
+
+    private static TableConfig createTableConfig(String tableName, List<Column> columns, Path tableFile) {
+        return new TableConfig(tableName, columns, new TableFile(tableFile, false), ByteOrderType.AUTO);
+    }
 
     private static Column createColumn(String name, String columnType) {
         class Holder {
@@ -612,9 +653,23 @@ class ExtTableIntegrationTests {
                 rsmd -> {});
     }
 
+    private void assertExternalTable(Path configFile, String tableName, Path expectedDataCsvFile,
+            CsvParserConfig csvParserConfig, int expectedRowCount, EndColumn.Type expectedEndColumnType)
+            throws Throwable {
+        assertExternalTable(configFile, tableName, expectedDataCsvFile, csvParserConfig, expectedRowCount,
+                expectedEndColumnType, rsmd -> {});
+    }
+
     private void assertExternalTable(Path configFile, String tableName, Path expectedDataCsvFile, int expectedRowCount,
             EndColumn.Type expectedEndColumnType, ThrowingConsumer<ResultSetMetaData> resultSetMetaDataAssertions)
             throws Throwable {
+        assertExternalTable(configFile, tableName, expectedDataCsvFile, CsvParserConfig.of(), expectedRowCount,
+                expectedEndColumnType, resultSetMetaDataAssertions);
+    }
+
+    private void assertExternalTable(Path configFile, String tableName, Path expectedDataCsvFile,
+            CsvParserConfig csvParserConfig, int expectedRowCount, EndColumn.Type expectedEndColumnType,
+            ThrowingConsumer<ResultSetMetaData> resultSetMetaDataAssertions) throws Throwable {
         String ddl = getDdl(configFile);
         try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
              var statement = connection.createStatement()) {
@@ -624,13 +679,13 @@ class ExtTableIntegrationTests {
                     "select * from " + statement.enquoteIdentifier(tableName, true))) {
                 resultSetMetaDataAssertions.accept(rs.getMetaData());
                 // NOTE: We're using the "dec" value for comparison, because we compare as decimal values
-                assertResultSet(expectedDataCsvFile, expectedRowCount, rs, expectedEndColumnType);
+                assertResultSet(expectedDataCsvFile, csvParserConfig, expectedRowCount, rs, expectedEndColumnType);
             }
         }
     }
 
-    private void assertResultSet(Path expectedDataCsvFile, int expectedRowCount, ResultSet rs,
-            EndColumn.Type endColumnType) throws Exception {
+    private void assertResultSet(Path expectedDataCsvFile, CsvParserConfig csvParserConfig, int expectedRowCount,
+            ResultSet rs, EndColumn.Type endColumnType) throws Exception {
         final int rsColumnCount = rs.getMetaData().getColumnCount();
         final int expectedCsvColumnCount = endColumnType == EndColumn.Type.NONE ? rsColumnCount : rsColumnCount - 1;
         final String expectedEndColumnValue = switch (endColumnType) {
@@ -639,8 +694,8 @@ class ExtTableIntegrationTests {
             case NONE -> null;
         };
 
-        var csvFileDriver =
-                new CsvFile(InputResource.of(expectedDataCsvFile), new CsvFile.Config(StandardCharsets.UTF_8, 0, true));
+        var csvFileDriver = new CsvFile(InputResource.of(expectedDataCsvFile),
+                new CsvFile.Config(StandardCharsets.UTF_8, 0, true, csvParserConfig));
         try {
             ResultSetMetaData rsmd = rs.getMetaData();
             var resultSetVsCsvValidator = new AbstractRowProcessor() {

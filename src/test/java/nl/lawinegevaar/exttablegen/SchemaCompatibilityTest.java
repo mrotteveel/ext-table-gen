@@ -37,7 +37,7 @@ class SchemaCompatibilityTest {
                                     customers10Columns(EndColumn.Type.LF, FbEncoding.ISO8859_1),
                                     new TableFile(Path.of("output.dat"), false), ByteOrderType.AUTO),
                             TableDerivationConfig.getDefault().withMode(TableDerivationMode.NEVER),
-                            new CsvFileConfig(Path.of("input.csv"), UTF_8, true)),
+                            new CsvFileConfig(Path.of("input.csv"), UTF_8, true, CsvParserConfig.of())),
                     etgConfig,
                     "Unexpected configuration for version 1.0 file");
         }

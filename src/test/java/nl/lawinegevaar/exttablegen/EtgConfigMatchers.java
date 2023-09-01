@@ -149,6 +149,15 @@ final class EtgConfigMatchers {
         };
     }
 
+    static Matcher<CsvFileConfig> csvParserConfig(Matcher<CsvParserConfig> matcher) {
+        return new FeatureMatcher<>(matcher, "CSV parser config", "CSV parser config") {
+            @Override
+            protected CsvParserConfig featureValueOf(CsvFileConfig actual) {
+                return actual.parserConfig();
+            }
+        };
+    }
+
     private static class CsvFileConfigMatcher extends FeatureMatcher<EtgConfig, Optional<CsvFileConfig>> {
 
         CsvFileConfigMatcher(Matcher<? super Optional<CsvFileConfig>> subMatcher) {

@@ -260,7 +260,37 @@ final class ConfigMapper {
         csvFileType.setPath(csvFileConfig.path().toString());
         csvFileType.setCharset(csvFileConfig.charset().name());
         csvFileType.setHeaderRow(csvFileConfig.headerRow());
+        csvFileType.setCsvParser(toXmlCsvParserType(csvFileConfig.parserConfig()));
         return csvFileType;
+    }
+
+    private JAXBElement<? extends CsvParserType> toXmlCsvParserType(CsvParserConfig csvParserConfig) {
+        return switch (csvParserConfig.type()) {
+            case RFC_4180 -> toXmlRfc4180CsvParserType(csvParserConfig);
+            case CUSTOM -> toXmlCustomCsvParserType(csvParserConfig);
+        };
+    }
+
+    private JAXBElement<Rfc4180CsvParserType> toXmlRfc4180CsvParserType(CsvParserConfig csvParserConfig) {
+        Rfc4180CsvParserType parserType = factory.createRfc4180CsvParserType();
+        parserType.setQuoteChar(charValueAsStringOrNull(csvParserConfig.quoteChar()));
+        parserType.setSeparator(charValueAsStringOrNull(csvParserConfig.separator()));
+        return factory.createRfc4180CsvParser(parserType);
+    }
+
+    private static String charValueAsStringOrNull(CharValue charValue) {
+        return charValue != null ? charValue.toString() : null;
+    }
+
+    private JAXBElement<CustomCsvParserType> toXmlCustomCsvParserType(CsvParserConfig csvParserConfig) {
+        CustomCsvParserType parserType = factory.createCustomCsvParserType();
+        parserType.setQuoteChar(charValueAsStringOrNull(csvParserConfig.quoteChar()));
+        parserType.setSeparator(charValueAsStringOrNull(csvParserConfig.separator()));
+        parserType.setEscapeChar(charValueAsStringOrNull(csvParserConfig.escapeChar()));
+        parserType.setIgnoreLeadingWhiteSpace(csvParserConfig.ignoreLeadingWhiteSpace());
+        parserType.setIgnoreQuotations(csvParserConfig.ignoreQuotations());
+        parserType.setStrictQuotes(csvParserConfig.strictQuotes());
+        return factory.createCustomCsvParser(parserType);
     }
 
     EtgConfig fromXmlExtTableGenConfig(ExtTableGenConfig extTableGenConfig) {
@@ -441,9 +471,52 @@ final class ConfigMapper {
                     new CsvFileConfig(
                             csvFileType.getPath(),
                             csvFileType.getCharset(),
-                            csvFileType.isHeaderRow()));
+                            csvFileType.isHeaderRow(),
+                            fromXmlCsvParserConfig(csvFileType.getCsvParser())));
+        } catch (InvalidConfigurationException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new InvalidConfigurationException("Could not convert from XML CsvFileType", e);
+        }
+    }
+
+    private static CsvParserConfig fromXmlCsvParserConfig(JAXBElement<? extends CsvParserType> csvParserElement) {
+        return fromXmlCsvParserConfig(csvParserElement != null ? csvParserElement.getValue() : null);
+    }
+
+    private static CsvParserConfig fromXmlCsvParserConfig(CsvParserType csvParserType) {
+        if (csvParserType == null) {
+            return CsvParserConfig.of();
+        } else if (csvParserType instanceof Rfc4180CsvParserType rfc4180CsvParserType) {
+            return fromXmlRfc4180CsvParserType(rfc4180CsvParserType);
+        } else if (csvParserType instanceof CustomCsvParserType customCsvParserType) {
+            return fromXmlCustomCsvParserType(customCsvParserType);
+        } else {
+            throw new InvalidConfigurationException("Unsupported CsvParserType: " + csvParserType.getClass().getName());
+        }
+    }
+
+    private static CsvParserConfig fromXmlRfc4180CsvParserType(Rfc4180CsvParserType rfc4180CsvParserType) {
+        try {
+            return CsvParserConfig.rfc4180(
+                    CharValue.of(rfc4180CsvParserType.getQuoteChar()),
+                    CharValue.of(rfc4180CsvParserType.getSeparator()));
+        } catch (RuntimeException e) {
+            throw new InvalidConfigurationException("Could not convert from XML Rfc4180CsvParserType", e);
+        }
+    }
+
+    private static CsvParserConfig fromXmlCustomCsvParserType(CustomCsvParserType customCsvParserType) {
+        try {
+            return CsvParserConfig.custom(
+                    CharValue.of(customCsvParserType.getQuoteChar()),
+                    CharValue.of(customCsvParserType.getSeparator()),
+                    CharValue.of(customCsvParserType.getEscapeChar()),
+                    customCsvParserType.isIgnoreLeadingWhiteSpace(),
+                    customCsvParserType.isIgnoreQuotations(),
+                    customCsvParserType.isStrictQuotes());
+        } catch (RuntimeException e) {
+            throw new InvalidConfigurationException("Could not convert from XML CustomCsvParserType", e);
         }
     }
 

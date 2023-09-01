@@ -285,9 +285,38 @@
     </xs:complexType>
 
     <xs:complexType name="CsvFileType">
+        <xs:sequence>
+            <xs:element ref="csvParser" minOccurs="0"/>
+        </xs:sequence>
         <xs:attribute name="path" type="xs:string" use="required"/>
         <xs:attribute name="charset" type="xs:string" use="required"/>
         <xs:attribute name="headerRow" type="xs:boolean" default="true"/>
+    </xs:complexType>
+
+    <xs:element name="csvParser" type="CsvParserType" abstract="true"/>
+    <xs:element name="rfc4180CsvParser" type="Rfc4180CsvParserType" substitutionGroup="csvParser"/>
+    <xs:element name="customCsvParser" type="CustomCsvParserType" substitutionGroup="csvParser"/>
+
+    <xs:complexType name="CsvParserType" abstract="true">
+        <xs:attribute name="quoteChar" type="xs:string"/>
+        <xs:attribute name="separator" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="Rfc4180CsvParserType">
+        <xs:complexContent>
+            <xs:extension base="CsvParserType"/>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="CustomCsvParserType">
+        <xs:complexContent>
+            <xs:extension base="CsvParserType">
+                <xs:attribute name="escapeChar" type="xs:string"/>
+                <xs:attribute name="ignoreLeadingWhiteSpace" type="xs:boolean"/>
+                <xs:attribute name="ignoreQuotations" type="xs:boolean"/>
+                <xs:attribute name="strictQuotes" type="xs:boolean"/>
+            </xs:extension>
+        </xs:complexContent>
     </xs:complexType>
 
     <xs:complexType name="InformationalType">

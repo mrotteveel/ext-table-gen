@@ -9,7 +9,7 @@
 
 The "`Firebird External Table Generator`" or _ext-table-gen_ requires Java 17.
 We have not tested it on higher versions, but expect it to work on higher versions as well.
-We will only fix issues reported against Java versions which are in support according to the OpenJDK project, at the time of writing this -- June 2023, that means Java 17 and Java 20.
+We will only fix issues reported against Java versions which are in support according to the OpenJDK project, at the time of writing this -- August 2023, that means Java 17 and Java 20.
 
 [#install-dist]
 == Distribution package

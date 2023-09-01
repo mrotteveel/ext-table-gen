@@ -53,7 +53,7 @@ final class EtgConfigFixtures {
     }
 
     static CsvFileConfig testCsvFileConfig() {
-        return new CsvFileConfig(CSV_FILE_PATH, US_ASCII, CSV_FILE_HEADER);
+        return new CsvFileConfig(CSV_FILE_PATH, US_ASCII, CSV_FILE_HEADER, CsvParserConfig.of());
     }
 
 }

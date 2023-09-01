@@ -36,7 +36,7 @@ The version option (`-V` or `--version`) prints version information and then exi
 The CSV file option (`--csv-file=FILE`) specifies the path of the CSV file.
 `FILE` is the absolute or relative path to the file.
 Relative paths are resolved against the current working directory.
-The file must be in {link-rfc4180}[RFC 4180^] format.
+By default, the file will be parsed as {link-rfc4180}[RFC 4180^] format, but this can be configured with the <<ref-cmd-csv-parser>> and other commandline options.
 
 We recommend specifying absolute paths, as the configuration file will store the path as specified, which means that if a relative path is used, and the configuration file is then used from a different location, it may attempt to read a non-existent or wrong file.
 
@@ -63,6 +63,88 @@ If an existing external table configuration is used, the header row is skipped.
 If the first row is not a header, and the external table is derived, columns are assigned a name in the form of `++COLUMN_++__idx__`, where _idx_ is the 1-based index of the column (first is `COLUMN_1`, second is `COLUMN_2`, etc.).
 
 This option can override the XML config of <<ref-xml-csvfile,`/extTableGenConfig/csvFile[@headerRow]`>> if explicitly specified.
+
+[#ref-cmd-csv-parser]
+==== CSV parser (`--csv-parser`)
+
+The CSV parser option (`--csv-parser=++{RFC_4180|CUSTOM}++`) configures the CSV parser to use.
+The default is `RFC_4180`.
+
+Possible options are:
+
+[horizontal]
+`RFC_4180`:: selects RFC 4180 parser (implementation: `com.opencsv.RFC4180Parser`)
+`CUSTOM`:: selects the "`custom`" parser (implementation: `com.opencsv.CSVParser`)
+
+This option can override the XML config of <<ref-xml-customCsvParser,`/extTableGenConfig/csvFile/customCsvParser`>> or <<ref-xml-rfc4180CsvParser,`/extTableGenConfig/csvFile/rfc4180CsvParser`>> if explicitly specified.
+Applicable configuration properties from the overridden parser will be retained unless explicitly specified on the commandline.
+
+[#ref-cmd-csv-quote-char]
+==== CSV Quote Character (`--csv-quote-char`)
+
+The CSV quote character option (`--csv-parser=CHAR`) configures the quote character of the CSV parser.
+The default is double quote (`"`).
+
+`CHAR` can be a single character, a <<ref-common-char-mnemonic,character mnemonic>> or a <<ref-common-unicode-escape,Unicode escape>>.
+
+For the RFC 4180 parser, the quote character is used to quote values (e.g. `"value"` -> `value`), or to escape itself (e.g. `"quote ""in"" value"` -> `quote "in" value`).
+For the "`custom`" parser, the quote character is only used to quote values.
+
+This option can override the XML config of <<ref-xml-customCsvParser,`/extTableGenConfig/csvFile/customCsvParser[@quoteChar]`>> or <<ref-xml-rfc4180CsvParser,`/extTableGenConfig/csvFile/rfc4180CsvParser[@quoteChar]`>> if explicitly specified.
+
+[#ref-cmd-csv-separator]
+==== CSV Separator (`--csv-separator`)
+
+The CSV separator option (`--csv-separator=CHAR`) configures the separator character of the CSV parser.
+The default is comma (`,`).
+
+`CHAR` can be a single character, a <<ref-common-char-mnemonic,character mnemonic>> or a <<ref-common-unicode-escape,Unicode escape>>.
+
+The separator is the character used to separate columns in a row.
+
+This option can override the XML config of <<ref-xml-customCsvParser,`/extTableGenConfig/csvFile/customCsvParser[@separator]`>> or <<ref-xml-rfc4180CsvParser,`/extTableGenConfig/csvFile/rfc4180CsvParser[@separator]`>> if explicitly specified.
+
+[#ref-cmd-csv-escape-char]
+==== CSV Escape Character (`--csv-escape-char`)
+
+The CSV escape character option (`--csv-escape-char=CHAR`) configures the escape character of the "`custom`" CSV parser.
+The default -- for the "`custom`" parser -- is back-slash (`\`).
+
+`CHAR` can be a single character, a <<ref-common-char-mnemonic,character mnemonic>> or a <<ref-common-unicode-escape,Unicode escape>>.
+
+This option is ignored for the RFC 4180 parser, as that uses the quote character for escaping.
+
+This option can override the XML config of <<ref-xml-customCsvParser,`/extTableGenConfig/csvFile/customCsvParser[@escapeChar]`>> if explicitly specified.
+
+[#ref-cmd-csv-ignore-leading-ws]
+==== CSV Ignore Leading White Space (`--[no-]ignore-leading-white-space`)
+
+The CSV ignore leading white space Boolean option (`--[no-]ignore-leading-white-space`) configures if the "`custom`" CSV parser ignores leading spaces before a (quoted) value.
+The default -- for the "`custom`" parser -- is `true` (`--ignore-leading-white-space`).
+
+This option is ignored for the RFC 4180 parser.
+
+This option can override the XML config of <<ref-xml-customCsvParser,`/extTableGenConfig/csvFile/customCsvParser[@ignoreLeadingWhiteSpace]`>> if explicitly specified.
+
+[#ref-cmd-csv-ignore-quotations]
+==== CSV Ignore Quotations (`--[no-]ignore-quotations`)
+
+The CSV ignore quotations Boolean option (`--[no-]ignore-quotations`) configures if the "`custom`" CSV parser ignores quotations.
+The default -- for the "`custom`" parser -- is `false` (`--no-ignore-quotations`).
+
+This option is ignored for the RFC 4180 parser.
+
+This option can override the XML config of <<ref-xml-customCsvParser,`/extTableGenConfig/csvFile/customCsvParser[@ignoreQuotations]`>> if explicitly specified.
+
+[#ref-cmd-csv-strict-quotes]
+==== CSV Strict Quotes (`--[no-]strict-quotes`)
+
+The CSV strict quotes Boolean option (`--[no-]strict-quotes`) configures the "`strict quotes`" feature of the "`custom`" CSV parser (ignore characters outside quotes).
+The default -- for the "`custom`" parser -- is `false` (`--no-strict-quotes`).
+
+This option is ignored for the RFC 4180 parser.
+
+This option can override the XML config of <<ref-xml-customCsvParser,`/extTableGenConfig/csvFile/customCsvParser[@strictQuotes]`>> if explicitly specified.
 
 [#ref-cmd-output]
 === External table file configuration
@@ -98,7 +180,7 @@ We only allow this override if also specifying the external table file, so you'r
 
 Table derivation options configure how _ext-table-gen_ derives the external table definition.
 
-Apart from <<ref-cmd-table-name,`--table-name`>> and <<ref-cmd-byte-order,`--byte-order`>>, these options only have effect when a new external table definitions is generated (see also <<ref-cmd-table-derivation-mode>>).
+Apart from <<ref-cmd-table-name,`--table-name`>> and <<ref-cmd-byte-order,`--byte-order`>>, these options only have effect when a new external table definition is generated (see also <<ref-cmd-table-derivation-mode>>).
 
 [#ref-cmd-table-name]
 ==== Table name (`--table-name`)
@@ -143,10 +225,11 @@ It does not override the column encoding of existing columns (unless you use an 
 ===== Unsupported character sets
 
 Not all Firebird character sets are supported.
-`OCTETS` and `NONE` are not supported, as we need to know which character set to use to encode string data when writing the external table file, so we require that a "`real`" character set is specified as the column encoding.
-The character set `UNICODE_FSS` is not supported, as we can't support this variant of UTF-8 with the standard Java character sets.
-Other multibyte character sets (`SJIS_0208`, `EUCJ_0208`, `KSC_5601`, `BIG_5`, `GB_2312`, `GBK`, `CP943C`, `GB18030`) are not supported as we're not sure how to handle padding for these character sets (support may be added in the future after we've experimented with this).
-Character sets which have no equivalent Java character set are also not supported (e.g. `NEXT`, `CYRL`).
+
+* `OCTETS` and `NONE` are not supported, as we need to know which character set to use to encode string data when writing the external table file, so we require that a "`real`" character set is specified as the column encoding.
+* The character set `UNICODE_FSS` is not supported, as we can't support this variant of UTF-8 with the standard Java character sets.
+* Other multibyte character sets (`SJIS_0208`, `EUCJ_0208`, `KSC_5601`, `BIG_5`, `GB_2312`, `GBK`, `CP943C`, `GB18030`) are not supported as we're not sure how to handle padding for these character sets (support may be added in the future after we've experimented with this).
+* Character sets which have no equivalent Java character set are also not supported (e.g. `NEXT`, `CYRL`).
 
 [#ref-cmd-end-column]
 ==== End column type (`--end-column`)
@@ -338,7 +421,7 @@ At this time, _ext-table-gen_ supports the following column data types:
 [float#ref-xml-bigint]
 ====== `bigint`
 
-The `bigint` elements represents the Firebird datatype `BIGINT`.
+The `bigint` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-bigint[`BIGINT`^].
 
 .Attributes
 None
@@ -349,7 +432,7 @@ None
 [float#ref-xml-char]
 ====== `char`
 
-The `char` element represents the Firebird datatype `CHAR`.
+The `char` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-chartypes.html#fblangref40-datatypes-chartypes-char[`CHAR`^].
 
 .Attributes
 [horizontal]
@@ -366,8 +449,8 @@ The XSD uses an enum-type, `encoding`, with supported names.
 [float#ref-xml-date]
 ====== `date`
 
-The `date` element represents the Firebird datatype `DATE`.
-The Firebird `DATE` type only accepts values between 0001-01-1 and 9999-12-31.
+The `date` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-date[`DATE`^].
+The Firebird `DATE` type only accepts values between 0001-01-01 and 9999-12-31.
 
 The default conversion parses the string using the ISO 8601 calendar date format (pattern `yyyy-MM-dd`, or named pattern `ISO_LOCAL_DATE`).
 
@@ -382,7 +465,7 @@ None
 
 // NOTE: keep in-sync with ref-xml-numeric
 
-The `decimal` element represents the Firebird datatype `DECIMAL`.
+The `decimal` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-decimal[`DECIMAL`^].
 
 The default conversion parses the string using the rules described in the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^].
 Contrary to the `parseBigDecimal` converter, this converter can also parse strings in scientific notation.
@@ -439,7 +522,7 @@ For `DECIMAL`, that means:
 [float#ref-xml-int128]
 ====== `int128`
 
-The `int128` element represents the Firebird datatype `INT128`.
+The `int128` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-int128[`INT128`^].
 
 .Attributes
 None
@@ -450,7 +533,7 @@ None
 [float#ref-xml-integer]
 ====== `integer`
 
-The `integer` element represents the Firebird datatype `INTEGER`.
+The `integer` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-int[`INTEGER`^].
 
 .Attributes
 None
@@ -463,7 +546,7 @@ None
 
 // NOTE: keep in-sync with ref-xml-decimal
 
-The `numeric` element represents the Firebird datatype `NUMERIC`.
+The `numeric` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-numeric[`NUMERIC`^].
 
 The default conversion parses the string using the rules described in the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^].
 Contrary to the `parseBigDecimal` converter, this converter can also parse strings in scientific notation.
@@ -522,7 +605,7 @@ For `NUMERIC`, that means:
 [float#ref-xml-smallint]
 ====== `smallint`
 
-The `smallint` element represents the Firebird datatype `SMALLINT`.
+The `smallint` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-smallint[`SMALLINT`^].
 
 .Attributes
 None
@@ -533,7 +616,7 @@ None
 [float#ref-xml-time]
 ====== `time`
 
-The `time` elements represents the Firebird datatype `TIME [WITHOUT TIME ZONE]`.
+The `time` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-time[`TIME [WITHOUT TIME ZONE]`^].
 The Firebird `TIME` type only accepts values between 00:00:00.0000 and 23:59:59.9999.
 
 .Attributes
@@ -545,7 +628,7 @@ None
 [float#ref-xml-timestamp]
 ====== `timestamp`
 
-The `timestamp` elements represents the Firebird datatype `TIMESTAMP [WITHOUT TIME ZONE]`.
+The `timestamp` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-timestamp[`TIMESTAMP [WITHOUT TIME ZONE]`^].
 See also the limitations of <<ref-xml-date>> and <<ref-xml-time>>.
 
 For additional flexibility, the time part is not required.
@@ -740,6 +823,56 @@ As available character sets depend on the JVM and its classpath, this is not res
 Boolean specifying if the first row of the CSV file is a header row or a data row (optional; defaults to `true`)
 
 .Elements
+* CSV parser configuration -- optional +
+If absent, behaves as if an empty `rfc4180CsvParser` is specified. +
+One of:
+** <<ref-xml-rfc4180CsvParser>>
+** <<ref-xml-customCsvParser>>
+
+[#ref-xml-rfc4180CsvParser]
+==== `rfc4180CsvParser`
+
+The element `rfc4180CsvParser` specifies use of the RFC 4180 parser (implementation: `com.opencsv.RFC4180Parser`) and its configuration.
+
+.Attributes
+[horizontal]
+`quoteChar`::
+Quote character (optional, defaults to `"`). +
+Value can be a single character, a <<ref-common-char-mnemonic,character mnemonic>> or a <<ref-common-unicode-escape,Unicode escape>>.
+`separator`::
+Separator (optional, defaults to `,`). +
+Value can be a single character, a <<ref-common-char-mnemonic,character mnemonic>> or a <<ref-common-unicode-escape,Unicode escape>>.
+
+.Elements
+None
+
+[#ref-xml-customCsvParser]
+==== `customCsvParser`
+
+The element `customCsvParser` specifies use of the "`custom`" parser (implementation: `com.opencsv.CSVParser`) and its configuration.
+
+.Attributes
+[horizontal]
+`quoteChar`::
+Quote character (optional, defaults to `"`). +
+Value can be a single character, a <<ref-common-char-mnemonic,character mnemonic>> or a <<ref-common-unicode-escape,Unicode escape>>.
+`separator`::
+Separator (optional, defaults to `,`). +
+Value can be a single character, a <<ref-common-char-mnemonic,character mnemonic>> or a <<ref-common-unicode-escape,Unicode escape>>.
+`escapeChar`::
+Escape character (optional, defaults to `\`). +
+Value can be a single character, a <<ref-common-char-mnemonic,character mnemonic>> or a <<ref-common-unicode-escape,Unicode escape>>.
+`ignoreLeadingWhiteSpace`::
+Ignore leading white space before (quoted) value (optional, defaults to `true`).
+Boolean value.
+`ignoreQuotations`::
+Ignores quotes (optional, defaults to `false`).
+Boolean value.
+`strictQuotes`::
+Strict quotes, ignores values outside of quotes (optional, defaults to `false`).
+Boolean value.
+
+.Elements
 None
 
 [#ref-xml-informational]
@@ -765,3 +898,53 @@ None
 
 .Elements
 None
+
+[#ref-common-config]
+== Common Configuration
+
+The following definitions are shared between commandline and XML configuration
+
+[#ref-common-char-mnemonic]
+=== Character Mnemonics
+
+Character mnemonics are aliases for characters.
+They can be used for characters that are unprintable (e.g. the tab character) or are hard to use on the commandline or XML (e.g. the double quote character).
+
+Supported mnemonics are:
+
+[horizontal]
+`TAB`:: horizontal tab (Unicode U+0009)
+`SPACE`:: space (Unicode U+0020)
+`QUOT`:: quotation mark/double quote (``"``, Unicode U+0022)
+`APOS`:: apostrophe/single quote (``'``, Unicode U+0027)
+`GRAVE`:: grave accent/back tick (``{backtick}``, Unicode U+0060)
+
+[TIP]
+====
+If you're missing a mnemonic, use <<#ref-common-unicode-escape>>.
+
+If you think we need to add another mnemonic, please create an issue on {link-repo}[^].
+====
+
+[#ref-common-unicode-escape]
+=== Unicode Escape
+
+The Unicode escape can be used to represent any Unicode character supported by UTF-16footnote:[this limitation is in place because the escape character must be a Java `char`].
+
+Its format is:
+
+[listing,subs=+quotes]
+----
+<escape> =
+    U+<h><h><h><h>
+  | u+<h><h><h><h>
+
+<h> = __hexadecimal digit, one of 0-9, A-F, a-f__
+----
+
+For example:
+
+[listing]
+----
+U+20AC -- € (EURO SIGN)
+----

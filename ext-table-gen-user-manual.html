@@ -442,7 +442,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>Firebird External Table Generator: User Manual</h1>
 <div class="details">
 <span id="author" class="author">Mark Rotteveel</span><br>
-<span id="revdate">1.0</span>
+<span id="revdate">2.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -462,12 +462,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#usage-basic-csv">3.2. Generating an external table from CSV</a></li>
 <li><a href="#usage-config">3.3. Using configuration</a></li>
 <li><a href="#usage-workflow">3.4. Recommended workflow</a></li>
+<li><a href="#usage-csv-format">3.5. Customizing the CSV Format</a></li>
 </ul>
 </li>
 <li><a href="#ref">4. Reference</a>
 <ul class="sectlevel2">
 <li><a href="#ref-cmd">4.1. Commandline options</a></li>
 <li><a href="#ref-xml">4.2. XML configuration</a></li>
+<li><a href="#ref-common-config">4.3. Common Configuration</a></li>
 </ul>
 </li>
 <li><a href="#_appendices">Appendices</a>
@@ -495,7 +497,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="intro"><a class="anchor" href="#intro"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> is a commandline tool to convert <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> CSV files to <a href="https://www.firebirdsql.org/" target="_blank" rel="noopener">Firebird</a> external tables (a binary format for Firebird external table data).</p>
+<p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> is a commandline tool to convert <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> CSV files and CSV files with custom formats to <a href="https://www.firebirdsql.org/" target="_blank" rel="noopener">Firebird</a> external tables (a binary format for Firebird external table data).</p>
 </div>
 <div class="paragraph">
 <p>External tables are a good way for bulk-loading data into Firebird.
@@ -516,8 +518,72 @@ It is not always easy to create an appropriate external table file, and this is 
 </ul>
 </div>
 <div class="paragraph">
-<p>The current version only supports <code>CHAR</code> columns, which makes the generated file essentially a fixed-width text format.
-Future versions may introduce support for additional column types.</p>
+<p>By default, <em>ext-table-gen</em> derives tables with only <code>CHAR</code> columns.
+This makes the generated file essentially a fixed-width text format.
+However, you can modify the configuration file to make <em>ext-table-gen</em> generate columns of different types, in which case the file becomes a binary format.
+<em>ext-table-gen</em> supports the following types of columns:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>String types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>char</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Integral number types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>smallint</code></p>
+</li>
+<li>
+<p><code>integer</code></p>
+</li>
+<li>
+<p><code>bigint</code></p>
+</li>
+<li>
+<p><code>int128</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Exact numeric types (fixed point):</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>numeric</code></p>
+</li>
+<li>
+<p><code>decimal</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Datetime types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>date</code></p>
+</li>
+<li>
+<p><code>time</code> (without time zone)</p>
+</li>
+<li>
+<p><code>timestamp</code> (without time zone)</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>This user manual provides examples of use, and serves as reference documentation for the commandline options and XML format.</p>
@@ -535,7 +601,7 @@ Future versions may introduce support for additional column types.</p>
 <div class="paragraph">
 <p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> requires Java 17.
 We have not tested it on higher versions, but expect it to work on higher versions as well.
-We will only fix issues reported against Java versions which are in support according to the OpenJDK project, at the time of writing this&#8201;&#8212;&#8201;June 2023, that means Java 17 and Java 20.</p>
+We will only fix issues reported against Java versions which are in support according to the OpenJDK project, at the time of writing this&#8201;&#8212;&#8201;August 2023, that means Java 17 and Java 20.</p>
 </div>
 </div>
 <div class="sect2">
@@ -546,7 +612,7 @@ We will only fix issues reported against Java versions which are in support acco
 <div class="ulist">
 <ul>
 <li>
-<p><code>ext-table-gen-1.0.zip</code>&#8201;&#8212;&#8201;for Linux, macOS and Windows</p>
+<p><code>ext-table-gen-2.0.zip</code>&#8201;&#8212;&#8201;for Linux, macOS and Windows</p>
 </li>
 </ul>
 </div>
@@ -556,7 +622,7 @@ We will only fix issues reported against Java versions which are in support acco
 <div class="ulist">
 <ul>
 <li>
-<p><code>ext-table-gen-1.0</code>&#8201;&#8212;&#8201;root directory with application files</p>
+<p><code>ext-table-gen-2.0</code>&#8201;&#8212;&#8201;root directory with application files</p>
 <div class="ulist">
 <ul>
 <li>
@@ -599,7 +665,7 @@ Improvements are always welcome through pull requests.</p>
 <div class="paragraph">
 <div class="title">Windows</div>
 <p>When copying or extracting to <code>C:\Program Files\</code> or <code>C:\Program Files (x86)\</code>, be aware that the archive tool must be run as administrator.
-You can also use Explorer to open ZIP files, and copy or extract the <code>ext-table-gen-1.0</code> directory from the zip.</p>
+You can also use Explorer to open ZIP files, and copy or extract the <code>ext-table-gen-2.0</code> directory from the zip.</p>
 </div>
 <div class="paragraph">
 <div class="title">Linux/macOS</div>
@@ -664,7 +730,7 @@ On Linux, there is generally a common group (e.g. <code>firebird</code>) which c
 All files in the directories (and subdirectories) listed in <code>ExternalFileAccess</code> which are readable by the Firebird process can be read this way, and files which are writable can be modified (append only), and files can be created in directories which are writable.</p>
 </div>
 <div class="paragraph">
-<p>If you have a compromised database or Firebird server, it would be possible exfiltrate the contents of those files with a carefully crafted external table (or tables), and risks files that are writable by the Firebird server user to be modified (only by appending), or additional files to be introduced on your filesystem in directories where the server has write access.</p>
+<p>If you have a compromised database or Firebird server, it would be possible to exfiltrate the contents of those files with a carefully crafted external table (or tables), and risks files that are writable by the Firebird server user to be modified (only by appending), or additional files to be introduced on your filesystem in directories where the server has write access.</p>
 </div>
 <div class="paragraph">
 <p>To reduce these risks, follow these guidelines</p>
@@ -762,21 +828,22 @@ For (Linux) shells, use <code>\</code>.</p>
 <div class="sect2">
 <h3 id="usage-notes"><a class="anchor" href="#usage-notes"></a>3.1. General notes</h3>
 <div class="paragraph">
-<p><em>ext-table-gen</em> can only read CSV files in <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> format, with or without a header line.
-At this time, <em>ext-table-gen</em> does not support other CSV formats, and it does not offer any way to configure things like quote, escape or separator characters.</p>
+<p><em>ext-table-gen</em> by defaults reads CSV files in <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> format, with or without a header line.
+The commandline and XML file support configuring a different quote character and separator for the RFC 4180 parser (<code>com.opencsv.RFC4180Parser</code>), and configuring a different parser with more options (<code>com.opencsv.CSVParser</code>).
+See <a href="#usage-csv-format">Customizing the CSV Format</a> for more information.</p>
 </div>
 <div class="paragraph">
 <p>CSV files are assumed to be encoded in UTF-8.
 The character set can be explicitly configured using <a href="#ref-cmd-csv-charset"><code>--csv-charset=CHARSET</code></a>, where <code>CHARSET</code> is a Java character set name (e.g. <code>--csv-charset=windows-1252</code>).</p>
 </div>
 <div class="paragraph">
-<p>The external table definition derived from a CSV file uses only <code>CHAR</code> columns<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>, and the default character set is <code>ISO8859_1</code>.
+<p>The external table definition derived from a CSV file uses only <code>CHAR</code> columns, and the default character set is <code>ISO8859_1</code>.
 This can be overridden by specifying <a href="#ref-cmd-column-encoding"><code>--column-encoding=ENCODING</code></a>, where <code>ENCODING</code> is a Firebird character set name (e.g. <code>column-encoding=WIN1252</code>).
 Alternatively, an existing configuration file can be edited to change the column encoding.
-The configuration file allows you to configure the character set <em>per column</em>).</p>
+The configuration file allows you to configure the character set <em>per column</em>, and also allows you to use data types other than <code>CHAR</code>.</p>
 </div>
 <div class="paragraph">
-<p>Given the overhead of using <code>UTF8</code> columns (e.g. a <code>CHAR(1000) CHARACTER SET UTF8</code> column will occupy 4000 bytes in an external table), we recommend to use a single-byte character set where possible, and only define columns as <code>UTF8</code> when absolutely necessary.</p>
+<p>Given the overhead of using <code>UTF8</code> columns (e.g. a <code>CHAR(1000) CHARACTER SET UTF8</code> column will occupy 4000 bytes in an external table), we recommend using a single-byte character set where possible, and only defining columns as <code>UTF8</code> when absolutely necessary.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -801,7 +868,7 @@ In this manual, we use the <code>dat</code> extension, as that is a generally ac
 <p>The following demonstrates how you can use <em>ext-table-gen</em> to derive an external table definition and generate an external table file matching that definition.</p>
 </div>
 <div class="paragraph">
-<p>This example use a very simple CSV file, shown below.</p>
+<p>This example uses a very simple CSV file, shown below.</p>
 </div>
 <div class="listingblock">
 <div class="title">Example CSV file, persons.csv</div>
@@ -845,8 +912,8 @@ It is possible to use relative paths, but those will also appear as relative pat
 <div class="title">persons.xml</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"&gt;
-    &lt;externalTable name="DEFAULT_EXTERNAL_TABLE_NAME"&gt;
+&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0"&gt;
+    &lt;externalTable name="DEFAULT_EXTERNAL_TABLE_NAME" byteOrder="LITTLE_ENDIAN"&gt;
         &lt;columns&gt;
             &lt;column name="ID"&gt;
                 &lt;char length="1" encoding="ISO8859_1"/&gt;
@@ -865,7 +932,9 @@ It is possible to use relative paths, but those will also appear as relative pat
         &lt;tableFile path="C:\FirebirdData\exttables\persons.dat" overwrite="false"/&gt;
     &lt;/externalTable&gt;
     &lt;tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/&gt;
-    &lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"/&gt;
+    &lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"&gt;
+        &lt;rfc4180CsvParser/&gt;
+    &lt;/csvFile&gt;
     &lt;informational&gt;
         &lt;ddl&gt;create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\FirebirdData\exttables\persons.dat' (
   "ID" char(1) character set ISO8859_1,
@@ -913,6 +982,9 @@ This needs to be explicitly enabled with <a href="#ref-cmd-overwrite-table-file"
 <div class="olist arabic">
 <ol class="arabic">
 <li>
+<p>The datatype is always <code>CHAR</code>, while using a different data type may be more efficient (both from a storage perspective, and in loading it into Firebird)</p>
+</li>
+<li>
 <p>The maximum lengths of columns is derived from the CSV data.
 If you want to reuse the external table without dropping and recreating it, with data files derived from CSV files with the same layout, but columns have longer (or shorter!) maximum length, this will not work.</p>
 <div class="paragraph">
@@ -930,7 +1002,7 @@ Using <code>UTF8</code> would be a catch-all solution, but given its downsides (
 <p>These limitations can be addressed by modifying the configuration file and using it for subsequent calls to <em>ext-table-gen</em>.</p>
 </div>
 <div class="paragraph">
-<p>We&#8217;ll demonstrate this for length, and separately for character set.</p>
+<p>We&#8217;ll demonstrate this separately for length, character set, and using a different column type.</p>
 </div>
 <div class="sect3">
 <h4 id="usage-config-length"><a class="anchor" href="#usage-config-length"></a>3.3.1. Changing column lengths</h4>
@@ -958,14 +1030,14 @@ Using <code>UTF8</code> would be a catch-all solution, but given its downsides (
 </div>
 </div>
 <div class="paragraph">
-<p>Below, we modified the XML generated in section <a href="#usage-basic-csv">Generating an external table from CSV</a>, slightly increasing the lengths of each column<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>.</p>
+<p>Below, we modified the XML generated in section <a href="#usage-basic-csv">Generating an external table from CSV</a>, slightly increasing the lengths of each column<sup class="footnote">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup>.</p>
 </div>
 <div class="listingblock">
 <div class="title">Modified persons.xml</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"&gt;
-    &lt;externalTable name="DEFAULT_EXTERNAL_TABLE_NAME"&gt;
+&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0"&gt;
+    &lt;externalTable name="DEFAULT_EXTERNAL_TABLE_NAME" byteOrder="LITTLE_ENDIAN"&gt;
         &lt;columns&gt;
             &lt;column name="ID"&gt;
                 &lt;char length="3" encoding="ISO8859_1"/&gt;
@@ -984,7 +1056,9 @@ Using <code>UTF8</code> would be a catch-all solution, but given its downsides (
         &lt;tableFile path="C:\FirebirdData\exttables\persons.dat" overwrite="true"/&gt;
     &lt;/externalTable&gt;
     &lt;tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/&gt;
-    &lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"/&gt;
+    &lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"&gt;
+        &lt;rfc4180CsvParser/&gt;
+    &lt;/csvFile&gt;
     &lt;informational&gt;
         &lt;ddl&gt;create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\FirebirdData\exttables\persons.dat' (
   "ID" char(1) character set ISO8859_1,
@@ -1038,7 +1112,7 @@ We didn&#8217;t change the DDL, as we&#8217;ll demonstrate later how to regenera
 The examples up-to-now use only <code>CHAR</code> columns with the same character set, so these examples effectively behave as a fixed width text format.</p>
 </div>
 <div class="paragraph">
-<p>This changes once we start using multiple character sets, and&#8201;&#8212;&#8201;hopefully&#8201;&#8212;&#8201;in the future support other data types.</p>
+<p>This changes once we start using multiple character sets, or other data types.</p>
 </div>
 </td>
 </tr>
@@ -1070,8 +1144,8 @@ Be aware, the external table file specified in the configuration file will also 
 <div class="listingblock">
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"&gt;
-    &lt;externalTable name="DEFAULT_EXTERNAL_TABLE_NAME"&gt;
+&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0"&gt;
+    &lt;externalTable name="DEFAULT_EXTERNAL_TABLE_NAME" byteOrder="LITTLE_ENDIAN"&gt;
         &lt;columns&gt;
             &lt;column name="ID"&gt;
                 &lt;char length="3" encoding="ISO8859_1"/&gt;
@@ -1090,7 +1164,9 @@ Be aware, the external table file specified in the configuration file will also 
         &lt;tableFile path="C:\FirebirdData\exttables\persons.dat" overwrite="true"/&gt;
     &lt;/externalTable&gt;
     &lt;tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/&gt;
-    &lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"/&gt;
+    &lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"&gt;
+        &lt;rfc4180CsvParser/&gt;
+    &lt;/csvFile&gt;
     &lt;informational&gt;
         &lt;ddl&gt;create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\FirebirdData\exttables\persons.dat' (
   "ID" char(3) character set ISO8859_1,
@@ -1111,7 +1187,7 @@ Be aware, the external table file specified in the configuration file will also 
 <div class="sect3">
 <h4 id="usage-config-charset"><a class="anchor" href="#usage-config-charset"></a>3.3.3. Changing column character set</h4>
 <div class="paragraph">
-<p>Taking the initial example of <a href="#usage-basic-csv">Generating an external table from CSV</a>, say we also need to import someone with the Czech name Eliška<sup class="footnote">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>:</p>
+<p>Taking the initial example of <a href="#usage-basic-csv">Generating an external table from CSV</a>, say we also need to import someone with the Czech name Eliška<sup class="footnote">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>:</p>
 </div>
 <div class="listingblock">
 <div class="title">persons.csv with Czech name</div>
@@ -1146,7 +1222,7 @@ Be aware, the external table file specified in the configuration file will also 
 </div>
 </div>
 <div class="paragraph">
-<p>As you can see, the <code>š</code> has been replaced by a <code>?</code><sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>, because <code>š</code> cannot be encoded in ISO-8859-1.
+<p>As you can see, the <code>š</code> has been replaced by a <code>?</code><sup class="footnote">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>, because <code>š</code> cannot be encoded in ISO-8859-1.
 To be able to import the right character, we need to use a different encoding.
 In our simplified example, we could change the column to <code>ISO8859_2</code> or <code>WIN1250</code> (which supports Czech codepoints like <code>š</code>), but we&#8217;ll use <code>UTF8</code> to also demonstrate the effects of using a multibyte character set.</p>
 </div>
@@ -1157,8 +1233,8 @@ In our simplified example, we could change the column to <code>ISO8859_2</code> 
 <div class="title">persons.xml modified for UTF8</div>
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"&gt;
-    &lt;externalTable name="DEFAULT_EXTERNAL_TABLE_NAME"&gt;
+&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0"&gt;
+    &lt;externalTable name="DEFAULT_EXTERNAL_TABLE_NAME" byteOrder="LITTLE_ENDIAN"&gt;
         &lt;columns&gt;
             &lt;column name="ID"&gt;
                 &lt;char length="1" encoding="ISO8859_1"/&gt;
@@ -1177,7 +1253,9 @@ In our simplified example, we could change the column to <code>ISO8859_2</code> 
         &lt;tableFile path="C:\FirebirdData\exttables\persons.dat" overwrite="true"/&gt;
     &lt;/externalTable&gt;
     &lt;tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/&gt;
-    &lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"/&gt;
+    &lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"&gt;
+        &lt;rfc4180CsvParser/&gt;
+    &lt;/csvFile&gt;
     &lt;informational&gt;
         &lt;ddl&gt;create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\FirebirdData\exttables\persons.dat' (
   "ID" char(1) character set ISO8859_1,
@@ -1229,7 +1307,163 @@ UTF-8 encodes characters in 1 to 4 bytes, and Firebird requires the column to be
 <div class="paragraph">
 <p>Again, it is important to keep in mind, that by using two different and incompatible character sets in the external table file, it is now truly a <em>binary</em> file.
 In our example it just happens to work OK when shown as text, because all other characters are in ASCII, which is a subset of both ISO-8859-1 and UTF-8.
-If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would have been rendered as Unicode replacement characters (because the AsciiDoctor tool used to create this manual also reads our example data as UTF-8).</p>
+If some other column had ISO-8859-1 characters beyond 0x7f, they would have been rendered as Unicode replacement characters (because the AsciiDoctor tool used to create this manual also reads our example data as UTF-8).</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="usage-config-datatype"><a class="anchor" href="#usage-config-datatype"></a>3.3.4. Using a different column data type</h4>
+<div class="paragraph">
+<p>The default configuration file derived from a CSV file only uses <code>CHAR</code> columns.
+It can be more efficient&#8201;&#8212;&#8201;both in terms of storage space and for performance of loading the data into Firebird&#8201;&#8212;&#8201;to use a different datatype.</p>
+</div>
+<div class="paragraph">
+<p>In this example, we&#8217;ll change the data type of the <code>ID</code> column from a <code>CHAR(1)</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;column name="ID"&gt;
+    &lt;char length="1" encoding="ISO8859_1"/&gt;
+&lt;/column&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>to a <code>SMALLINT</code></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;column name="ID"&gt;
+    &lt;smallint/&gt;
+&lt;/column&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For a full list of possible data types and their attributes, see <a href="#ref-xml-datatype">datatype</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you change the data type to anything other than <code>char</code>, the generated file becomes truly <em>binary</em>.
+Having an end-column makes less sense for this type of file, so we recommend removing it.</p>
+</div>
+<div class="paragraph">
+<p>Taking the original example from <a href="#usage-basic-csv">Generating an external table from CSV</a>, modifying it like above, and then regenerating the file as described in <a href="#usage-config-regen">Regenerating the configuration file</a> results in the following file:</p>
+</div>
+<div class="listingblock">
+<div class="title">persons.xml with ID changed to smallint, and no end-column</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
+&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="2.0"&gt;
+    &lt;externalTable name="DEFAULT_EXTERNAL_TABLE_NAME" byteOrder="LITTLE_ENDIAN"&gt;
+        &lt;columns&gt;
+            &lt;column name="ID"&gt;
+                &lt;smallint/&gt;
+            &lt;/column&gt;
+            &lt;column name="Lastname"&gt;
+                &lt;char length="4" encoding="ISO8859_1"/&gt;
+            &lt;/column&gt;
+            &lt;column name="Firstname"&gt;
+                &lt;char length="7" encoding="ISO8859_1"/&gt;
+            &lt;/column&gt;
+            &lt;column name="Email"&gt;
+                &lt;char length="19" encoding="ISO8859_1"/&gt;
+            &lt;/column&gt;
+        &lt;/columns&gt;
+        &lt;tableFile path="C:\FirebirdData\exttables\persons.dat" overwrite="false"/&gt;
+    &lt;/externalTable&gt;
+    &lt;tableDerivation columnEncoding="ISO8859_1" endColumnType="LF"/&gt;
+    &lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"&gt;
+        &lt;rfc4180CsvParser/&gt;
+    &lt;/csvFile&gt;
+    &lt;informational&gt;
+        &lt;ddl&gt;create table "DEFAULT_EXTERNAL_TABLE_NAME" external file 'C:\FirebirdData\exttables\persons.dat' (
+  "ID" smallint,
+  "Lastname" char(4) character set ISO8859_1,
+  "Firstname" char(7) character set ISO8859_1,
+  "Email" char(19) character set ISO8859_1
+);
+&lt;/ddl&gt;
+    &lt;/informational&gt;
+&lt;/extTableGenConfig&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For data types other than <code>char</code> the <code>byteOrder</code> is important for determining how to write out data.
+Absence of <code>byteOrder</code> will use <code>AUTO</code>, but when writing the configuration file, it will report the byte-order of the system that created the file.
+Specify <code>byteOrder="AUTO"</code> to use the endianness of the system where <em>ext-table-gen</em> is run.
+However, if you generate the table file on a little-endian machine, while your Firebird server runs on a big-endian machine (or vice-versa), you&#8217;ll need to set the <code>byteOrder</code> to match the endianness of the Firebird server.</p>
+</div>
+<div class="paragraph">
+<p>See <a href="#ref-xml-externaltable"><code>externalTable</code></a> for more information on <code>byteOrder</code>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="usage-config-converter"><a class="anchor" href="#usage-config-converter"></a>3.3.5. Using a different data type conversion</h4>
+<div class="paragraph">
+<p>Each data type has a default conversion from the CSV string value to a Firebird data type value.
+This default conversion is not always suitable.
+For example, a CSV with hexadecimal string values for integers cannot be read as an <code>integer</code>, because the default conversion uses radix 10.</p>
+</div>
+<div class="paragraph">
+<p>To address this, the data type elements in the configuration have an optional element, <a href="#ref-xml-converter"><code>converter</code></a>, to specify a conversion using a <em>converter step</em>.
+We&#8217;ll provide examples for each <em>converter step</em> below.</p>
+</div>
+<div class="sect4">
+<h5 id="usage-config-parsebigdecimal"><a class="anchor" href="#usage-config-parsebigdecimal"></a><code>parseBigDecimal</code></h5>
+<div class="paragraph">
+<p>The converter step <a href="#ref-xml-parsebigdecimal"><code>parseBigDecimal</code></a> can be used to specify a locale for converter CSV values to exact numeric values.</p>
+</div>
+<div class="paragraph">
+<p>For example, to convert a number with <code>.</code> as the grouping symbol and <code>,</code> as the decimal separator (e.g. <code>"12.345,67"</code>), use the following data type definition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;decimal precision="9" scale="2"&gt;
+    &lt;converter&gt;
+        &lt;parseBigDecimal locale="nl-NL"/&gt;
+    &lt;/converter&gt;
+&lt;/decimal&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The allowed range of values is restricted by the enclosing data type and its precision (or more precisely, the backing datatype derived from the precision).</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="usage-config-parsedatetime"><a class="anchor" href="#usage-config-parsedatetime"></a><code>parseDatetime</code></h5>
+<div class="paragraph">
+<p>The converter step <a href="#ref-xml-parsedatetime"><code>parseDatetime</code></a> can be used to specify a different pattern and locale for converting CSV values to datetime values.</p>
+</div>
+<div class="paragraph">
+<p>For example, to convert a date in <code>d MMMM yyyy</code> format in Dutch (e.g. <code>15 juli 2023</code>), use the following data type definition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;date&gt;
+    &lt;converter&gt;
+        &lt;parseDatetime pattern="d MMMM yyyy" locale="nl-NL"/&gt;
+    &lt;/converter&gt;
+&lt;/date&gt;</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="usage-config-parseintegralnumber"><a class="anchor" href="#usage-config-parseintegralnumber"></a><code>parseIntegralNumber</code></h5>
+<div class="paragraph">
+<p>The converter step <a href="#ref-xml-parseintegralnumber"><code>parseIntegralNumber</code></a> can be used to specify a different radix for converting CSV values to integral numbers.</p>
+</div>
+<div class="paragraph">
+<p>For example, to convert integer values in radix 16 instead of radix 10, use the following data type definition:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;integer&gt;
+    &lt;converter&gt;
+        &lt;parseIntegralNumber radix="16"/&gt;
+    &lt;/converter&gt;
+&lt;/integer&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The allowed range of values is restricted by the enclosing data type.</p>
+</div>
 </div>
 </div>
 </div>
@@ -1243,7 +1477,7 @@ If some of the other columns had ISO-8859-1 characters beyond 0x7f, they would h
 You may need to use <a href="#ref-cmd-column-encoding"><code>--column-encoding</code></a> if you need something other than <code>ISO8859_1</code> for the external table columns, and <a href="#ref-cmd-csv-charset"><code>--csv-charset</code></a> if the CSV file is not encoded in ASCII or UTF-8.</p>
 </div>
 <div class="paragraph">
-<p>For repeated imports, or where multiple character sets are needed, we recommend the following steps:</p>
+<p>For repeated imports, or where multiple character sets or other data types are needed, we recommend the following steps:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -1251,10 +1485,16 @@ You may need to use <a href="#ref-cmd-column-encoding"><code>--column-encoding</
 <p>Generate a config file using <a href="#usage-basic-csv">Generating an external table from CSV</a>,</p>
 </li>
 <li>
-<p>Tweak the configuration file to increase columns lengths to expected maximums (see <a href="#usage-config-length">Changing column lengths</a>),</p>
+<p>Increase columns lengths to expected maximums (see <a href="#usage-config-length">Changing column lengths</a>),</p>
 </li>
 <li>
 <p>If needed, change the encoding of columns (see <a href="#usage-config-charset">Changing column character set</a>),</p>
+</li>
+<li>
+<p>Determine if there are more appropriate data types for columns and change the type if needed (see <a href="#usage-config-datatype">Using a different column data type</a>),</p>
+</li>
+<li>
+<p>Determine if a custom converter is needed (see <a href="#usage-config-converter">Using a different data type conversion</a>),</p>
 </li>
 <li>
 <p>Finally, regenerate the config file (see <a href="#usage-config-regen">Regenerating the configuration file</a>) for up-to-date DDL.</p>
@@ -1302,6 +1542,169 @@ You may need to use <a href="#ref-cmd-column-encoding"><code>--column-encoding</
 <p>If a CSV file changes incompatibly (e.g. too wide columns, or different number of columns) or has inconsistent column counts, the import will fail, but the external table file will have been overwritten with valid row data before the failing row.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="usage-csv-format"><a class="anchor" href="#usage-csv-format"></a>3.5. Customizing the CSV Format</h3>
+<div class="paragraph">
+<p>By default, <em>ext-table-gen</em> reads CSV files in <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> format.</p>
+</div>
+<div class="paragraph">
+<p>It is possible to configure the RFC 4180 parser with the following options:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Quote character (used to enclose values, and to escape itself, default is <code>"</code>)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Commandline&#8201;&#8212;&#8201;<a href="#ref-cmd-csv-quote-char"><code>--csv-quote-char=CHAR</code></a></p>
+</li>
+<li>
+<p>XML&#8201;&#8212;&#8201;attribute <code>quoteChar="CHAR"</code> on element <a href="#ref-xml-rfc4180CsvParser"><code>rfc4180CsvParser</code></a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Separator (used to separate values, default is <code>,</code>)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Commandline&#8201;&#8212;&#8201;<a href="#ref-cmd-csv-separator"><code>--csv-separator=CHAR</code></a></p>
+</li>
+<li>
+<p>XML&#8201;&#8212;&#8201;attribute <code>separator="CHAR"</code> on element <a href="#ref-xml-rfc4180CsvParser"><code>rfc4180CsvParser</code></a></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The <code>CHAR</code> option accepts any single character value, a <a href="#ref-common-char-mnemonic">character mnemonic</a>, or a <a href="#ref-common-unicode-escape">Unicode escape</a>.</p>
+</div>
+<div class="paragraph">
+<p>You can also select a different CSV parser (default is <code>RFC_4180</code>, or the parser specified in <code>--config-in</code>):</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Commandline: <a href="#ref-cmd-csv-parser"><code>--csv-parser={RFC_4180|CUSTOM}</code></a></p>
+</li>
+<li>
+<p>XML: element <a href="#ref-xml-rfc4180CsvParser"><code>rfc4180CsvParser</code></a> or <a href="#ref-xml-customCsvParser"><code>customCsvParser</code></a> in <a href="#ref-xml-csvfile"><code>csvFile</code></a></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The custom parser supports more options:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Quote character (used to enclose values, default is <code>"</code>)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Commandline&#8201;&#8212;&#8201;<a href="#ref-cmd-csv-quote-char"><code>--csv-quote-char=CHAR</code></a></p>
+</li>
+<li>
+<p>XML&#8201;&#8212;&#8201;attribute <code>quoteChar="CHAR"</code> on element <a href="#ref-xml-customCsvParser"><code>customCsvParser</code></a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Separator (used to separate values, default is <code>,</code>)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Commandline&#8201;&#8212;&#8201;<a href="#ref-cmd-csv-separator"><code>--csv-separator=CHAR</code></a></p>
+</li>
+<li>
+<p>XML&#8201;&#8212;&#8201;attribute <code>separator="CHAR"</code> on element <a href="#ref-xml-customCsvParser"><code>customCsvParser</code></a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Escape character (used to escape characters, default is <code>\</code>)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Commandline&#8201;&#8212;&#8201;<a href="#ref-cmd-csv-escape-char"><code>--csv-escape-char=CHAR</code></a></p>
+</li>
+<li>
+<p>XML&#8201;&#8212;&#8201;attribute <code>escapeChar="CHAR"</code> on element <a href="#ref-xml-customCsvParser"><code>customCsvParser</code></a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Ignore leading white space (ignores/skips white space before a value, default is <code>true</code>)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Commandline&#8201;&#8212;&#8201;<a href="#ref-cmd-csv-ignore-leading-ws"><code>--[no-]ignore-leading-white-space</code></a></p>
+</li>
+<li>
+<p>XML&#8201;&#8212;&#8201;attribute <code>ignoreLeadingWhiteSpace="{true|false}"</code> on element <a href="#ref-xml-customCsvParser"><code>customCsvParser</code></a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Ignore quotations (quotation marks are ignored, default is <code>false</code>)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Commandline&#8201;&#8212;&#8201;<a href="#ref-cmd-csv-ignore-quotations"><code>--[no-]ignore-quotations</code></a></p>
+</li>
+<li>
+<p>XML&#8201;&#8212;&#8201;attribute <code>ignoreQuotations="{true|false}"</code> on element <a href="#ref-xml-customCsvParser"><code>customCsvParser</code></a></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Strict quotes (OpenCSV strict quotes behaviour, default is <code>false</code>)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Commandline&#8201;&#8212;&#8201;<a href="#ref-cmd-csv-strict-quotes"><code>--[no-]strict-quotes</code></a></p>
+</li>
+<li>
+<p>XML&#8201;&#8212;&#8201;attribute <code>strictQuotes="{true|false}"</code> on element <a href="#ref-xml-customCsvParser"><code>customCsvParser</code></a>`</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>For example, to import a custom CSV with single quotes, tab as a separator and <code>#</code> as the escape symbol.</p>
+</div>
+<div class="paragraph">
+<p>On the commandline:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>ext-table-gen --csv-file=persons.csv --table-file=persons.dat ^
+  --csv-parser=CUSTOM --csv-quote-char=APOS
+  --csv-separator=TAB --csv-escape-char=#</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In the configuration file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;csvFile path="C:\FirebirdData\csv\persons.csv" charset="UTF-8" headerRow="true"&gt;
+  &lt;customCsvParser quoteChar="APOS" separator="TAB" escapeChar="#"/&gt;
+&lt;/csvFile&gt;</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1341,7 +1744,7 @@ The general usage summary is also printed for command-line errors.</p>
 <p>The CSV file option (<code>--csv-file=FILE</code>) specifies the path of the CSV file.
 <code>FILE</code> is the absolute or relative path to the file.
 Relative paths are resolved against the current working directory.
-The file must be in <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> format.</p>
+By default, the file will be parsed as <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> format, but this can be configured with the <a href="#ref-cmd-csv-parser">CSV parser (<code>--csv-parser</code>)</a> and other commandline options.</p>
 </div>
 <div class="paragraph">
 <p>We recommend specifying absolute paths, as the configuration file will store the path as specified, which means that if a relative path is used, and the configuration file is then used from a different location, it may attempt to read a non-existent or wrong file.</p>
@@ -1376,6 +1779,128 @@ If an existing external table configuration is used, the header row is skipped.<
 </div>
 <div class="paragraph">
 <p>This option can override the XML config of <a href="#ref-xml-csvfile"><code>/extTableGenConfig/csvFile[@headerRow]</code></a> if explicitly specified.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="ref-cmd-csv-parser"><a class="anchor" href="#ref-cmd-csv-parser"></a>CSV parser (<code>--csv-parser</code>)</h5>
+<div class="paragraph">
+<p>The CSV parser option (<code>--csv-parser={RFC_4180|CUSTOM}</code>) configures the CSV parser to use.
+The default is <code>RFC_4180</code>.</p>
+</div>
+<div class="paragraph">
+<p>Possible options are:</p>
+</div>
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>RFC_4180</code>
+</td>
+<td class="hdlist2">
+<p>selects RFC 4180 parser (implementation: <code>com.opencsv.RFC4180Parser</code>)</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>CUSTOM</code>
+</td>
+<td class="hdlist2">
+<p>selects the &#8220;custom&#8221; parser (implementation: <code>com.opencsv.CSVParser</code>)</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>This option can override the XML config of <a href="#ref-xml-customCsvParser"><code>/extTableGenConfig/csvFile/customCsvParser</code></a> or <a href="#ref-xml-rfc4180CsvParser"><code>/extTableGenConfig/csvFile/rfc4180CsvParser</code></a> if explicitly specified.
+Applicable configuration properties from the overridden parser will be retained unless explicitly specified on the commandline.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="ref-cmd-csv-quote-char"><a class="anchor" href="#ref-cmd-csv-quote-char"></a>CSV Quote Character (<code>--csv-quote-char</code>)</h5>
+<div class="paragraph">
+<p>The CSV quote character option (<code>--csv-parser=CHAR</code>) configures the quote character of the CSV parser.
+The default is double quote (<code>"</code>).</p>
+</div>
+<div class="paragraph">
+<p><code>CHAR</code> can be a single character, a <a href="#ref-common-char-mnemonic">character mnemonic</a> or a <a href="#ref-common-unicode-escape">Unicode escape</a>.</p>
+</div>
+<div class="paragraph">
+<p>For the RFC 4180 parser, the quote character is used to quote values (e.g. <code>"value"</code> &#8594; <code>value</code>), or to escape itself (e.g. <code>"quote ""in"" value"</code> &#8594; <code>quote "in" value</code>).
+For the &#8220;custom&#8221; parser, the quote character is only used to quote values.</p>
+</div>
+<div class="paragraph">
+<p>This option can override the XML config of <a href="#ref-xml-customCsvParser"><code>/extTableGenConfig/csvFile/customCsvParser[@quoteChar]</code></a> or <a href="#ref-xml-rfc4180CsvParser"><code>/extTableGenConfig/csvFile/rfc4180CsvParser[@quoteChar]</code></a> if explicitly specified.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="ref-cmd-csv-separator"><a class="anchor" href="#ref-cmd-csv-separator"></a>CSV Separator (<code>--csv-separator</code>)</h5>
+<div class="paragraph">
+<p>The CSV separator option (<code>--csv-separator=CHAR</code>) configures the separator character of the CSV parser.
+The default is comma (<code>,</code>).</p>
+</div>
+<div class="paragraph">
+<p><code>CHAR</code> can be a single character, a <a href="#ref-common-char-mnemonic">character mnemonic</a> or a <a href="#ref-common-unicode-escape">Unicode escape</a>.</p>
+</div>
+<div class="paragraph">
+<p>The separator is the character used to separate columns in a row.</p>
+</div>
+<div class="paragraph">
+<p>This option can override the XML config of <a href="#ref-xml-customCsvParser"><code>/extTableGenConfig/csvFile/customCsvParser[@separator]</code></a> or <a href="#ref-xml-rfc4180CsvParser"><code>/extTableGenConfig/csvFile/rfc4180CsvParser[@separator]</code></a> if explicitly specified.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="ref-cmd-csv-escape-char"><a class="anchor" href="#ref-cmd-csv-escape-char"></a>CSV Escape Character (<code>--csv-escape-char</code>)</h5>
+<div class="paragraph">
+<p>The CSV escape character option (<code>--csv-escape-char=CHAR</code>) configures the escape character of the &#8220;custom&#8221; CSV parser.
+The default&#8201;&#8212;&#8201;for the &#8220;custom&#8221; parser&#8201;&#8212;&#8201;is back-slash (<code>\</code>).</p>
+</div>
+<div class="paragraph">
+<p><code>CHAR</code> can be a single character, a <a href="#ref-common-char-mnemonic">character mnemonic</a> or a <a href="#ref-common-unicode-escape">Unicode escape</a>.</p>
+</div>
+<div class="paragraph">
+<p>This option is ignored for the RFC 4180 parser, as that uses the quote character for escaping.</p>
+</div>
+<div class="paragraph">
+<p>This option can override the XML config of <a href="#ref-xml-customCsvParser"><code>/extTableGenConfig/csvFile/customCsvParser[@escapeChar]</code></a> if explicitly specified.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="ref-cmd-csv-ignore-leading-ws"><a class="anchor" href="#ref-cmd-csv-ignore-leading-ws"></a>CSV Ignore Leading White Space (<code>--[no-]ignore-leading-white-space</code>)</h5>
+<div class="paragraph">
+<p>The CSV ignore leading white space Boolean option (<code>--[no-]ignore-leading-white-space</code>) configures if the &#8220;custom&#8221; CSV parser ignores leading spaces before a (quoted) value.
+The default&#8201;&#8212;&#8201;for the &#8220;custom&#8221; parser&#8201;&#8212;&#8201;is <code>true</code> (<code>--ignore-leading-white-space</code>).</p>
+</div>
+<div class="paragraph">
+<p>This option is ignored for the RFC 4180 parser.</p>
+</div>
+<div class="paragraph">
+<p>This option can override the XML config of <a href="#ref-xml-customCsvParser"><code>/extTableGenConfig/csvFile/customCsvParser[@ignoreLeadingWhiteSpace]</code></a> if explicitly specified.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="ref-cmd-csv-ignore-quotations"><a class="anchor" href="#ref-cmd-csv-ignore-quotations"></a>CSV Ignore Quotations (<code>--[no-]ignore-quotations</code>)</h5>
+<div class="paragraph">
+<p>The CSV ignore quotations Boolean option (<code>--[no-]ignore-quotations</code>) configures if the &#8220;custom&#8221; CSV parser ignores quotations.
+The default&#8201;&#8212;&#8201;for the &#8220;custom&#8221; parser&#8201;&#8212;&#8201;is <code>false</code> (<code>--no-ignore-quotations</code>).</p>
+</div>
+<div class="paragraph">
+<p>This option is ignored for the RFC 4180 parser.</p>
+</div>
+<div class="paragraph">
+<p>This option can override the XML config of <a href="#ref-xml-customCsvParser"><code>/extTableGenConfig/csvFile/customCsvParser[@ignoreQuotations]</code></a> if explicitly specified.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="ref-cmd-csv-strict-quotes"><a class="anchor" href="#ref-cmd-csv-strict-quotes"></a>CSV Strict Quotes (<code>--[no-]strict-quotes</code>)</h5>
+<div class="paragraph">
+<p>The CSV strict quotes Boolean option (<code>--[no-]strict-quotes</code>) configures the &#8220;strict quotes&#8221; feature of the &#8220;custom&#8221; CSV parser (ignore characters outside quotes).
+The default&#8201;&#8212;&#8201;for the &#8220;custom&#8221; parser&#8201;&#8212;&#8201;is <code>false</code> (<code>--no-strict-quotes</code>).</p>
+</div>
+<div class="paragraph">
+<p>This option is ignored for the RFC 4180 parser.</p>
+</div>
+<div class="paragraph">
+<p>This option can override the XML config of <a href="#ref-xml-customCsvParser"><code>/extTableGenConfig/csvFile/customCsvParser[@strictQuotes]</code></a> if explicitly specified.</p>
 </div>
 </div>
 </div>
@@ -1428,7 +1953,7 @@ In other words, it does not override the XML config.</p>
 <p>Table derivation options configure how <em>ext-table-gen</em> derives the external table definition.</p>
 </div>
 <div class="paragraph">
-<p>Apart from <a href="#ref-cmd-table-name"><code>--table-name</code></a>, these options only have effect when a new external table definitions is generated (see also <a href="#ref-cmd-table-derivation-mode">Table derivation mode (<code>--table-derivation-mode</code>)</a>).</p>
+<p>Apart from <a href="#ref-cmd-table-name"><code>--table-name</code></a> and <a href="#ref-cmd-byte-order"><code>--byte-order</code></a>, these options only have effect when a new external table definition is generated (see also <a href="#ref-cmd-table-derivation-mode">Table derivation mode (<code>--table-derivation-mode</code>)</a>).</p>
 </div>
 <div class="sect4">
 <h5 id="ref-cmd-table-name"><a class="anchor" href="#ref-cmd-table-name"></a>Table name (<code>--table-name</code>)</h5>
@@ -1440,6 +1965,48 @@ When no name is specified through <code>--table-name</code> or the XML file, the
 </div>
 <div class="paragraph">
 <p>This option can override the XML config of <a href="#ref-xml-externaltable"><code>/extTableGenConfig/externalTable[@name]</code></a> if explicitly specified.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="ref-cmd-byte-order"><a class="anchor" href="#ref-cmd-byte-order"></a>Byte order (<code>--byte-order</code>)</h5>
+<div class="paragraph">
+<p>The byte order option (<code>--byte-order=ORDER</code>) specifies the byte order of the external table.
+<code>ORDER</code> can have value:</p>
+</div>
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>BIG_ENDIAN</code>
+</td>
+<td class="hdlist2">
+<p>big-endian</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>LITTLE_ENDIAN</code>
+</td>
+<td class="hdlist2">
+<p>little-endian</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>AUTO</code>
+</td>
+<td class="hdlist2">
+<p>automatically select based on the byte order of the runtime platform</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The default is the effective value of <code>AUTO</code> (that is, either <code>BIG_ENDIAN</code> or <code>LITTLE_ENDIAN</code>).
+Explicitly specifying <code>AUTO</code> will store  <code>AUTO</code> in the configuration file.</p>
+</div>
+<div class="paragraph">
+<p>This option can override the XML config of <a href="#ref-xml-externaltable"><code>/extTableGenConfig/externalTable[@byteOrder]</code></a> if explicitly specified.</p>
 </div>
 </div>
 <div class="sect4">
@@ -1456,11 +2023,23 @@ It does not override the column encoding of existing columns (unless you use an 
 <div class="sect5">
 <h6 id="ref-unsupported-encoding"><a class="anchor" href="#ref-unsupported-encoding"></a>Unsupported character sets</h6>
 <div class="paragraph">
-<p>Not all Firebird character sets are supported.
-<code>OCTETS</code> and <code>NONE</code> are not supported, as we need to know which character set to use to encode string data when writing the external table file, so we require that a &#8220;real&#8221; character set is specified as the column encoding.
-The character set <code>UNICODE_FSS</code> is not supported, as we can&#8217;t support this variant of UTF-8 with the standard Java character sets.
-Other multibyte character sets (<code>SJIS_0208</code>, <code>EUCJ_0208</code>, <code>KSC_5601</code>, <code>BIG_5</code>, <code>GB_2312</code>, <code>GBK</code>, <code>CP943C</code>, <code>GB18030</code>) are not supported as we&#8217;re not sure how to handle padding for these character sets (support may be added in the future after we&#8217;ve experimented with this).
-Character sets which have no equivalent Java character set are also not supported (e.g. <code>NEXT</code>, <code>CYRL</code>).</p>
+<p>Not all Firebird character sets are supported.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><code>OCTETS</code> and <code>NONE</code> are not supported, as we need to know which character set to use to encode string data when writing the external table file, so we require that a &#8220;real&#8221; character set is specified as the column encoding.</p>
+</li>
+<li>
+<p>The character set <code>UNICODE_FSS</code> is not supported, as we can&#8217;t support this variant of UTF-8 with the standard Java character sets.</p>
+</li>
+<li>
+<p>Other multibyte character sets (<code>SJIS_0208</code>, <code>EUCJ_0208</code>, <code>KSC_5601</code>, <code>BIG_5</code>, <code>GB_2312</code>, <code>GBK</code>, <code>CP943C</code>, <code>GB18030</code>) are not supported as we&#8217;re not sure how to handle padding for these character sets (support may be added in the future after we&#8217;ve experimented with this).</p>
+</li>
+<li>
+<p>Character sets which have no equivalent Java character set are also not supported (e.g. <code>NEXT</code>, <code>CYRL</code>).</p>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -1670,6 +2249,50 @@ The columns it contains are used by <em>ext-table-gen</em> to validate the colum
 <p>Name of the table (used for the DDL; required)</p>
 </td>
 </tr>
+<tr>
+<td class="hdlist1">
+<code>byteOrder</code>
+</td>
+<td class="hdlist2">
+<p>Byte order of the table (optional)
+Possible values:</p>
+<div class="openblock">
+<div class="content">
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>BIG_ENDIAN</code>
+</td>
+<td class="hdlist2">
+<p>big-endian</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>LITTLE_ENDIAN</code>
+</td>
+<td class="hdlist2">
+<p>little-endian</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>AUTO</code>
+</td>
+<td class="hdlist2">
+<p>automatically select based on the byte order of the runtime platform</p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>If the attribute is absent, <code>AUTO</code> is used.</p>
+</div>
+</td>
+</tr>
 </table>
 </div>
 <div class="ulist">
@@ -1732,11 +2355,76 @@ The columns it contains are used by <em>ext-table-gen</em> to validate the colum
 <div class="sect6">
 <h7 id="ref-xml-datatype"><a class="anchor" href="#ref-xml-datatype"></a>datatype</h7>
 <div class="paragraph">
-<p>At this time, <em>ext-table-gen</em> supports only one column datatype: <a href="#ref-xml-char"><code>char</code></a>.</p>
+<p>A datatype is a placeholder for an element corresponding to a specific Firebird data type.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None, though subtypes may define attributes</p>
+</div>
+<div class="ulist">
+<div class="title">Elements, in order</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>At this time, <em>ext-table-gen</em> supports the following column data types:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#ref-xml-bigint"><code>bigint</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-char"><code>char</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-date"><code>date</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-decimal"><code>decimal</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-int128"><code>int128</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-integer"><code>integer</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-numeric"><code>numeric</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-smallint"><code>smallint</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-time"><code>time</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-timestamp"><code>timestamp</code></a></p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-bigint" class="float"><code>bigint</code></h7>
+<div class="paragraph">
+<p>The <code>bigint</code> elements represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-bigint" target="_blank" rel="noopener"><code>BIGINT</code></a>.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
 </div>
 <h7 id="ref-xml-char" class="float"><code>char</code></h7>
 <div class="paragraph">
-<p>The <code>char</code> element represents the Firebird datatype <code>CHAR</code>.</p>
+<p>The <code>char</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-chartypes.html#fblangref40-datatypes-chartypes-char" target="_blank" rel="noopener"><code>CHAR</code></a>.</p>
 </div>
 <div class="hdlist">
 <div class="title">Attributes</div>
@@ -1761,10 +2449,592 @@ The XSD uses an enum-type, <code>encoding</code>, with supported names.</p>
 </tr>
 </table>
 </div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-date" class="float"><code>date</code></h7>
+<div class="paragraph">
+<p>The <code>date</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-date" target="_blank" rel="noopener"><code>DATE</code></a>.
+The Firebird <code>DATE</code> type only accepts values between 0001-01-01 and 9999-12-31.</p>
+</div>
+<div class="paragraph">
+<p>The default conversion parses the string using the ISO 8601 calendar date format (pattern <code>yyyy-MM-dd</code>, or named pattern <code>ISO_LOCAL_DATE</code>).</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-decimal" class="float"><code>decimal</code></h7>
+<div class="paragraph">
+<p>The <code>decimal</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-decimal" target="_blank" rel="noopener"><code>DECIMAL</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>The default conversion parses the string using the rules described in the constructor <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)" target="_blank" rel="noopener"><code>BigDecimal(String)</code></a>.
+Contrary to the <code>parseBigDecimal</code> converter, this converter can also parse strings in scientific notation.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>precision</code>
+</td>
+<td class="hdlist2">
+<p>Integer in the range [1, 38] for the precision in decimal digits (required).<br>
+Precision greater than 19 requires Firebird 4.0 and higher.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>scale</code>
+</td>
+<td class="hdlist2">
+<p>Integer in the range [0, <em>scale</em>] for the scale in decimal digits (required).<br>
+The XSD does not enforce that <em>scale</em> must be less than or equal to <em>precision</em>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>roundingMode</code>
+</td>
+<td class="hdlist2">
+<p>Rounding mode applied when reducing the scale of a parsed number with more digits after the decimal point than allowed by <em>scale</em> (optional, defaults to <code>HALF_UP</code>).<br>
+The XSD uses an enum-type, <code>roundingMode</code>, with supported names.<br>
+Possible values are:</p>
+<div class="openblock">
+<div class="content">
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>CEILING</code>
+</td>
+<td class="hdlist2">
+<p>Round towards positive infinity.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>DOWN</code>
+</td>
+<td class="hdlist2">
+<p>Round towards zero.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>FLOOR</code>
+</td>
+<td class="hdlist2">
+<p>Round towards negative infinity.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>HALF_DOWN</code>
+</td>
+<td class="hdlist2">
+<p>Round towards &#8220;nearest neighbor&#8221; unless both neighbors are equidistant, in which case round down.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>HALF_EVEN</code>
+</td>
+<td class="hdlist2">
+<p>Round towards the &#8220;nearest neighbor&#8221; unless both neighbors are equidistant, in which case, round towards the even neighbor.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>HALF_UP</code>
+</td>
+<td class="hdlist2">
+<p>(default) Round towards &#8220;nearest neighbor&#8221; unless both neighbors are equidistant, in which case round up.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>UNNECESSARY</code>
+</td>
+<td class="hdlist2">
+<p>Asserts that the requested operation has an exact result, hence no rounding is necessary.<br>
+Using this rounding mode will reject values with more non-zero digits after the decimal point than <em>scale</em>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>UP</code>
+</td>
+<td class="hdlist2">
+<p>Round away from zero.</p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <em>precision</em> is used only to determine the backing datatype, and is not used to enforce length limits.
+Just like in Firebird itself, the allowed range of values is determined by the backing datatype.
+For <code>DECIMAL</code>, that means:</p>
+</div>
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>1 <= precision <= 9</code>
+</td>
+<td class="hdlist2">
+<p><code>INTEGER</code>, unscaled range [-2147483648, 2147483647]</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>10 <= precision <= 18</code>
+</td>
+<td class="hdlist2">
+<p><code>BIGINT</code>, unscaled range [-9223372036854775808, 9223372036854775807]</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>19 <= precision <= 38</code>
+</td>
+<td class="hdlist2">
+<p><code>INT128</code>, unscaled range [-170141183460469231731687303715884105728, 170141183460469231731687303715884105727]</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-int128" class="float"><code>int128</code></h7>
+<div class="paragraph">
+<p>The <code>int128</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-int128" target="_blank" rel="noopener"><code>INT128</code></a>.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-integer" class="float"><code>integer</code></h7>
+<div class="paragraph">
+<p>The <code>integer</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-int" target="_blank" rel="noopener"><code>INTEGER</code></a>.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-numeric" class="float"><code>numeric</code></h7>
+<div class="paragraph">
+<p>The <code>numeric</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-numeric" target="_blank" rel="noopener"><code>NUMERIC</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>The default conversion parses the string using the rules described in the constructor <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)" target="_blank" rel="noopener"><code>BigDecimal(String)</code></a>.
+Contrary to the <code>parseBigDecimal</code> converter, this converter can also parse strings in scientific notation.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>precision</code>
+</td>
+<td class="hdlist2">
+<p>Integer in the range [1, 38] for the precision in decimal digits (required).<br>
+Precision greater than 19 requires Firebird 4.0 and higher.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>scale</code>
+</td>
+<td class="hdlist2">
+<p>Integer in the range [0, <em>scale</em>] for the scale in decimal digits (required).<br>
+The XSD does not enforce that <em>scale</em> must be less than or equal to <em>precision</em>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>roundingMode</code>
+</td>
+<td class="hdlist2">
+<p>Rounding mode applied when reducing the scale of a parsed number with more digits after the decimal point than allowed by <em>scale</em> (optional, defaults to <code>HALF_UP</code>).<br>
+The XSD uses an enum-type, <code>roundingMode</code>, with supported names.<br>
+Possible values are:</p>
+<div class="openblock">
+<div class="content">
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>CEILING</code>
+</td>
+<td class="hdlist2">
+<p>Round towards positive infinity.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>DOWN</code>
+</td>
+<td class="hdlist2">
+<p>Round towards zero.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>FLOOR</code>
+</td>
+<td class="hdlist2">
+<p>Round towards negative infinity.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>HALF_DOWN</code>
+</td>
+<td class="hdlist2">
+<p>Round towards &#8220;nearest neighbor&#8221; unless both neighbors are equidistant, in which case round down.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>HALF_EVEN</code>
+</td>
+<td class="hdlist2">
+<p>Round towards the &#8220;nearest neighbor&#8221; unless both neighbors are equidistant, in which case, round towards the even neighbor.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>HALF_UP</code>
+</td>
+<td class="hdlist2">
+<p>(default) Round towards &#8220;nearest neighbor&#8221; unless both neighbors are equidistant, in which case round up.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>UNNECESSARY</code>
+</td>
+<td class="hdlist2">
+<p>Asserts that the requested operation has an exact result, hence no rounding is necessary.<br>
+Using this rounding mode will reject values with more non-zero digits after the decimal point than <em>scale</em>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>UP</code>
+</td>
+<td class="hdlist2">
+<p>Round away from zero.</p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>The <em>precision</em> is used only to determine the backing datatype, and is not used to enforce length limits.
+Just like in Firebird itself, the allowed range of values is determined by the backing datatype.
+For <code>NUMERIC</code>, that means:</p>
+</div>
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>1 <= precision <= 4</code>
+</td>
+<td class="hdlist2">
+<p><code>SMALLINT</code>, unscaled range [-32768, 32767]</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>5 <= precision <= 9</code>
+</td>
+<td class="hdlist2">
+<p><code>INTEGER</code>, unscaled range [-2147483648, 2147483647]</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>10 <= precision <= 18</code>
+</td>
+<td class="hdlist2">
+<p><code>BIGINT</code>, unscaled range [-9223372036854775808, 9223372036854775807]</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>19 <= precision <= 38</code>
+</td>
+<td class="hdlist2">
+<p><code>INT128</code>, unscaled range [-170141183460469231731687303715884105728, 170141183460469231731687303715884105727]</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-smallint" class="float"><code>smallint</code></h7>
+<div class="paragraph">
+<p>The <code>smallint</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-smallint" target="_blank" rel="noopener"><code>SMALLINT</code></a>.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-time" class="float"><code>time</code></h7>
+<div class="paragraph">
+<p>The <code>time</code> elements represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-time"><code>TIME [WITHOUT TIME ZONE</a></code>^].
+The Firebird <code>TIME</code> type only accepts values between 00:00:00.0000 and 23:59:59.9999.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-timestamp" class="float"><code>timestamp</code></h7>
+<div class="paragraph">
+<p>The <code>timestamp</code> elements represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-timestamp"><code>TIMESTAMP [WITHOUT TIME ZONE</a></code>^].
+See also the limitations of <a href="#ref-xml-date"><code>date</code></a> and <a href="#ref-xml-time"><code>time</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>For additional flexibility, the time part is not required.
+For example if you use a <code>parseDatetime</code> with a pattern which only provides date information, but doesn&#8217;t provide time information (e.g. <code>yyyy-MM-dd</code>), it will save the date with time set to 00:00:00.0000.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect5">
+<h6 id="ref-xml-converter"><a class="anchor" href="#ref-xml-converter"></a><code>converter</code></h6>
+<div class="paragraph">
+<p>The <code>converter</code> element&#8201;&#8212;&#8201;if present&#8201;&#8212;&#8201;defines a conversion from the CSV string value to a Firebird data type value.
+If absent, a default conversion will be applied, specific to the column data type.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p>One of the <em>converter steps</em> listed below&#8201;&#8212;&#8201;required</p>
+</li>
+</ul>
+</div>
+<div class="ulist">
+<div class="title">Available converter steps</div>
+<ul>
+<li>
+<p><a href="#ref-xml-parsebigdecimal"><code>parseBigDecimal</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-parsedatetime"><code>parseDatetime</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-parseintegralnumber"><code>parseIntegralNumber</code></a></p>
+</li>
+</ul>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The name <em>converter step</em> may seem to imply that a converter can consist of multiple steps chained together.
+That is currently not supported, but it is something that may be introduced in a future version.</p>
+</div>
+<div class="paragraph">
+<p>In the actual program code, a <em>converter step</em> is also called a <em>converter</em>, but in this manual we wanted to prevent overloading the term as it already refers to the <code>converter</code> element.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<h7 id="ref-xml-parsebigdecimal" class="float"><code>parseBigDecimal</code></h7>
+<div class="paragraph">
+<p>Parses a string using the Java <code>NumberFormat</code> instance for the specified locale to a <code>BigDecimal</code>.</p>
+</div>
+<div class="paragraph">
+<p>This converter step is only valid in <a href="#ref-xml-decimal"><code>decimal</code></a> and <a href="#ref-xml-numeric"><code>numeric</code></a>.
+Contrary to the default converter of <code>numeric</code> and <code>decimal</code>, this converter does not parse strings in scientific notation.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>locale</code>
+</td>
+<td class="hdlist2">
+<p>Locale as a <a href="https://www.ietf.org/rfc/bcp/bcp47.txt" target="_blank" rel="noopener">BCP 47</a> language tag (required)</p>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <div class="title">Elements</div>
 <p>None</p>
 </div>
+<h7 id="ref-xml-parsedatetime" class="float"><code>parseDatetime</code></h7>
+<div class="paragraph">
+<p>Parses a string using the specified pattern and locale to a datetime value.</p>
+</div>
+<div class="paragraph">
+<p>This converter step is only valid in <a href="#ref-xml-date"><code>date</code></a>, <a href="#ref-xml-time"><code>time</code></a>, and <a href="#ref-xml-timestamp"><code>timestamp</code></a>.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>pattern</code>
+</td>
+<td class="hdlist2">
+<p>Datetime pattern, or one of the pre-defined formatter names (required)</p>
+<div class="paragraph">
+<p>The pattern format uses the syntax described in <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html" target="_blank" rel="noopener"><code>java.time.format.DateTimeFormatter</code></a>.
+The pre-defined formatter names are the constants listed under <em>Field Summary</em> in <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#field-summary" target="_blank" rel="noopener"><code>DateTimeFormatter</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>In addition, the following custom pre-defined formatter names are available:</p>
+</div>
+<div class="openblock">
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p><code>SQL_TIMESTAMP</code>&#8201;&#8212;&#8201;basically the same as <code>ISO_LOCAL_DATE_TIME</code>, but uses a space as the separator instead of <code>T</code>.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>locale</code>
+</td>
+<td class="hdlist2">
+<p>Locale as a <a href="https://www.ietf.org/rfc/bcp/bcp47.txt" target="_blank" rel="noopener">BCP 47</a> language tag (optional)</p>
+<div class="paragraph">
+<p>Generally only relevant to parse datetime strings with localized names for months and days.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<div class="title">Elements</div>
+<p>None</p>
+</div>
+<h7 id="ref-xml-parseintegralnumber" class="float"><code>parseIntegralNumber</code></h7>
+<div class="paragraph">
+<p>Parses a string using a specified radix to an integral number of the type of the enclosing datatype.</p>
+</div>
+<div class="paragraph">
+<p>This converter step is only valid in <a href="#ref-xml-bigint"><code>bigint</code></a>, <a href="#ref-xml-integer"><code>integer</code></a>, <a href="#ref-xml-int128"><code>int128</code></a>, and <a href="#ref-xml-smallint"><code>smallint</code></a>.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>radix</code>
+</td>
+<td class="hdlist2">
+<p>Radix for parsing a string to an integral number.
+Default <code>10</code>, range [2, 36].</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<div class="title">Elements</div>
+<p>None</p>
 </div>
 </div>
 </div>
@@ -1969,9 +3239,127 @@ As available character sets depend on the JVM and its classpath, this is not res
 </tr>
 </table>
 </div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p>CSV parser configuration&#8201;&#8212;&#8201;optional<br>
+If absent, behaves as if an empty <code>rfc4180CsvParser</code> is specified.<br>
+One of:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#ref-xml-rfc4180CsvParser"><code>rfc4180CsvParser</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-customCsvParser"><code>customCsvParser</code></a></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="sect4">
+<h5 id="ref-xml-rfc4180CsvParser"><a class="anchor" href="#ref-xml-rfc4180CsvParser"></a><code>rfc4180CsvParser</code></h5>
+<div class="paragraph">
+<p>The element <code>rfc4180CsvParser</code> specifies use of the RFC 4180 parser (implementation: <code>com.opencsv.RFC4180Parser</code>) and its configuration.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>quoteChar</code>
+</td>
+<td class="hdlist2">
+<p>Quote character (optional, defaults to <code>"</code>).<br>
+Value can be a single character, a <a href="#ref-common-char-mnemonic">character mnemonic</a> or a <a href="#ref-common-unicode-escape">Unicode escape</a>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>separator</code>
+</td>
+<td class="hdlist2">
+<p>Separator (optional, defaults to <code>,</code>).<br>
+Value can be a single character, a <a href="#ref-common-char-mnemonic">character mnemonic</a> or a <a href="#ref-common-unicode-escape">Unicode escape</a>.</p>
+</td>
+</tr>
+</table>
+</div>
 <div class="paragraph">
 <div class="title">Elements</div>
 <p>None</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="ref-xml-customCsvParser"><a class="anchor" href="#ref-xml-customCsvParser"></a><code>customCsvParser</code></h5>
+<div class="paragraph">
+<p>The element <code>customCsvParser</code> specifies use of the &#8220;custom&#8221; parser (implementation: <code>com.opencsv.CSVParser</code>) and its configuration.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>quoteChar</code>
+</td>
+<td class="hdlist2">
+<p>Quote character (optional, defaults to <code>"</code>).<br>
+Value can be a single character, a <a href="#ref-common-char-mnemonic">character mnemonic</a> or a <a href="#ref-common-unicode-escape">Unicode escape</a>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>separator</code>
+</td>
+<td class="hdlist2">
+<p>Separator (optional, defaults to <code>,</code>).<br>
+Value can be a single character, a <a href="#ref-common-char-mnemonic">character mnemonic</a> or a <a href="#ref-common-unicode-escape">Unicode escape</a>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>escapeChar</code>
+</td>
+<td class="hdlist2">
+<p>Escape character (optional, defaults to <code>\</code>).<br>
+Value can be a single character, a <a href="#ref-common-char-mnemonic">character mnemonic</a> or a <a href="#ref-common-unicode-escape">Unicode escape</a>.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>ignoreLeadingWhiteSpace</code>
+</td>
+<td class="hdlist2">
+<p>Ignore leading white space before (quoted) value (optional, defaults to <code>true</code>).
+Boolean value.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>ignoreQuotations</code>
+</td>
+<td class="hdlist2">
+<p>Ignores quotes (optional, defaults to <code>false</code>).
+Boolean value.</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>strictQuotes</code>
+</td>
+<td class="hdlist2">
+<p>Strict quotes, ignores values outside of quotes (optional, defaults to <code>false</code>).
+Boolean value.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<div class="title">Elements</div>
+<p>None</p>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -2009,6 +3397,109 @@ See <a href="#usage-config-regen">Regenerating the configuration file</a> on how
 </div>
 </div>
 </div>
+<div class="sect2">
+<h3 id="ref-common-config"><a class="anchor" href="#ref-common-config"></a>4.3. Common Configuration</h3>
+<div class="paragraph">
+<p>The following definitions are shared between commandline and XML configuration</p>
+</div>
+<div class="sect3">
+<h4 id="ref-common-char-mnemonic"><a class="anchor" href="#ref-common-char-mnemonic"></a>4.3.1. Character Mnemonics</h4>
+<div class="paragraph">
+<p>Character mnemonics are aliases for characters.
+They can be used for characters that are unprintable (e.g. the tab character) or are hard to use on the commandline or XML (e.g. the double quote character).</p>
+</div>
+<div class="paragraph">
+<p>Supported mnemonics are:</p>
+</div>
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>TAB</code>
+</td>
+<td class="hdlist2">
+<p>horizontal tab (Unicode U+0009)</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>SPACE</code>
+</td>
+<td class="hdlist2">
+<p>space (Unicode U+0020)</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>QUOT</code>
+</td>
+<td class="hdlist2">
+<p>quotation mark/double quote (<code>"</code>, Unicode U+0022)</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>APOS</code>
+</td>
+<td class="hdlist2">
+<p>apostrophe/single quote (<code>'</code>, Unicode U+0027)</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>GRAVE</code>
+</td>
+<td class="hdlist2">
+<p>grave accent/back tick (<code>`</code>, Unicode U+0060)</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>If you&#8217;re missing a mnemonic, use <a href="#ref-common-unicode-escape">Unicode Escape</a>.</p>
+</div>
+<div class="paragraph">
+<p>If you think we need to add another mnemonic, please create an issue on <a href="https://github.com/mrotteveel/ext-table-gen" class="bare" target="_blank" rel="noopener">https://github.com/mrotteveel/ext-table-gen</a>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="ref-common-unicode-escape"><a class="anchor" href="#ref-common-unicode-escape"></a>4.3.2. Unicode Escape</h4>
+<div class="paragraph">
+<p>The Unicode escape can be used to represent any Unicode character supported by UTF-16<sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
+</div>
+<div class="paragraph">
+<p>Its format is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;escape&gt; =
+    U+&lt;h&gt;&lt;h&gt;&lt;h&gt;&lt;h&gt;
+  | u+&lt;h&gt;&lt;h&gt;&lt;h&gt;&lt;h&gt;
+
+&lt;h&gt; = <em>hexadecimal digit, one of 0-9, A-F, a-f</em></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>U+20AC -- € (EURO SIGN)</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 <h1 id="_appendices" class="sect0"><a class="anchor" href="#_appendices"></a>Appendices</h1>
@@ -2023,14 +3514,16 @@ See <a href="#usage-config-regen">Regenerating the configuration file</a> on how
 <div class="listingblock">
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-&lt;!-- SPDX-FileCopyrightText: 2023 Mark Rotteveel --&gt;
+&lt;!-- SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel --&gt;
 &lt;!-- SPDX-License-Identifier: Apache-2.0 --&gt;
+&lt;!-- NOTE: Updates to /xs:schema[@version] also need to be reflected in ConfigMapper.CURRENT_SCHEMA_VERSION --&gt;
 &lt;xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            targetNamespace="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"
            xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"
            elementFormDefault="qualified"
            xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
-           jaxb:version="3.0"&gt;
+           jaxb:version="3.0"
+           version="2.0"&gt;
 
     &lt;xs:element name="extTableGenConfig"&gt;
         &lt;xs:complexType&gt;
@@ -2040,6 +3533,7 @@ See <a href="#usage-config-regen">Regenerating the configuration file</a> on how
                 &lt;xs:element name="csvFile" type="CsvFileType" minOccurs="0"/&gt;
                 &lt;xs:element name="informational" type="InformationalType" minOccurs="0"/&gt;
             &lt;/xs:sequence&gt;
+            &lt;xs:attribute name="schemaVersion" type="xs:token" use="required"/&gt;
         &lt;/xs:complexType&gt;
     &lt;/xs:element&gt;
 
@@ -2049,6 +3543,7 @@ See <a href="#usage-config-regen">Regenerating the configuration file</a> on how
             &lt;xs:element name="tableFile" type="TableFileType" minOccurs="0"/&gt;
         &lt;/xs:sequence&gt;
         &lt;xs:attribute name="name" type="xs:string" use="required"/&gt;
+        &lt;xs:attribute name="byteOrder" type="ByteOrderEnum"/&gt;
     &lt;/xs:complexType&gt;
 
     &lt;xs:complexType name="TableDerivationType"&gt;
@@ -2081,8 +3576,21 @@ See <a href="#usage-config-regen">Regenerating the configuration file</a> on how
 
     &lt;xs:element name="datatype" type="DatatypeType" abstract="true"/&gt;
     &lt;xs:element name="char" type="CharType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="smallint" type="DatatypeType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="integer" type="DatatypeType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="bigint" type="DatatypeType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="int128" type="DatatypeType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="date" type="DatatypeType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="time" type="DatatypeType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="timestamp" type="DatatypeType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="numeric" type="FixedPointType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="decimal" type="FixedPointType" substitutionGroup="datatype"/&gt;
 
-    &lt;xs:complexType name="DatatypeType" abstract="true"/&gt;
+    &lt;xs:complexType name="DatatypeType"&gt;
+        &lt;xs:sequence&gt;
+            &lt;xs:element name="converter" type="ConverterType" minOccurs="0"/&gt;
+        &lt;/xs:sequence&gt;
+    &lt;/xs:complexType&gt;
 
     &lt;xs:complexType name="CharType"&gt;
         &lt;xs:complexContent&gt;
@@ -2162,6 +3670,93 @@ See <a href="#usage-config-regen">Regenerating the configuration file</a> on how
         &lt;/xs:restriction&gt;
     &lt;/xs:simpleType&gt;
 
+    &lt;xs:complexType name="FixedPointType"&gt;
+        &lt;xs:complexContent&gt;
+            &lt;xs:extension base="DatatypeType"&gt;
+                &lt;xs:attribute name="precision" use="required"&gt;
+                    &lt;xs:simpleType&gt;
+                        &lt;xs:restriction base="xs:int"&gt;
+                            &lt;xs:minInclusive value="1"/&gt;
+                            &lt;xs:maxInclusive value="38"/&gt;
+                        &lt;/xs:restriction&gt;
+                    &lt;/xs:simpleType&gt;
+                &lt;/xs:attribute&gt;
+                &lt;xs:attribute name="scale" use="required"&gt;
+                    &lt;xs:simpleType&gt;
+                        &lt;xs:restriction base="xs:int"&gt;
+                            &lt;xs:minInclusive value="0"/&gt;
+                            &lt;xs:maxInclusive value="38"/&gt;
+                        &lt;/xs:restriction&gt;
+                    &lt;/xs:simpleType&gt;
+                &lt;/xs:attribute&gt;
+                &lt;xs:attribute name="roundingMode" type="roundingMode" default="HALF_UP"/&gt;
+            &lt;/xs:extension&gt;
+        &lt;/xs:complexContent&gt;
+    &lt;/xs:complexType&gt;
+
+    &lt;xs:simpleType name="roundingMode"&gt;
+        &lt;xs:annotation&gt;
+            &lt;xs:appinfo&gt;
+                &lt;jaxb:typesafeEnumClass map="false"/&gt;
+            &lt;/xs:appinfo&gt;
+        &lt;/xs:annotation&gt;
+        &lt;xs:restriction base="xs:string"&gt;
+            &lt;xs:enumeration value="CEILING"/&gt;
+            &lt;xs:enumeration value="DOWN"/&gt;
+            &lt;xs:enumeration value="FLOOR"/&gt;
+            &lt;xs:enumeration value="HALF_DOWN"/&gt;
+            &lt;xs:enumeration value="HALF_EVEN"/&gt;
+            &lt;xs:enumeration value="HALF_UP"/&gt;
+            &lt;xs:enumeration value="UNNECESSARY"/&gt;
+            &lt;xs:enumeration value="UP"/&gt;
+        &lt;/xs:restriction&gt;
+    &lt;/xs:simpleType&gt;
+
+    &lt;xs:complexType name="ConverterType"&gt;
+        &lt;xs:sequence&gt;
+            &lt;xs:element ref="converterStep"/&gt;
+        &lt;/xs:sequence&gt;
+    &lt;/xs:complexType&gt;
+
+    &lt;xs:element name="converterStep" type="ConverterStepType" abstract="true"/&gt;
+    &lt;xs:element name="parseIntegralNumber" type="ParseIntegralType" substitutionGroup="converterStep"/&gt;
+    &lt;xs:element name="parseDatetime" type="ParseDatetimeType" substitutionGroup="converterStep"/&gt;
+    &lt;xs:element name="parseBigDecimal" type="ParseBigDecimalType" substitutionGroup="converterStep"/&gt;
+
+    &lt;xs:complexType name="ConverterStepType" abstract="true"/&gt;
+
+    &lt;xs:complexType name="ParseIntegralType"&gt;
+        &lt;xs:complexContent&gt;
+            &lt;xs:extension base="ConverterStepType"&gt;
+                &lt;xs:attribute name="radix" default="10"&gt;
+                    &lt;xs:simpleType&gt;
+                        &lt;xs:restriction base="xs:int"&gt;
+                            &lt;xs:minInclusive value="2"/&gt;
+                            &lt;xs:maxInclusive value="36"/&gt;
+                        &lt;/xs:restriction&gt;
+                    &lt;/xs:simpleType&gt;
+                &lt;/xs:attribute&gt;
+            &lt;/xs:extension&gt;
+        &lt;/xs:complexContent&gt;
+    &lt;/xs:complexType&gt;
+
+    &lt;xs:complexType name="ParseDatetimeType"&gt;
+        &lt;xs:complexContent&gt;
+            &lt;xs:extension base="ConverterStepType"&gt;
+                &lt;xs:attribute name="pattern" type="xs:normalizedString" use="required"/&gt;
+                &lt;xs:attribute name="locale" type="xs:language"/&gt;
+            &lt;/xs:extension&gt;
+        &lt;/xs:complexContent&gt;
+    &lt;/xs:complexType&gt;
+
+    &lt;xs:complexType name="ParseBigDecimalType"&gt;
+        &lt;xs:complexContent&gt;
+            &lt;xs:extension base="ConverterStepType"&gt;
+                &lt;xs:attribute name="locale" type="xs:language" use="required"/&gt;
+            &lt;/xs:extension&gt;
+        &lt;/xs:complexContent&gt;
+    &lt;/xs:complexType&gt;
+
     &lt;xs:complexType name="EndColumnType"&gt;
         &lt;xs:attribute name="type" use="required"&gt;
             &lt;xs:simpleType&gt;
@@ -2186,15 +3781,57 @@ See <a href="#usage-config-regen">Regenerating the configuration file</a> on how
         &lt;/xs:restriction&gt;
     &lt;/xs:simpleType&gt;
 
+    &lt;xs:simpleType name="ByteOrderEnum"&gt;
+        &lt;xs:annotation&gt;
+            &lt;xs:appinfo&gt;
+                &lt;jaxb:typesafeEnumClass map="false"/&gt;
+            &lt;/xs:appinfo&gt;
+        &lt;/xs:annotation&gt;
+        &lt;xs:restriction base="xs:string"&gt;
+            &lt;xs:enumeration value="BIG_ENDIAN"/&gt;
+            &lt;xs:enumeration value="LITTLE_ENDIAN"/&gt;
+            &lt;xs:enumeration value="AUTO"/&gt;
+        &lt;/xs:restriction&gt;
+    &lt;/xs:simpleType&gt;
+
     &lt;xs:complexType name="TableFileType"&gt;
         &lt;xs:attribute name="path" type="xs:string" use="required"/&gt;
         &lt;xs:attribute name="overwrite" type="xs:boolean" default="false"/&gt;
     &lt;/xs:complexType&gt;
 
     &lt;xs:complexType name="CsvFileType"&gt;
+        &lt;xs:sequence&gt;
+            &lt;xs:element ref="csvParser" minOccurs="0"/&gt;
+        &lt;/xs:sequence&gt;
         &lt;xs:attribute name="path" type="xs:string" use="required"/&gt;
         &lt;xs:attribute name="charset" type="xs:string" use="required"/&gt;
         &lt;xs:attribute name="headerRow" type="xs:boolean" default="true"/&gt;
+    &lt;/xs:complexType&gt;
+
+    &lt;xs:element name="csvParser" type="CsvParserType" abstract="true"/&gt;
+    &lt;xs:element name="rfc4180CsvParser" type="Rfc4180CsvParserType" substitutionGroup="csvParser"/&gt;
+    &lt;xs:element name="customCsvParser" type="CustomCsvParserType" substitutionGroup="csvParser"/&gt;
+
+    &lt;xs:complexType name="CsvParserType" abstract="true"&gt;
+        &lt;xs:attribute name="quoteChar" type="xs:string"/&gt;
+        &lt;xs:attribute name="separator" type="xs:string"/&gt;
+    &lt;/xs:complexType&gt;
+
+    &lt;xs:complexType name="Rfc4180CsvParserType"&gt;
+        &lt;xs:complexContent&gt;
+            &lt;xs:extension base="CsvParserType"/&gt;
+        &lt;/xs:complexContent&gt;
+    &lt;/xs:complexType&gt;
+
+    &lt;xs:complexType name="CustomCsvParserType"&gt;
+        &lt;xs:complexContent&gt;
+            &lt;xs:extension base="CsvParserType"&gt;
+                &lt;xs:attribute name="escapeChar" type="xs:string"/&gt;
+                &lt;xs:attribute name="ignoreLeadingWhiteSpace" type="xs:boolean"/&gt;
+                &lt;xs:attribute name="ignoreQuotations" type="xs:boolean"/&gt;
+                &lt;xs:attribute name="strictQuotes" type="xs:boolean"/&gt;
+            &lt;/xs:extension&gt;
+        &lt;/xs:complexContent&gt;
     &lt;/xs:complexType&gt;
 
     &lt;xs:complexType name="InformationalType"&gt;
@@ -2216,21 +3853,21 @@ See <a href="#usage-config-regen">Regenerating the configuration file</a> on how
 <a href="#_footnoteref_1">1</a>. The format is essentially the in-memory layout of rows which Firebird also uses internally
 </div>
 <div class="footnote" id="_footnotedef_2">
-<a href="#_footnoteref_2">2</a>. At this time, <code>CHAR</code> is the only supported datatype
+<a href="#_footnoteref_2">2</a>. So the external table file will not be too wide for display purposes
 </div>
 <div class="footnote" id="_footnotedef_3">
-<a href="#_footnoteref_3">3</a>. So the external table file will not be too wide for display purposes
+<a href="#_footnoteref_3">3</a>. I semi-randomly picked this name from <a href="https://en.wikipedia.org/wiki/Czech_name" target="_blank" rel="noopener">&#8220;Czech name&#8221; on Wikipedia</a>
 </div>
 <div class="footnote" id="_footnotedef_4">
-<a href="#_footnoteref_4">4</a>. I semi-randomly picked this name from <a href="https://en.wikipedia.org/wiki/Czech_name" target="_blank" rel="noopener">&#8220;Czech name&#8221; on Wikipedia</a>
+<a href="#_footnoteref_4">4</a>. This is default behaviour of Java when encoding characters which don&#8217;t exist in an encoding
 </div>
 <div class="footnote" id="_footnotedef_5">
-<a href="#_footnoteref_5">5</a>. This is default behaviour of Java when encoding characters which don&#8217;t exist in an encoding
+<a href="#_footnoteref_5">5</a>. this limitation is in place because the escape character must be a Java <code>char</code>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-06-28 13:18:29 UTC
+Last updated 2023-09-01 13:33:02 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>

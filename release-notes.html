@@ -442,7 +442,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>Firebird External Table Generator: Release notes</h1>
 <div class="details">
 <span id="author" class="author">Mark Rotteveel</span><br>
-<span id="revdate">1.0</span>
+<span id="revdate">2.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -469,11 +469,11 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="intro"><a class="anchor" href="#intro"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>&#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> is a commandline tool to transform <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> CSV files to Firebird external table files (a binary format for external table data).</p>
+<p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> is a commandline tool to convert <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> CSV files and CSV files with custom formats to <a href="https://www.firebirdsql.org/" target="_blank" rel="noopener">Firebird</a> external tables (a binary format for Firebird external table data).</p>
 </div>
 <div class="paragraph">
 <p>External tables are a good way for bulk-loading data into Firebird.
-Unfortunately, external tables use a fixed-width <em>binary</em> format<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>, and not (more) standard formats like CSV.
+Unfortunately, external tables use a fixed-width <em>binary</em> format<sup class="footnote">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup>, and not a (more) standard format like CSV.
 It is not always easy to create an appropriate external table file, and this is where <em>ext-table-gen</em> can be used.</p>
 </div>
 <div class="paragraph">
@@ -490,8 +490,72 @@ It is not always easy to create an appropriate external table file, and this is 
 </ul>
 </div>
 <div class="paragraph">
-<p>The current version only supports <code>CHAR</code> columns, which makes the generated file essentially a fixed-width text format.
-Future versions may introduce support for additional column types.</p>
+<p>By default, <em>ext-table-gen</em> derives tables with only <code>CHAR</code> columns.
+This makes the generated file essentially a fixed-width text format.
+However, you can modify the configuration file to make <em>ext-table-gen</em> generate columns of different types, in which case the file becomes a binary format.
+<em>ext-table-gen</em> supports the following types of columns:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>String types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>char</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Integral number types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>smallint</code></p>
+</li>
+<li>
+<p><code>integer</code></p>
+</li>
+<li>
+<p><code>bigint</code></p>
+</li>
+<li>
+<p><code>int128</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Exact numeric types (fixed point):</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>numeric</code></p>
+</li>
+<li>
+<p><code>decimal</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Datetime types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>date</code></p>
+</li>
+<li>
+<p><code>time</code> (without time zone)</p>
+</li>
+<li>
+<p><code>timestamp</code> (without time zone)</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
 </div>
 </div>
 </div>
@@ -499,19 +563,161 @@ Future versions may introduce support for additional column types.</p>
 <h2 id="about-version"><a class="anchor" href="#about-version"></a>2. About this version</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Firebird External Table Generator version 1.0 is the first release of this application.
-This application is licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache 2.0 license</a>.</p>
+<p>Firebird External Table Generator version 2.0 is the second release of this application.</p>
+</div>
+<div class="paragraph">
+<p>This version introduces two major new features:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Support for additional data types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Integral number types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>smallint</code></p>
+</li>
+<li>
+<p><code>integer</code></p>
+</li>
+<li>
+<p><code>bigint</code></p>
+</li>
+<li>
+<p><code>int128</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Exact numeric types (fixed point):</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>numeric</code></p>
+</li>
+<li>
+<p><code>decimal</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Datetime types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>date</code></p>
+</li>
+<li>
+<p><code>time</code> (without time zone)</p>
+</li>
+<li>
+<p><code>timestamp</code> (without time zone)</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Customizing the CSV parser configuration</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This application is licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache 2.0 license</a>.</p>
 </div>
 <div class="paragraph">
 <p>Consult the <a href="ext-table-gen-user-manual.html">User Manual</a> for installation, usage examples and reference documentation.</p>
 </div>
 <div class="paragraph">
-<p>For more information, or to report issues or submit pull request, go to <a href="https://github.com/mrotteveel/ext-table-gen" class="bare" target="_blank" rel="noopener">https://github.com/mrotteveel/ext-table-gen</a></p>
+<p>For more information, or to report issues or submit pull requests, go to <a href="https://github.com/mrotteveel/ext-table-gen" class="bare" target="_blank" rel="noopener">https://github.com/mrotteveel/ext-table-gen</a></p>
 </div>
 <div class="sect2">
 <h3 id="version-history"><a class="anchor" href="#version-history"></a>2.1. Version history</h3>
 <div class="sect3">
-<h4 id="_ext_table_gen_1_0"><a class="anchor" href="#_ext_table_gen_1_0"></a>2.1.1. <em>ext-table-gen</em> 1.0</h4>
+<h4 id="_ext_table_gen_2_0"><a class="anchor" href="#_ext_table_gen_2_0"></a>2.1.1. <em>ext-table-gen</em> 2.0</h4>
+<div class="paragraph">
+<p>The following changes were made in <em>ext-table-gen</em> 2.0</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Add support for integer types (<code>SMALLINT</code>, <code>INTEGER</code>, <code>BIGINT</code>, <code>INT128</code>) (<a href="https://github.com/mrotteveel/ext-table-gen/issues/11" target="_blank" rel="noopener">#11</a>)</p>
+</li>
+<li>
+<p>Support custom conversions (<a href="https://github.com/mrotteveel/ext-table-gen/issues/17" target="_blank" rel="noopener">#17</a>)</p>
+</li>
+<li>
+<p>Add <code>DATE</code> support (<a href="https://github.com/mrotteveel/ext-table-gen/issues/8" target="_blank" rel="noopener">#8</a>)</p>
+</li>
+<li>
+<p>Add <code>TIME</code> and <code>TIMESTAMP</code> (without time zone) support (<a href="https://github.com/mrotteveel/ext-table-gen/issues/9" target="_blank" rel="noopener">#9</a>)</p>
+</li>
+<li>
+<p>Add support for <code>NUMERIC</code>/<code>DECIMAL</code> types (<a href="https://github.com/mrotteveel/ext-table-gen/issues/12" target="_blank" rel="noopener">#12</a>)</p>
+</li>
+<li>
+<p>Support custom CSV formats (<a href="https://github.com/mrotteveel/ext-table-gen/issues/18" target="_blank" rel="noopener">#18</a>)</p>
+</li>
+<li>
+<p>Define <code>module-info.java</code> (<a href="https://github.com/mrotteveel/ext-table-gen/issues/16" target="_blank" rel="noopener">#16</a>)</p>
+</li>
+<li>
+<p>The XML schema is now versioned. (<a href="https://github.com/mrotteveel/ext-table-gen/issues/14" target="_blank" rel="noopener">#14</a>)<br>
+Where possible, backwards compatible changes are performed while retaining the same namespace.
+See <a href="https://github.com/mrotteveel/ext-table-gen/blob/main/devdoc/adr/2023-05-xml-schema-versioning.adoc" target="_blank" rel="noopener">2023-05 XML Schema Versioning</a> for details.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>We introduced a minor breaking change to XSD, while not changing the namespace.
+This will result in validation errors when a config file from version 1.0 is validated against the XSD of version 2.0.
+We considered this change too minor to go through the trouble of changing the namespace.</p>
+<div class="paragraph">
+<p>To address this breaking change, let <em>ext-table-gen</em> upgrade the file for you (this example uses the Windows Command Prompt continuation character <code>^</code>):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>ext-table-gen --config-in=path-to-config.xml ^
+  --config-out=path-to-config.xml ^
+  --overwrite-config</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Alternatively, edit the XML to add the attribute <code>schemaVersion</code> with value <code>1.0</code> (i.e. <code>schemaVersion="1.0"</code>) to the <code>extTableGenConfig</code> element.
+For example:</p>
+</div>
+<div class="listingblock">
+<div class="title">XML from version 1.0</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd"&gt;
+    &lt;!-- ... --&gt;
+&lt;/extTableGenConfig&gt;</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="title">Modified XML</div>
+<div class="content">
+<pre class="prettyprint highlight"><code data-lang="xml">&lt;extTableGenConfig xmlns="https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd" schemaVersion="1.0"&gt;
+    &lt;!-- ... --&gt;
+&lt;/extTableGenConfig&gt;</code></pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_ext_table_gen_1_0"><a class="anchor" href="#_ext_table_gen_1_0"></a>2.1.2. <em>ext-table-gen</em> 1.0</h4>
 <div class="paragraph">
 <p>Initial release</p>
 </div>
@@ -528,7 +734,7 @@ This application is licensed under the <a href="https://www.apache.org/licenses/
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-06-28 13:18:29 UTC
+Last updated 2023-09-01 13:33:02 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>

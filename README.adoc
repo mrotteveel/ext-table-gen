@@ -2,10 +2,10 @@
 // SPDX-License-Identifier: Apache-2.0
 = ext-table-gen: Firebird External Table Generator
 
-The "`Firebird External Table Generator`" or _ext-table-gen_ is a commandline tool to convert https://www.rfc-editor.org/rfc/rfc4180[RFC 4180^] CSV files to https://www.firebirdsql.org/[Firebird^] external tables (a binary format for Firebird external table data).
+The "`Firebird External Table Generator`" or _ext-table-gen_ is a commandline tool to convert https://www.rfc-editor.org/rfc/rfc4180[RFC 4180^] CSV files and CSV files with custom formats to https://www.firebirdsql.org/[Firebird^] external tables (a binary format for Firebird external table data).
 
 External tables are a good way for bulk-loading data into Firebird.
-Unfortunately, external tables use a fixed-width _binary_ format, and not a (more) standard format like CSV.
+Unfortunately, external tables use a fixed-width _binary_ formatfootnote:[The format is essentially the in-memory layout of rows which Firebird also uses internally], and not a (more) standard format like CSV.
 It is not always easy to create an appropriate external table file, and this is where _ext-table-gen_ can be used.
 
 At a high level, _ext-table-gen_ provides the following features:
@@ -13,8 +13,25 @@ At a high level, _ext-table-gen_ provides the following features:
 * Derive a `CHAR`-based external table definition (i.e. a `CREATE TABLE` statement and a configuration for _ext-table-gen_) from a CSV file
 * Transform a CSV file to an external table file (either based on the CSV file itself, or based on a configuration file)
 
-The current version only supports `CHAR` columns, which makes the generated file essentially a fixed-width text format.
-Future versions may introduce support for additional column types.
+By default, _ext-table-gen_ derives tables with only `CHAR` columns.
+This makes the generated file essentially a fixed-width text format.
+However, you can modify the configuration file to make _ext-table-gen_ generate columns of different types, in which case the file becomes a binary format.
+_ext-table-gen_ supports the following types of columns:
+
+* String types:
+** `char`
+* Integral number types:
+** `smallint`
+** `integer`
+** `bigint`
+** `int128`
+* Exact numeric types (fixed point):
+** `numeric`
+** `decimal`
+* Datetime types:
+** `date`
+** `time` (without time zone)
+** `timestamp` (without time zone)
 
 The project is hosted on GitHub: https://github.com/mrotteveel/ext-table-gen[^].
 

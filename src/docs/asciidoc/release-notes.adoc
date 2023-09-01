@@ -23,10 +23,10 @@ toc::[]
 [#intro]
 == Introduction
 
-"`Firebird External Table Generator`" or _ext-table-gen_ is a commandline tool to transform {link-rfc4180}[RFC 4180^] CSV files to Firebird external table files (a binary format for external table data).
+The "`Firebird External Table Generator`" or _ext-table-gen_ is a commandline tool to convert {link-rfc4180}[RFC 4180^] CSV files and CSV files with custom formats to https://www.firebirdsql.org/[Firebird^] external tables (a binary format for Firebird external table data).
 
 External tables are a good way for bulk-loading data into Firebird.
-Unfortunately, external tables use a fixed-width _binary_ formatfootnote:[The format is essentially the in-memory layout of rows which Firebird also uses internally], and not (more) standard formats like CSV.
+Unfortunately, external tables use a fixed-width _binary_ formatfootnote:[The format is essentially the in-memory layout of rows which Firebird also uses internally], and not a (more) standard format like CSV.
 It is not always easy to create an appropriate external table file, and this is where _ext-table-gen_ can be used.
 
 At a high level, _ext-table-gen_ provides the following features:
@@ -34,21 +34,53 @@ At a high level, _ext-table-gen_ provides the following features:
 * Derive a `CHAR`-based external table definition (i.e. a `CREATE TABLE` statement and a configuration for _ext-table-gen_) from a CSV file
 * Transform a CSV file to an external table file (either based on the CSV file itself, or based on a configuration file)
 
-The current version only supports `CHAR` columns, which makes the generated file essentially a fixed-width text format.
-Future versions may introduce support for additional column types.
+By default, _ext-table-gen_ derives tables with only `CHAR` columns.
+This makes the generated file essentially a fixed-width text format.
+However, you can modify the configuration file to make _ext-table-gen_ generate columns of different types, in which case the file becomes a binary format.
+_ext-table-gen_ supports the following types of columns:
+
+* String types:
+** `char`
+* Integral number types:
+** `smallint`
+** `integer`
+** `bigint`
+** `int128`
+* Exact numeric types (fixed point):
+** `numeric`
+** `decimal`
+* Datetime types:
+** `date`
+** `time` (without time zone)
+** `timestamp` (without time zone)
 
 [#about-version]
 == About this version
 
 Firebird External Table Generator version 2.0 is the second release of this application.
 
-// TODO Describe major new features
+This version introduces two major new features:
+
+* Support for additional data types:
+** Integral number types:
+*** `smallint`
+*** `integer`
+*** `bigint`
+*** `int128`
+** Exact numeric types (fixed point):
+*** `numeric`
+*** `decimal`
+** Datetime types:
+*** `date`
+*** `time` (without time zone)
+*** `timestamp` (without time zone)
+* Customizing the CSV parser configuration
 
 This application is licensed under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
 
 Consult the xref:ext-table-gen-user-manual.adoc[User Manual] for installation, usage examples and reference documentation.
 
-For more information, or to report issues or submit pull request, go to https://github.com/mrotteveel/ext-table-gen[^]
+For more information, or to report issues or submit pull requests, go to https://github.com/mrotteveel/ext-table-gen[^]
 
 [#version-history]
 === Version history
@@ -57,7 +89,14 @@ For more information, or to report issues or submit pull request, go to https://
 
 The following changes were made in _ext-table-gen_ 2.0
 
-* The XML schema is now versioned.
+* Add support for integer types (`SMALLINT`, `INTEGER`, `BIGINT`, `INT128`) (https://github.com/mrotteveel/ext-table-gen/issues/11[#11^])
+* Support custom conversions (https://github.com/mrotteveel/ext-table-gen/issues/17[#17^])
+* Add `DATE` support (https://github.com/mrotteveel/ext-table-gen/issues/8[#8^])
+* Add `TIME` and `TIMESTAMP` (without time zone) support (https://github.com/mrotteveel/ext-table-gen/issues/9[#9^])
+* Add support for `NUMERIC`/`DECIMAL` types (https://github.com/mrotteveel/ext-table-gen/issues/12[#12^])
+* Support custom CSV formats (https://github.com/mrotteveel/ext-table-gen/issues/18[#18^])
+* Define `module-info.java` (https://github.com/mrotteveel/ext-table-gen/issues/16[#16^])
+* The XML schema is now versioned. (https://github.com/mrotteveel/ext-table-gen/issues/14[#14^]) +
 Where possible, backwards compatible changes are performed while retaining the same namespace.
 See https://github.com/mrotteveel/ext-table-gen/blob/main/devdoc/adr/2023-05-xml-schema-versioning.adoc[2023-05 XML Schema Versioning^] for details.
 ** We introduced a minor breaking change to XSD, while not changing the namespace.

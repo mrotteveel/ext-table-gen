@@ -627,7 +627,7 @@ None
 [float#ref-xml-time]
 ====== `time`
 
-The `time` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-time[`TIME [WITHOUT TIME ZONE]`^].
+The `time` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-time[`++TIME [WITHOUT TIME ZONE]++`^].
 The Firebird `TIME` type only accepts values between 00:00:00.0000 and 23:59:59.9999.
 
 .Attributes
@@ -639,7 +639,7 @@ None
 [float#ref-xml-timestamp]
 ====== `timestamp`
 
-The `timestamp` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-timestamp[`TIMESTAMP [WITHOUT TIME ZONE]`^].
+The `timestamp` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-timestamp[`++TIMESTAMP [WITHOUT TIME ZONE]++`^].
 See also the limitations of <<ref-xml-date>> and <<ref-xml-time>>.
 
 For additional flexibility, the time part is not required.

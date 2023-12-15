@@ -14,15 +14,15 @@ jobs:
   create-artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Java 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
       - name: Validate Gradle wrapper
-        uses: gradle/wrapper-validation-action@8d49e559aae34d3e0eb16cde532684bc9702762b
+        uses: gradle/wrapper-validation-action@56b90f209b02bf6d1deae490e9ef18b21a389cd4
       - name: Assemble with Gradle
         run: ./gradlew assemble
       - name: Cleanup Gradle Cache
@@ -34,16 +34,18 @@ jobs:
           rm -fr ~/.gradle/caches/*/plugin-resolution/
           find ~/.gradle/caches/ -name "*.lock" -type f -delete
       - name: Pages artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: pages-artifact
           path: build/docs/asciidoc
+          compression-level: 9
           retention-days: 1
       - name: Distribution artifact
         uses: actions/upload-artifact@v3
         with:
           name: distribution-artifact
           path: build/distributions
+          compression-level: 0
           retention-days: 1
   publish-pages:
     runs-on: ubuntu-latest
@@ -51,14 +53,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Get pages artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: pages-artifact
           path: pages
       - name: Deploy to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@v4.4.2
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
         with:
           branch: gh-pages
           folder: pages
@@ -68,14 +70,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Get distribution artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: distribution-artifact
           path: dist
       - name: Create Release
-        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e
+        uses: ncipollo/release-action@6c75be85e571768fa31b40abf38de58ba0397db5
         with:
           artifacts: dist/*.zip
           artifactContentType: application/x-zip-compressed

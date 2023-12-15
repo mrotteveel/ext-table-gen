@@ -331,7 +331,18 @@ This section follows the structure of the XSD.
 The root of the XML is `extTableGenConfig`.
 
 .Attributes
-None
+[horizontal]
+`schemaVersion`::
+Version of the schema (required) +
+Possible values:
++
+--
+[horizontal]
+`1.0`::
+Schema of _ext-table-gen_ 1.0
+`2.0`::
+Schema of _ext-table-gen_ 2.0
+--
 
 .Elements
 * <<ref-xml-externaltable>> -- required
@@ -350,7 +361,7 @@ The columns it contains are used by _ext-table-gen_ to validate the columns in t
 `name`::
 Name of the table (used for the DDL; required)
 `byteOrder`::
-Byte order of the table (optional)
+Byte order of the table (optional) +
 Possible values:
 +
 --

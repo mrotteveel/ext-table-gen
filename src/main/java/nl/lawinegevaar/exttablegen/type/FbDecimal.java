@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -78,7 +78,7 @@ public final class FbDecimal extends AbstractFbFixedPointDatatype implements FbF
     private static BackingType decimalBackingType(int precision) {
         if (precision < 1 || precision > 38) {
             throw new IllegalArgumentException("precision must be between 1 and 38");
-        } if (precision <= 9) {
+        } else if (precision <= 9) {
             return BackingType.INTEGER;
         } else if (precision <= 18) {
             return BackingType.BIGINT;

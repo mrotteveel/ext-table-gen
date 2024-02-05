@@ -22,7 +22,7 @@ dependencyResolutionManagement {
         }
 
         testLibs {
-            version('junit', '5.10.0')
+            version('junit', '5.10.2')
 
             library('junit-bom', 'org.junit', 'junit-bom').versionRef('junit')
             library('junit-jupiter', 'org.junit.jupiter', 'junit-jupiter').withoutVersion()

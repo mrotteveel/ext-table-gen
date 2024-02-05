@@ -7,7 +7,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'application'
-    id 'com.intershop.gradle.jaxb' version '6.0.0'
+    id 'com.intershop.gradle.jaxb' version '7.0.0'
     id 'org.asciidoctor.jvm.convert' version '4.0.2'
 }
 

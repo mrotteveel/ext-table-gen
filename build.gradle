@@ -8,7 +8,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'application'
     id 'com.intershop.gradle.jaxb' version '6.0.0'
-    id 'org.asciidoctor.jvm.convert' version '4.0.0-alpha.1'
+    id 'org.asciidoctor.jvm.convert' version '4.0.2'
 }
 
 group 'nl.lawinegevaar'
@@ -98,7 +98,7 @@ tasks.named('check') {
 }
 
 asciidoctorj {
-    version = '2.5.9'
+    version = '2.5.11'
 }
 
 distributions {

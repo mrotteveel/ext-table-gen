@@ -118,8 +118,9 @@ tasks.withType(Tar).configureEach {
 }
 
 tasks.named('asciidoctor', AsciidoctorTask).configure {
-    attributes 'etg-version': project.version
-    forkOptions {
+    attributes 'revnumber': false, 'etg-version': project.version
+    executionMode = OUT_OF_PROCESS
+    jvm {
         jvmArgs "--add-opens", "java.base/sun.nio.ch=ALL-UNNAMED", "--add-opens", "java.base/java.io=ALL-UNNAMED"
     }
 }

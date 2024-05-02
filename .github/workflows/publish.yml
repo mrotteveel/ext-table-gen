@@ -77,7 +77,7 @@ jobs:
           name: distribution-artifact
           path: dist
       - name: Create Release
-        uses: ncipollo/release-action@6c75be85e571768fa31b40abf38de58ba0397db5
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5
         with:
           artifacts: dist/*.zip
           artifactContentType: application/x-zip-compressed

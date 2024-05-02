@@ -1,11 +1,11 @@
 = ext-table-gen build documentation
 
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 [NOTE]
 ====
-This document doesn't all aspects of the build.
+This document doesn't cover all aspects of the build.
 If you miss something, please contribute using a pull request, or create an issue asking for the information.
 ====
 

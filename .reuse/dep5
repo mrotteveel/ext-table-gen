@@ -11,7 +11,7 @@ License: Apache-2.0
 
 # Gradle
 
-Files: gradlew.bat gradlew gradle/wrapper/*
+Files: gradle/wrapper/*
 Copyright: Gradle Inc. and/or "the original authors"
 License: Apache-2.0
 

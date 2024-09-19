@@ -8,7 +8,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 plugins {
     id 'application'
     id 'com.intershop.gradle.jaxb' version '7.0.0'
-    id 'org.asciidoctor.jvm.convert' version '4.0.2'
+    id 'org.asciidoctor.jvm.convert' version '4.0.3'
 }
 
 group 'nl.lawinegevaar'
@@ -98,7 +98,8 @@ tasks.named('check') {
 }
 
 asciidoctorj {
-    version = '2.5.11'
+    // asciidoctorj 3.0.0 doesn't seem to work with asciidoctor-gradle-plugin 4.0.3
+    version = '2.5.13'
 }
 
 distributions {

@@ -9,7 +9,7 @@ dependencyResolutionManagement {
 
     versionCatalogs {
         libs {
-            version('picocli', '4.7.5')
+            version('picocli', '4.7.6')
 
             library('picocli-core', 'info.picocli', 'picocli').versionRef('picocli')
             library('picocli-codegen', 'info.picocli', 'picocli-codegen').versionRef('picocli')

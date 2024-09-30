@@ -16,7 +16,7 @@ dependencyResolutionManagement {
             library('opencsv', 'com.opencsv', 'opencsv').version('5.9')
             library('jaxb-api', 'jakarta.xml.bind', 'jakarta.xml.bind-api').version('4.0.2')
             library('jaxb-runtime', 'org.glassfish.jaxb', 'jaxb-runtime').version('4.0.5')
-            library('commons-lang3', 'org.apache.commons', 'commons-lang3').version('3.14.0')
+            library('commons-lang3', 'org.apache.commons', 'commons-lang3').version('3.17.0')
             library('jspecify', 'org.jspecify', 'jspecify').version('1.0.0')
 
             bundle('jaxb', ['jaxb-api', 'jaxb-runtime'])

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -12,7 +12,8 @@ import java.util.Optional;
  * Represents a Firebird datatype (with length, precision and/or scale).
  */
 public sealed interface FbDatatype<T>
-        permits AbstractFbDatatype, FbChar, FbDatetimeType, FbFixedPointDatatype, FbIntegralNumberDatatype {
+        permits AbstractFbDatatype, FbChar, FbDatetimeType, FbFixedPointDatatype, FbFloatingPointDatatype,
+        FbIntegralNumberDatatype {
 
     /**
      * @return Java type used by this data type

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -7,6 +7,7 @@ import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
+import nl.lawinegevaar.exttablegen.convert.AbstractParseFloatingPointNumber;
 import nl.lawinegevaar.exttablegen.convert.AbstractParseIntegralNumber;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.ParseBigDecimal;
@@ -28,15 +29,18 @@ import static nl.lawinegevaar.exttablegen.TableDerivationConfig.DEFAULT_END_COLU
 /**
  * Maps between the internal model and XML model of the configuration file.
  */
+@SuppressWarnings("java:S6539")
 final class ConfigMapper {
 
-    static final String SCHEMA_VERSION_1_0 = "1.0";
     // Schema version for documents created by ext-table-gen v1.0
+    static final String SCHEMA_VERSION_1_0 = "1.0";
     static final String SCHEMA_VERSION_2_0 = "2.0";
-    private static final Set<String> SUPPORTED_SCHEMA_VERSIONS = Set.of(SCHEMA_VERSION_1_0, SCHEMA_VERSION_2_0);
+    static final String SCHEMA_VERSION_3_0 = "3.0";
+    private static final Set<String> SUPPORTED_SCHEMA_VERSIONS = Set.of(
+            SCHEMA_VERSION_1_0, SCHEMA_VERSION_2_0, SCHEMA_VERSION_3_0);
 
     // Must match /xs:schema[@version]
-    static final String CURRENT_SCHEMA_VERSION = SCHEMA_VERSION_2_0;
+    static final String CURRENT_SCHEMA_VERSION = SCHEMA_VERSION_3_0;
     static final String UNKNOWN_SCHEMA_VERSION = SCHEMA_VERSION_1_0;
 
     private final ObjectFactory factory = new ObjectFactory();
@@ -196,6 +200,8 @@ final class ConfigMapper {
                             "Unsupported Datatype class: " + datatype.getClass().getName());
                 };
             }
+            case "FbFloat" -> factory.createFloat(factory.createDatatypeType());
+            case "FbDoublePrecision" -> factory.createDoublePrecision(factory.createDatatypeType());
             default ->
                     throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
         };
@@ -207,7 +213,8 @@ final class ConfigMapper {
             JAXBElement<? extends ConverterStepType> stepType = switch (converterName) {
                 case "parseIntegralNumber" -> {
                     ParseIntegralType parseIntegralType = factory.createParseIntegralType();
-                    parseIntegralType.setRadix(((AbstractParseIntegralNumber<?>) converter).radix());
+                    AbstractParseIntegralNumber<?> parseIntegralNumber = (AbstractParseIntegralNumber<?>) converter;
+                    parseIntegralType.setRadix(parseIntegralNumber.radix());
                     yield factory.createParseIntegralNumber(parseIntegralType);
                 }
                 case "parseDatetime" -> {
@@ -222,6 +229,13 @@ final class ConfigMapper {
                     ParseBigDecimal parseBigDecimal = (ParseBigDecimal) converter;
                     parseBigDecimalType.setLocale(parseBigDecimal.locale().toLanguageTag());
                     yield factory.createParseBigDecimal(parseBigDecimalType);
+                }
+                case "parseFloatingPointNumber" -> {
+                    ParseFloatingPointNumberType parseFloatingPointType = factory.createParseFloatingPointNumberType();
+                    AbstractParseFloatingPointNumber<?> parseFloatingPointNumber =
+                            (AbstractParseFloatingPointNumber<?>) converter;
+                    parseFloatingPointType.setLocale(parseFloatingPointNumber.locale().toLanguageTag());
+                    yield factory.createParseFloatingPointNumber(parseFloatingPointType);
                 }
                 default -> throw new InvalidConfigurationException("Unsupported converter: " + converterName);
             };
@@ -369,6 +383,8 @@ final class ConfigMapper {
                 yield new FbDecimal(fixedPointType.getPrecision(), fixedPointType.getScale(),
                         RoundingMode.valueOf(fixedPointType.getRoundingMode()));
             }
+            case "float" -> new FbFloat();
+            case "doublePrecision" -> new FbDoublePrecision();
             default -> throw new InvalidConfigurationException(
                     "Unsupported DatatypeType: " + datatype.getDeclaredType().getName());
         };
@@ -385,6 +401,8 @@ final class ConfigMapper {
             return Converter.parseDatetime(parseDatetimeType.getPattern(), parseDatetimeType.getLocale());
         } else if (converterStep instanceof ParseBigDecimalType parseBigDecimalType) {
             return Converter.parseBigDecimal(parseBigDecimalType.getLocale());
+        } else if (converterStep instanceof ParseFloatingPointNumberType parseFloatingPointNumberType) {
+            return fromXmlParseFloatingPointNumberType(parseFloatingPointNumberType, datatype);
         } else {
             throw new InvalidConfigurationException("Unsupported element: " + converterStepElement.getName());
         }
@@ -397,6 +415,17 @@ final class ConfigMapper {
         } catch (RuntimeException e) {
             throw new InvalidConfigurationException(
                     "Unsupported ParseIntegralType data type: " + datatype.getName(), e);
+        }
+    }
+
+    private static Converter<?> fromXmlParseFloatingPointNumberType(ParseFloatingPointNumberType parseFloatingPointType,
+            JAXBElement<? extends DatatypeType> datatype) {
+        try {
+            return Converter.parseFloatingPointNumber(
+                    datatype.getName().getLocalPart(), parseFloatingPointType.getLocale());
+        } catch (RuntimeException e) {
+            throw new InvalidConfigurationException(
+                    "Unsupported ParseFloatingPointNumberType data type: " + datatype.getName(), e);
         }
     }
 

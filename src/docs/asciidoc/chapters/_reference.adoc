@@ -338,10 +338,12 @@ Possible values:
 +
 --
 [horizontal]
-`1.0`::
-Schema of _ext-table-gen_ 1.0
+`3.0`::
+Schema of _ext-table-gen_ 3.0
 `2.0`::
 Schema of _ext-table-gen_ 2.0
+`1.0`::
+Schema of _ext-table-gen_ 1.0
 --
 
 .Elements
@@ -422,6 +424,8 @@ At this time, _ext-table-gen_ supports the following column data types:
 * <<ref-xml-char>>
 * <<ref-xml-date>>
 * <<ref-xml-decimal>>
+* <<ref-xml-doublePrecision>>
+* <<ref-xml-float>>
 * <<ref-xml-int128>>
 * <<ref-xml-integer>>
 * <<ref-xml-numeric>>
@@ -432,7 +436,7 @@ At this time, _ext-table-gen_ supports the following column data types:
 [float#ref-xml-bigint]
 ====== `bigint`
 
-The `bigint` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-bigint[`BIGINT`^].
+The `bigint` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-bigint[`BIGINT`^].
 
 .Attributes
 None
@@ -479,7 +483,7 @@ None
 The `decimal` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-decimal[`DECIMAL`^].
 
 The default conversion parses the string using the rules described in the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^].
-Contrary to the `parseBigDecimal` converter, this converter can also parse strings in scientific notation.
+Contrary to the <<ref-xml-parsebigdecimal>> converter, this converter can also parse strings in scientific notation.
 
 .Attributes
 [horizontal]
@@ -530,6 +534,34 @@ For `DECIMAL`, that means:
 .Elements
 * <<ref-xml-converter>> -- optional
 
+[float#ref-xml-doublePrecision]
+====== `doublePrecision`
+
+The `doublePrecision` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-floattypes.html#fblangref40-datatypes-double[`DOUBLE PRECISION`^].
+
+The default conversion parses the string using the rules described in https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Float.html#valueOf(java.lang.String)[`Float.valueOf(String)`^].
+Contrary to the <<ref-xml-parsefloatingpointnumber>> converter, this converter can also parse strings in scientific notation.
+
+.Attributes
+None
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
+[float#ref-xml-float]
+====== `float`
+
+The `float` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-floattypes.html#fblangref40-datatypes-double[`DOUBLE PRECISION`^].
+
+The default conversion parses the string using the rules described in https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Float.html#valueOf(java.lang.String)[`Float.valueOf(String)`^].
+Contrary to the <<ref-xml-parsefloatingpointnumber>> converter, this converter can also parse strings in scientific notation.
+
+.Attributes
+None
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
 [float#ref-xml-int128]
 ====== `int128`
 
@@ -560,7 +592,7 @@ None
 The `numeric` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-numeric[`NUMERIC`^].
 
 The default conversion parses the string using the rules described in the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^].
-Contrary to the `parseBigDecimal` converter, this converter can also parse strings in scientific notation.
+Contrary to the <<ref-xml-parsebigdecimal>> converter, this converter can also parse strings in scientific notation.
 
 .Attributes
 [horizontal]
@@ -627,7 +659,7 @@ None
 [float#ref-xml-time]
 ====== `time`
 
-The `time` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-time[`++TIME [WITHOUT TIME ZONE]++`^].
+The `time` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-time[`++TIME [WITHOUT TIME ZONE]++`^].
 The Firebird `TIME` type only accepts values between 00:00:00.0000 and 23:59:59.9999.
 
 .Attributes
@@ -639,7 +671,7 @@ None
 [float#ref-xml-timestamp]
 ====== `timestamp`
 
-The `timestamp` elements represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-timestamp[`++TIMESTAMP [WITHOUT TIME ZONE]++`^].
+The `timestamp` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-timestamp[`++TIMESTAMP [WITHOUT TIME ZONE]++`^].
 See also the limitations of <<ref-xml-date>> and <<ref-xml-time>>.
 
 For additional flexibility, the time part is not required.
@@ -721,6 +753,22 @@ Generally only relevant to parse datetime strings with localized names for month
 .Elements
 None
 
+[float#ref-xml-parsefloatingpointnumber]
+====== `parseFloatingPointNumber`
+
+Parses a string using the Java `NumberFormat` instance for the specified locale to a `double`.
+
+This converter step is only valid in <<ref-xml-doublePrecision>> and <<ref-xml-float>>.
+Contrary to the default converter of `doublePrecision` and `float`, this converter does not parse strings in scientific notation.
+
+.Attributes
+[horizontal]
+`locale`::
+Locale as a https://www.ietf.org/rfc/bcp/bcp47.txt[BCP 47^] language tag (required)
+
+.Elements
+None
+
 [float#ref-xml-parseintegralnumber]
 ====== `parseIntegralNumber`
 
@@ -740,7 +788,7 @@ None
 [#ref-xml-endcolumn]
 ==== `endColumn`
 
-The `endColumn` elements represents an extra column which is added to the external table to introduce a linebreak after each row in the external table file.
+The `endColumn` element represents an extra column which is added to the external table to introduce a linebreak after each row in the external table file.
 This linebreak is primarily intended to make the file more "`human-readable`", and is not needed for Firebird itself.
 
 .Attributes

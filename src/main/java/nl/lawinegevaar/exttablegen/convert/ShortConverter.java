@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
@@ -32,51 +32,15 @@ public interface ShortConverter extends Converter<Short> {
     }
 
     static ShortConverter wrap(Converter<Short> converter) {
-        final class ShortConverterAdapter implements ShortConverter {
-
-            private final Converter<Short> converter;
-
-            public ShortConverterAdapter(Converter<Short> converter) {
-                this.converter = converter;
-            }
-
-            @Override
-            public Short convert(String sourceValue) {
-                return converter.convert(sourceValue);
+        final class ShortConverterAdapter extends AbstractConverterAdapter<Short> implements ShortConverter {
+            ShortConverterAdapter(Converter<Short> converter) {
+                super(converter);
             }
 
             @Override
             public short convertToShort(String sourceValue) {
                 return convert(sourceValue);
             }
-
-            @Override
-            public Class<Short> targetType() {
-                return Short.class;
-            }
-
-            @Override
-            public String converterName() {
-                return converter.converterName();
-            }
-
-            @Override
-            public Converter<Short> unwrap() {
-                return converter;
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                if (this == obj) return true;
-                return obj instanceof Converter<?> that
-                       && this.converter.equals(that.unwrap());
-            }
-
-            @Override
-            public int hashCode() {
-                return converter.hashCode();
-            }
-            
         }
         if (converter == null) return null;
         if (converter instanceof ShortConverter shortConverter) {

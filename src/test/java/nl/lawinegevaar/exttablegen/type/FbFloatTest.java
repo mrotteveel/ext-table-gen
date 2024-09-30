@@ -1,11 +1,11 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.ByteOrderType;
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
-import nl.lawinegevaar.exttablegen.convert.ParseInteger;
+import nl.lawinegevaar.exttablegen.convert.FloatConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -20,42 +20,43 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class FbIntegerTest {
+class FbFloatTest {
 
-    private static final FbInteger integerType = new FbInteger();
+    private static final FbFloat floatType = new FbFloat();
 
     @ParameterizedTest
-    @ValueSource(ints = { Integer.MIN_VALUE, Short.MIN_VALUE, -1, 0, 1, Short.MAX_VALUE, Integer.MAX_VALUE })
-    void testWriteValue(int value) throws Exception {
+    @ValueSource(floats = { Float.POSITIVE_INFINITY, Float.MAX_VALUE, 1f, Float.MIN_VALUE, 0f,
+            -Float.MIN_VALUE, -1f, -Float.MAX_VALUE, Float.NEGATIVE_INFINITY, Float.NaN })
+    void testWriteValue(float value) throws IOException {
         assertEquals(value, writeAndGetValue(String.valueOf(value)));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { (Integer.MIN_VALUE - 1L) + "", (Integer.MAX_VALUE + 1L) + "", "NOT_A_NUMBER", "FF" })
-    void testWriteValue_outOfRangeOrInvalid_throwsNumberFormatException(String valueToWrite) {
+    @ValueSource(strings = { "NOT_A_NUMBER", "FF" })
+    void testWriteValue_invalid_throwsNumberFormatException(String valueToWrite) {
         EncoderOutputStream out = EncoderOutputStream.of(ByteOrderType.AUTO)
                 .withColumnCount(1)
                 .writeTo(new ByteArrayOutputStream());
-        assertThrows(NumberFormatException.class, () -> integerType.writeValue(valueToWrite, out));
+        assertThrows(NumberFormatException.class, () -> floatType.writeValue(valueToWrite, out));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     void testWriteValue_nullOrEmpty(String valueToWrite) throws Exception {
-        assertEquals(0, writeAndGetValue(valueToWrite));
+        assertEquals(0f, writeAndGetValue(valueToWrite));
     }
 
     @Test
     void testWriteValue_callsNonNullConverter() throws Exception {
-        var normalConverter = ParseInteger.ofRadix(16);
-        var offsetByTwoConverter = Converter.of(Integer.class, v -> normalConverter.convertToInt(v) + 2);
-        assertEquals(5, writeAndGetValue("3", offsetByTwoConverter));
+        var normalConverter = FloatConverter.wrap(Converter.of(Float.class, Float::valueOf));
+        var offsetByTwoConverter = Converter.of(Float.class, v -> normalConverter.convertToFloat(v) + 2.5f);
+        assertEquals(5.2f, writeAndGetValue("2.7", offsetByTwoConverter));
     }
 
     @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
-        integerType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
+        floatType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         assertEquals(0, buf.getInt());
@@ -63,27 +64,27 @@ class FbIntegerTest {
 
     @Test
     void testHashCode() {
-        assertEquals(integerType.hashCode(), new FbInteger().hashCode());
+        assertEquals(floatType.hashCode(), new FbFloat().hashCode());
     }
 
     @Test
     void testEquals() {
-        assertEquals(integerType, new FbInteger());
+        assertEquals(floatType, new FbFloat());
         //noinspection AssertBetweenInconvertibleTypes
-        assertNotEquals(integerType, new FbChar(10, FbEncoding.ASCII));
+        assertNotEquals(floatType, new FbChar(10, FbEncoding.ASCII));
     }
 
-    int writeAndGetValue(String valueToWrite) throws IOException {
+    float writeAndGetValue(String valueToWrite) throws IOException {
         return writeAndGetValue(valueToWrite, null);
     }
 
-    int writeAndGetValue(String valueToWrite, Converter<Integer> converter) throws IOException {
+    float writeAndGetValue(String valueToWrite, Converter<Float> converter) throws IOException {
         var baos = new ByteArrayOutputStream();
-        integerType.withConverter(converter)
+        floatType.withConverter(converter)
                 .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
-        return buf.getInt();
+        return buf.getFloat();
     }
 
 }

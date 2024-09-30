@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -225,6 +225,32 @@ final class ColumnFixtures {
      */
     static Column decimal(String name, int precision, int scale, RoundingMode roundingMode, Converter<?> converter) {
         return new Column(name, new FbDecimal(precision, scale, roundingMode).withConverterChecked(converter));
+    }
+
+    /**
+     * Creates a column with {@code name}, data type {@code FbFloat} and {@code converter}.
+     *
+     * @param name
+     *         name of the column
+     * @param converter
+     *         converter, or {@code null} for default
+     * @return column
+     */
+    static Column floatCol(String name, Converter<?> converter) {
+        return new Column(name, new FbFloat().withConverterChecked(converter));
+    }
+
+    /**
+     * Creates a column with {@code name}, data type {@code FbDoublePrecision} and {@code converter}.
+     *
+     * @param name
+     *         name of the column
+     * @param converter
+     *         converter, or {@code null} for default
+     * @return column
+     */
+    static Column doublePrecision(String name, Converter<?> converter) {
+        return new Column(name, new FbDoublePrecision().withConverterChecked(converter));
     }
 
     /**

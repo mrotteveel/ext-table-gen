@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -20,8 +20,9 @@ import static java.util.Objects.requireNonNullElse;
  *         specialised {@link Converter} type
  * @since 2
  */
-public sealed abstract class AbstractFbDatatype<T, C extends Converter<T>> implements FbDatatype<T>
-        permits FbBigint, FbChar, FbDate, FbInt128, FbInteger, FbSmallint, FbTime, FbTimestamp, AbstractFbFixedPointDatatype {
+public abstract sealed class AbstractFbDatatype<T, C extends Converter<T>> implements FbDatatype<T>
+        permits AbstractFbFixedPointDatatype, FbBigint, FbChar, FbDate, FbDoublePrecision, FbFloat, FbInt128, FbInteger,
+        FbSmallint, FbTime, FbTimestamp {
 
     private final Class<T> targetType;
     // The configured converter (can be null)
@@ -68,6 +69,7 @@ public sealed abstract class AbstractFbDatatype<T, C extends Converter<T>> imple
         }
     }
 
+    @SuppressWarnings("java:S3038")
     @Override
     public abstract void writeEmpty(EncoderOutputStream out) throws IOException;
 

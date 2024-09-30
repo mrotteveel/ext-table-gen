@@ -16,7 +16,7 @@ Mark Rotteveel
 // SPDX-FileCopyrightText: 2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
-Copyright 2023 Mark Rotteveel and all contributing authors under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
+Copyright 2023-2024 Mark Rotteveel and all contributing authors under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
 
 toc::[]
 
@@ -49,6 +49,9 @@ _ext-table-gen_ supports the following types of columns:
 * Exact numeric types (fixed point):
 ** `numeric`
 ** `decimal`
+* Approximate numeric types (binary floating point)
+** `float`
+** `doublePrecision`
 * Datetime types:
 ** `date`
 ** `time` (without time zone)
@@ -57,24 +60,14 @@ _ext-table-gen_ supports the following types of columns:
 [#about-version]
 == About this version
 
-Firebird External Table Generator version 2.0 is the second release of this application.
+Firebird External Table Generator version 3.0 is the thirs release of this application.
 
-This version introduces two major new features:
+This version introduces the following new features:
 
 * Support for additional data types:
-** Integral number types:
-*** `smallint`
-*** `integer`
-*** `bigint`
-*** `int128`
-** Exact numeric types (fixed point):
-*** `numeric`
-*** `decimal`
-** Datetime types:
-*** `date`
-*** `time` (without time zone)
-*** `timestamp` (without time zone)
-* Customizing the CSV parser configuration
+** Approximate numeric types (binary floating point)
+*** `float`
+*** `doublePrecision`
 
 This application is licensed under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
 
@@ -85,9 +78,15 @@ For more information, or to report issues or submit pull requests, go to https:/
 [#version-history]
 === Version history
 
+==== _ext-table-gen_ 3.0
+
+The following changes were made in _ext-table-gen_ 3.0:
+
+* Add support for binary floating point types (`FLOAT`, `DOUBLE PRECISION`) (https://github.com/mrotteveel/ext-table-gen/issues/20[#20^])
+
 ==== _ext-table-gen_ 2.0
 
-The following changes were made in _ext-table-gen_ 2.0
+The following changes were made in _ext-table-gen_ 2.0:
 
 * Add support for integer types (`SMALLINT`, `INTEGER`, `BIGINT`, `INT128`) (https://github.com/mrotteveel/ext-table-gen/issues/11[#11^])
 * Support custom conversions (https://github.com/mrotteveel/ext-table-gen/issues/17[#17^])

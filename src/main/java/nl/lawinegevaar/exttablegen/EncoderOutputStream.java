@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -75,7 +75,7 @@ public final class EncoderOutputStream extends FilterOutputStream {
     }
 
     private void writeAlignment(int requiredBytes) throws IOException {
-        class Holder {
+        final class Holder {
             private static final byte[] PADDING_BYTES = new byte[8];
         }
         if (positionInRow != nullMaskSize) {
@@ -133,6 +133,18 @@ public final class EncoderOutputStream extends FilterOutputStream {
             bytes = int128Bytes;
         }
         out.write(fromNetworkOrder(bytes));
+    }
+
+    public void writeFloat(float v) throws IOException {
+        byteBuffer.clear();
+        byteBuffer.putFloat(v);
+        writeBuffer();
+    }
+
+    public void writeDouble(double v) throws IOException {
+        byteBuffer.clear();
+        byteBuffer.putDouble(v);
+        writeBuffer();
     }
 
     private byte[] fromNetworkOrder(byte[] bytes) {

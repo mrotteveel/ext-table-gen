@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -52,6 +52,8 @@ import static java.util.Objects.requireNonNull;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.col;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.date;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.decimal;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.doublePrecision;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.floatCol;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.integralNumber;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.numeric;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.time;
@@ -84,6 +86,10 @@ class ExtTableIntegrationTests {
     private static final int TIMESTAMP_VALUES_ROW_COUNT = 7;
     private static final String FIXED_POINT_VALUES_BASELINE_PREFIX = "fixed-point-values-baseline";
     private static final int FIXED_POINT_VALUES_ROW_COUNT = 7;
+    private static final String FLOAT_VALUES_BASELINE_PREFIX = "float-values-baseline";
+    private static final int FLOAT_VALUES_ROW_COUNT = 6;
+    private static final String DOUBLE_PRECISION_VALUES_BASELINE_PREFIX = "doublePrecision-values-baseline";
+    private static final int DOUBLE_PRECISION_VALUES_ROW_COUNT = 6;
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -101,6 +107,8 @@ class ExtTableIntegrationTests {
     private static Path timeValuesBaselineCsvFile;
     private static Path timestampValuesBaselineCsvFile;
     private static Path fixedPointValuesBaselineCsvFile;
+    private static Path floatValuesBaselineCsvFile;
+    private static Path doublePrecisionValuesBaselineCsvFile;
     private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
@@ -133,6 +141,11 @@ class ExtTableIntegrationTests {
         fixedPointValuesBaselineCsvFile = copyForAllResource(
                 testDataResource(csvFilename(FIXED_POINT_VALUES_BASELINE_PREFIX)),
                 csvFilename(FIXED_POINT_VALUES_BASELINE_PREFIX));
+        floatValuesBaselineCsvFile = copyForAllResource(
+                testDataResource(csvFilename(FLOAT_VALUES_BASELINE_PREFIX)), csvFilename(FLOAT_VALUES_BASELINE_PREFIX));
+        doublePrecisionValuesBaselineCsvFile = copyForAllResource(
+                testDataResource(csvFilename(DOUBLE_PRECISION_VALUES_BASELINE_PREFIX)),
+                csvFilename(DOUBLE_PRECISION_VALUES_BASELINE_PREFIX));
     }
 
     @AfterAll
@@ -188,6 +201,7 @@ class ExtTableIntegrationTests {
             customers-1000-index-int128.xml,      1,             NUMERIC
             customers-1000-index-decimal_9_0.xml, 1,             DECIMAL
             customers-1000-index-numeric_9_0.xml, 1,             NUMERIC
+            customers-1000-index-float.xml,       1,             FLOAT
             customers-1000-index-date.xml,        11,            DATE
             """)
     void testCustomersCustomTypes_simple(String configName, int columnToCheck, JDBCType expectedJdbcType)
@@ -480,6 +494,55 @@ class ExtTableIntegrationTests {
                 FIXED_POINT_VALUES_ROW_COUNT, EndColumn.Type.NONE);
     }
 
+    @ParameterizedTest
+    @CsvSource(useHeadersInDisplayName = true, textBlock =
+            """
+            type,            locale
+            float,           en-US
+            float,           nl-NL
+            doublePrecision, en-US
+            doublePrecision, nl-NL
+            """)
+    void testWithExplicitConverter_parseFloatingPointNumber(String type, String locale) throws Throwable {
+        String prefix = type + "-values";
+        String testName = prefix + '-' + locale;
+        String testCsvFilename = csvFilename(testName);
+        Path csvFile = copyForEachResource(testDataResource(testCsvFilename), testCsvFilename);
+        var converter = Converter.parseFloatingPointNumber(type, locale);
+        Column column = switch (type) {
+            case "float" -> floatCol("Value", converter);
+            case "doublePrecision" -> doublePrecision("Value", converter);
+            default -> throw new AssertionError("Unsupported type: " + type);
+        };
+        var columns = List.of(column);
+        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        Path configFile = forEachTempDir.resolve(configFilename(testName));
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    createTableConfig(prefix, columns, tableFile),
+                    TableDerivationConfig.getDefault(),
+                    createCsvFileConfig(csvFile));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, prefix, csvFile, tableFile, configFile);
+
+        Path baselinePath;
+        int rowCount;
+        switch (type) {
+            case "float" -> {
+                baselinePath = floatValuesBaselineCsvFile;
+                rowCount = FLOAT_VALUES_ROW_COUNT;
+            }
+            case "doublePrecision" -> {
+                baselinePath = doublePrecisionValuesBaselineCsvFile;
+                rowCount = DOUBLE_PRECISION_VALUES_ROW_COUNT;
+            }
+            default -> throw new AssertionError("Unsupported type: " + type);
+        }
+
+        assertExternalTable(configFile, prefix, baselinePath, rowCount, EndColumn.Type.NONE);
+    }
+
     @Test
     void testWithCustomCsvParser() throws Throwable {
         Path csvFile = forEachTempDir.resolve("custom-csv-format.csv");
@@ -545,6 +608,8 @@ class ExtTableIntegrationTests {
             case "date" -> date(name, null);
             case "time" -> time(name, null);
             case "timestamp" -> timestamp(name, null);
+            case "float" -> floatCol(name, null);
+            case "doublePrecision" -> doublePrecision(name, null);
             default -> integralNumber(name, columnType);
         };
     }
@@ -608,6 +673,8 @@ class ExtTableIntegrationTests {
                 }
                 yield new BigDecimal(BigInteger.valueOf(value), fixedPoint.scale()).toPlainString();
             }
+            case "FbFloat" -> Float.toString((float) value);
+            case "FbDoublePrecision" -> Double.toString((double) value);
             default -> throw new IllegalArgumentException("Unsupported datatype: " + typeName);
         };
     }
@@ -724,6 +791,18 @@ class ExtTableIntegrationTests {
                                 // java.sql.Timestamp.toString() result in issues with trailing zeroes
                                 LocalDateTime dbValue = rs.getObject(idx, LocalDateTime.class);
                                 assertEquals(LocalDateTime.parse(csvValue), dbValue,
+                                        "expected equal values for CSV file row %d, column %d"
+                                                .formatted(row.line(), idx));
+                            }
+                            case Types.FLOAT -> {
+                                float dbValue = rs.getFloat(idx);
+                                assertEquals(Float.parseFloat(csvValue), dbValue, 0.000001,
+                                        "expected equal values for CSV file row %d, column %d"
+                                                .formatted(row.line(), idx));
+                            }
+                            case Types.DOUBLE -> {
+                                double dbValue = rs.getDouble(idx);
+                                assertEquals(Double.parseDouble(csvValue), dbValue, 0.00000001,
                                         "expected equal values for CSV file row %d, column %d"
                                                 .formatted(row.line(), idx));
                             }

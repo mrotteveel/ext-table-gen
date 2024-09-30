@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
@@ -58,7 +58,7 @@ public final class ParseBigDecimal implements Converter<BigDecimal> {
     }
 
     /**
-     * @return locale of this {@code ParseDatetime} (never {@code null})
+     * @return locale of this {@code ParseBigDecimal} (never {@code null})
      */
     public Locale locale() {
         return locale;
@@ -84,6 +84,11 @@ public final class ParseBigDecimal implements Converter<BigDecimal> {
         if (obj == this) return true;
         return obj instanceof ParseBigDecimal that
                && this.locale.equals(that.locale);
+    }
+
+    @Override
+    public String toString() {
+        return converterName() + "{locale=" + locale + '}';
     }
 
 }

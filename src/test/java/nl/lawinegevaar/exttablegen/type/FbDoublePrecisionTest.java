@@ -1,11 +1,11 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.ByteOrderType;
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
-import nl.lawinegevaar.exttablegen.convert.ParseInteger;
+import nl.lawinegevaar.exttablegen.convert.DoubleConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -20,42 +20,43 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class FbIntegerTest {
+class FbDoublePrecisionTest {
 
-    private static final FbInteger integerType = new FbInteger();
+    private static final FbDoublePrecision doublePrecisionType = new FbDoublePrecision();
 
     @ParameterizedTest
-    @ValueSource(ints = { Integer.MIN_VALUE, Short.MIN_VALUE, -1, 0, 1, Short.MAX_VALUE, Integer.MAX_VALUE })
-    void testWriteValue(int value) throws Exception {
+    @ValueSource(doubles = { Double.POSITIVE_INFINITY, Double.MAX_VALUE, 1, Double.MIN_VALUE, 0d,
+            -Double.MIN_VALUE, -1d, -Double.MAX_VALUE, Double.NEGATIVE_INFINITY, Double.NaN })
+    void testWriteValue(double value) throws IOException {
         assertEquals(value, writeAndGetValue(String.valueOf(value)));
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { (Integer.MIN_VALUE - 1L) + "", (Integer.MAX_VALUE + 1L) + "", "NOT_A_NUMBER", "FF" })
-    void testWriteValue_outOfRangeOrInvalid_throwsNumberFormatException(String valueToWrite) {
+    @ValueSource(strings = { "NOT_A_NUMBER", "FF" })
+    void testWriteValue_invalid_throwsNumberFormatException(String valueToWrite) {
         EncoderOutputStream out = EncoderOutputStream.of(ByteOrderType.AUTO)
                 .withColumnCount(1)
                 .writeTo(new ByteArrayOutputStream());
-        assertThrows(NumberFormatException.class, () -> integerType.writeValue(valueToWrite, out));
+        assertThrows(NumberFormatException.class, () -> doublePrecisionType.writeValue(valueToWrite, out));
     }
 
     @ParameterizedTest
     @NullAndEmptySource
     void testWriteValue_nullOrEmpty(String valueToWrite) throws Exception {
-        assertEquals(0, writeAndGetValue(valueToWrite));
+        assertEquals(0d, writeAndGetValue(valueToWrite));
     }
 
     @Test
     void testWriteValue_callsNonNullConverter() throws Exception {
-        var normalConverter = ParseInteger.ofRadix(16);
-        var offsetByTwoConverter = Converter.of(Integer.class, v -> normalConverter.convertToInt(v) + 2);
-        assertEquals(5, writeAndGetValue("3", offsetByTwoConverter));
+        var normalConverter = DoubleConverter.wrap(Converter.of(Double.class, Double::valueOf));
+        var offsetByTwoConverter = Converter.of(Double.class, v -> normalConverter.convertToDouble(v) + 2.5);
+        assertEquals(5.2, writeAndGetValue("2.7", offsetByTwoConverter));
     }
 
     @Test
     void testWriteEmpty() throws Exception {
         var baos = new ByteArrayOutputStream();
-        integerType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
+        doublePrecisionType.writeEmpty(EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
         assertEquals(0, buf.getInt());
@@ -63,27 +64,27 @@ class FbIntegerTest {
 
     @Test
     void testHashCode() {
-        assertEquals(integerType.hashCode(), new FbInteger().hashCode());
+        assertEquals(doublePrecisionType.hashCode(), new FbDoublePrecision().hashCode());
     }
 
     @Test
     void testEquals() {
-        assertEquals(integerType, new FbInteger());
+        assertEquals(doublePrecisionType, new FbDoublePrecision());
         //noinspection AssertBetweenInconvertibleTypes
-        assertNotEquals(integerType, new FbChar(10, FbEncoding.ASCII));
+        assertNotEquals(doublePrecisionType, new FbChar(10, FbEncoding.ASCII));
     }
 
-    int writeAndGetValue(String valueToWrite) throws IOException {
+    double writeAndGetValue(String valueToWrite) throws IOException {
         return writeAndGetValue(valueToWrite, null);
     }
 
-    int writeAndGetValue(String valueToWrite, Converter<Integer> converter) throws IOException {
+    double writeAndGetValue(String valueToWrite, Converter<Double> converter) throws IOException {
         var baos = new ByteArrayOutputStream();
-        integerType.withConverter(converter)
+        doublePrecisionType.withConverter(converter)
                 .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));
         var buf = ByteBuffer.wrap(baos.toByteArray());
         buf.order(ByteOrder.nativeOrder());
-        return buf.getInt();
+        return buf.getDouble();
     }
 
 }

@@ -128,7 +128,7 @@ int128,   char_1,   integer,  3
 int128,   char_1,   bigint,   3
 int128,   char_1,   int128,   3
 int128,   char_1,   char_1,   3
-##
+#
 char_1,   smallint, smallint, 3
 char_1,   smallint, integer,  3
 char_1,   smallint, bigint,   3
@@ -329,3 +329,17 @@ char_1,       char_1,       decimal_18_0, 33
 decimal_38_0, char_1,       decimal_38_0, 33
 char_1,       decimal_38_0, bigint,       33
 char_1,       char_1,       decimal_38_0, 33
+# cases for FLOAT
+float,        char_1,       float,        3
+char_1,       float,        bigint,       3
+char_1,       char_1,       float,        3
+float,        char_1,       float,        33
+char_1,       float,        bigint,       33
+char_1,       char_1,       float,        33
+# cases for DOUBLE PRECISION
+doublePrecision, char_1,          doublePrecision, 3
+char_1,          doublePrecision, bigint,          3
+char_1,          char_1,          doublePrecision, 3
+doublePrecision, char_1,          doublePrecision, 33
+char_1,          doublePrecision, bigint,          33
+char_1,          char_1,          doublePrecision, 33

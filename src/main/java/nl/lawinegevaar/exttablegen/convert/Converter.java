@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
@@ -49,7 +49,7 @@ public interface Converter<T> {
     /**
      * Performs a checked cast of this converter to one of {@code requiredType}.
      * <p>
-     * This should be used when all you have is a {@code Conversion<?>} and need the specific type information.
+     * This should be used when all you have is a {@code Converter<?>} and need the specific type information.
      * </p>
      *
      * @param requiredType
@@ -171,7 +171,7 @@ public interface Converter<T> {
      * @return converter to parse datetime values
      */
     static ParseDatetime parseDatetime(String pattern, String locale) {
-        return parseDatetime(pattern, locale != null ? Locale.forLanguageTag(locale) : null);
+        return parseDatetime(pattern, toLocale(locale));
     }
 
     /**
@@ -195,7 +195,7 @@ public interface Converter<T> {
      * @return converter to parse big decimal values
      */
     static ParseBigDecimal parseBigDecimal(String locale) {
-        return parseBigDecimal(locale != null ? Locale.forLanguageTag(locale) : null);
+        return parseBigDecimal(toLocale(locale));
     }
 
     /**
@@ -207,6 +207,54 @@ public interface Converter<T> {
      */
     static ParseBigDecimal parseBigDecimal(Locale locale) {
         return new ParseBigDecimal(locale);
+    }
+
+    /**
+     * Constructs a converter to parse to floating point number values, based on the type name in the XML config.
+     *
+     * @param xmlTypeName
+     *         type name, as used in the XML
+     * @param locale
+     *         locale in a BCP 47 language tag (cannot be {@code null})
+     * @return converter to parse big decimal values
+     * @throws IllegalArgumentException
+     *         if {@code xmlTypeName} is not supported or recognized
+     * @since 3
+     */
+    static Converter<? extends Number> parseFloatingPointNumber(String xmlTypeName, String locale) {
+        return parseFloatingPointNumber(xmlTypeName, toLocale(locale));
+    }
+
+    /**
+     * Constructs a converter to parse to floating point number values, based on the type name in the XML config.
+     *
+     * @param xmlTypeName
+     *         type name, as used in the XML
+     * @param locale
+     *         locale (cannot be {@code null})
+     * @return converter to parse big decimal values
+     * @throws IllegalArgumentException
+     *         if {@code xmlTypeName} is not supported or recognized
+     * @since 3
+     */
+    static Converter<? extends Number> parseFloatingPointNumber(String xmlTypeName, Locale locale) {
+        return switch (xmlTypeName) {
+            case "float" -> new ParseFloat(locale);
+            case "doublePrecision" -> new ParseDoublePrecision(locale);
+            default -> throw new IllegalArgumentException("Unsupported type name: " + xmlTypeName);
+        };
+    }
+
+    /**
+     * Converts a BCP 47 language tag to a {@link Locale}.
+     *
+     * @param languageTag
+     *         BCP 47 language tag, or {@code null}
+     * @return local instance, or {@code null} if {@code languageTag} is {@code null}
+     * @since 3
+     */
+    private static Locale toLocale(String languageTag) {
+        return languageTag != null ? Locale.forLanguageTag(languageTag) : null;
     }
 
 }

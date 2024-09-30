@@ -17,6 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * Tests if documents created with older versions of the {@code https://www.lawinegevaar.nl/xsd/ext-table-gen-1.0.xsd}
  * can still be loaded.
+ * <p>
+ * NOTE: For schema 2.0, this is tested implicitly by a number of integration test cases that still specify
+ * {@code schemaVersion="2.0"}.
+ * </p>
  */
 class SchemaCompatibilityTest {
 

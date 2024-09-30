@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel -->
+<!-- SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- NOTE: Updates to /xs:schema[@version] also need to be reflected in ConfigMapper.CURRENT_SCHEMA_VERSION -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -8,7 +8,7 @@
            elementFormDefault="qualified"
            xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
            jaxb:version="3.0"
-           version="2.0">
+           version="3.0">
 
     <xs:element name="extTableGenConfig">
         <xs:complexType>
@@ -70,6 +70,8 @@
     <xs:element name="timestamp" type="DatatypeType" substitutionGroup="datatype"/>
     <xs:element name="numeric" type="FixedPointType" substitutionGroup="datatype"/>
     <xs:element name="decimal" type="FixedPointType" substitutionGroup="datatype"/>
+    <xs:element name="float" type="DatatypeType" substitutionGroup="datatype"/>
+    <xs:element name="doublePrecision" type="DatatypeType" substitutionGroup="datatype"/>
 
     <xs:complexType name="DatatypeType">
         <xs:sequence>
@@ -207,6 +209,7 @@
     <xs:element name="parseIntegralNumber" type="ParseIntegralType" substitutionGroup="converterStep"/>
     <xs:element name="parseDatetime" type="ParseDatetimeType" substitutionGroup="converterStep"/>
     <xs:element name="parseBigDecimal" type="ParseBigDecimalType" substitutionGroup="converterStep"/>
+    <xs:element name="parseFloatingPointNumber" type="ParseFloatingPointNumberType" substitutionGroup="converterStep"/>
 
     <xs:complexType name="ConverterStepType" abstract="true"/>
 
@@ -235,6 +238,14 @@
     </xs:complexType>
 
     <xs:complexType name="ParseBigDecimalType">
+        <xs:complexContent>
+            <xs:extension base="ConverterStepType">
+                <xs:attribute name="locale" type="xs:language" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:complexType name="ParseFloatingPointNumberType">
         <xs:complexContent>
             <xs:extension base="ConverterStepType">
                 <xs:attribute name="locale" type="xs:language" use="required"/>

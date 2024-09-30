@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -24,15 +24,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.bigint;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.date;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.decimal;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.int128;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.integer;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.numeric;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.smallint;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.time;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.timestamp;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.*;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_1;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.COLUMN_2;
 import static nl.lawinegevaar.exttablegen.EtgConfigFixtures.testEtgConfig;
@@ -155,7 +147,11 @@ class ConfigMapperTest {
                 numeric("COLUMN_IN", 18, 1, null, Converter.parseBigDecimal("nl-NL")),
                 decimal("COLUMN_IN", 9, 1),
                 decimal("COLUMN_IN", 18, 1, RoundingMode.CEILING, null),
-                decimal("COLUMN_IN", 38, 1, null, Converter.parseBigDecimal("nl-NL")));
+                decimal("COLUMN_IN", 38, 1, null, Converter.parseBigDecimal("nl-NL")),
+                doublePrecision("COLUMN_IN", null),
+                doublePrecision("COLUMN_IN", Converter.parseFloatingPointNumber("doublePrecision", "nl-NL")),
+                floatCol("COLUMN_IN", null),
+                floatCol("COLUMN_IN", Converter.parseFloatingPointNumber("float", "nl-NL")));
     }
 
     @Test

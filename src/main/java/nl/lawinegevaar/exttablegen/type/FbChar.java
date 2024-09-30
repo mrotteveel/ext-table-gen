@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -47,7 +48,7 @@ public final class FbChar extends AbstractFbDatatype<String, Converter<String>> 
      *         converter to apply
      * @since 2
      */
-    public FbChar(int length, FbEncoding encoding, Converter<String> converter) {
+    public FbChar(int length, FbEncoding encoding, @Nullable Converter<String> converter) {
         super(String.class, converter, DEFAULT_CONVERTER);
         if (length < 1) {
             throw new IllegalArgumentException("Minimum size is 1 character");
@@ -63,7 +64,7 @@ public final class FbChar extends AbstractFbDatatype<String, Converter<String>> 
     }
 
     @Override
-    public FbChar withConverter(Converter<String> converter) {
+    public FbChar withConverter(@Nullable Converter<String> converter) {
         if (hasConverter(converter)) return this;
         return new FbChar(length, encoding, converter);
     }

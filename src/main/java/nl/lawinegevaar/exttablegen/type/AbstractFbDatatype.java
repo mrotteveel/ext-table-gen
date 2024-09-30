@@ -4,11 +4,13 @@ package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Objects;
 import java.util.Optional;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
 /**
@@ -26,7 +28,7 @@ public abstract sealed class AbstractFbDatatype<T, C extends Converter<T>> imple
 
     private final Class<T> targetType;
     // The configured converter (can be null)
-    private final C converter;
+    private final @Nullable C converter;
     // The final converter (either configured or the default)
     private final C finalConverter;
 
@@ -44,8 +46,8 @@ public abstract sealed class AbstractFbDatatype<T, C extends Converter<T>> imple
      * @param defaultConverter
      *         default converter to use when {@code converter} is {@code null}
      */
-    protected AbstractFbDatatype(Class<T> targetType, C converter, C defaultConverter) {
-        this.targetType = targetType;
+    protected AbstractFbDatatype(Class<T> targetType, @Nullable C converter, C defaultConverter) {
+        this.targetType = requireNonNull(targetType, "targetType");
         this.converter = converter;
         this.finalConverter = requireNonNullElse(converter, defaultConverter);
     }
@@ -61,7 +63,7 @@ public abstract sealed class AbstractFbDatatype<T, C extends Converter<T>> imple
     }
 
     @Override
-    public void writeValue(String value, EncoderOutputStream out) throws IOException {
+    public void writeValue(@Nullable String value, EncoderOutputStream out) throws IOException {
         if (value == null || value.isEmpty()) {
             writeEmpty(out);
         } else {
@@ -99,7 +101,7 @@ public abstract sealed class AbstractFbDatatype<T, C extends Converter<T>> imple
      *         converter
      * @return {@code true} if the (non-default) converter of this instance is equal to {@code converter}
      */
-    protected boolean hasConverter(C converter) {
+    protected boolean hasConverter(@Nullable C converter) {
         return Objects.equals(this.converter, converter);
     }
 

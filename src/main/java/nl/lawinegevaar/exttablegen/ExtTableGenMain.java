@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import jakarta.xml.bind.JAXBException;
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
+import org.jspecify.annotations.NullUnmarked;
 import picocli.CommandLine;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ import static nl.lawinegevaar.exttablegen.TableDerivationConfig.DEFAULT_END_COLU
  */
 @CommandLine.Command(name= "ext-table-gen", mixinStandardHelpOptions = true, sortOptions = false,
         versionProvider = ExtTableGenMain.VersionProvider.class)
+@NullUnmarked
 final class ExtTableGenMain implements Runnable {
 
     private static final Logger log;
@@ -191,7 +193,8 @@ final class ExtTableGenMain implements Runnable {
         boolean missingCsvFile = etgConfig.csvFileConfig().map(CsvFileConfig::path).isEmpty();
         if (missingCsvFile) {
             missingOptions.add("--csv-file=CSV");
-        } else if (etgConfig.csvFileConfig().map(CsvFileConfig::charset).isEmpty()) {
+        } else //noinspection ConstantValue
+            if (etgConfig.csvFileConfig().map(CsvFileConfig::charset).isEmpty()) {
             // csv-charset is also empty if --csv-file wasn't specified and the config doesn't have <csvFile>;
             // this condition itself shouldn't happen in practice, unless there is some bug preventing fallback to the
             // default of UTF-8

@@ -1,15 +1,19 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.Optional;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Base implementation of {@link RowProcessor}.
  */
 abstract class AbstractRowProcessor implements RowProcessor {
 
-    private Exception lastException;
+    private @Nullable Exception lastException;
 
     /**
      * {@inheritDoc}
@@ -36,7 +40,7 @@ abstract class AbstractRowProcessor implements RowProcessor {
      */
     @Override
     public final ProcessingResult onException(Exception exception) {
-        lastException = exception;
+        lastException = requireNonNull(exception, "exception");
         return onExceptionHandler(exception);
     }
 

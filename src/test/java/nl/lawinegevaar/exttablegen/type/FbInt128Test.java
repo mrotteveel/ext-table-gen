@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -7,6 +7,7 @@ import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.ParseInt128;
 import org.apache.commons.lang3.ArrayUtils;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -106,7 +107,7 @@ class FbInt128Test {
         return writeAndGetValue(valueToWrite, null);
     }
 
-    BigInteger writeAndGetValue(String valueToWrite, Converter<BigInteger> converter) throws IOException {
+    BigInteger writeAndGetValue(String valueToWrite, @Nullable Converter<BigInteger> converter) throws IOException {
         var baos = new ByteArrayOutputStream();
         int128Type.withConverter(converter)
                 .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));

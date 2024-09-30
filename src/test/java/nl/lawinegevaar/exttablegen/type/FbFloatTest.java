@@ -6,6 +6,7 @@ import nl.lawinegevaar.exttablegen.ByteOrderType;
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.FloatConverter;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -18,6 +19,7 @@ import java.nio.ByteOrder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FbFloatTest {
@@ -49,6 +51,7 @@ class FbFloatTest {
     @Test
     void testWriteValue_callsNonNullConverter() throws Exception {
         var normalConverter = FloatConverter.wrap(Converter.of(Float.class, Float::valueOf));
+        assertNotNull(normalConverter);
         var offsetByTwoConverter = Converter.of(Float.class, v -> normalConverter.convertToFloat(v) + 2.5f);
         assertEquals(5.2f, writeAndGetValue("2.7", offsetByTwoConverter));
     }
@@ -78,7 +81,7 @@ class FbFloatTest {
         return writeAndGetValue(valueToWrite, null);
     }
 
-    float writeAndGetValue(String valueToWrite, Converter<Float> converter) throws IOException {
+    float writeAndGetValue(String valueToWrite, @Nullable Converter<Float> converter) throws IOException {
         var baos = new ByteArrayOutputStream();
         floatType.withConverter(converter)
                 .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));

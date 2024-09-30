@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ColumnSizeValidatorTest {
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     void validate_happyPath() {
         var validator = new ColumnSizeValidator(new int[] { 3, 4, 5 });

@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.ParseDatetime;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.time.temporal.TemporalAccessor;
@@ -30,7 +31,7 @@ public final class FbTimestamp extends AbstractFbDatatype<TemporalAccessor, Conv
      * @param converter
      *         converter, or {@code null} for the default conversion
      */
-    public FbTimestamp(Converter<TemporalAccessor> converter) {
+    public FbTimestamp(@Nullable Converter<TemporalAccessor> converter) {
         super(TemporalAccessor.class, converter, ParseDatetime.getDefaultTimestampInstance());
     }
 
@@ -58,7 +59,7 @@ public final class FbTimestamp extends AbstractFbDatatype<TemporalAccessor, Conv
     }
 
     @Override
-    public FbDatatype<TemporalAccessor> withConverter(Converter<TemporalAccessor> converter) {
+    public FbDatatype<TemporalAccessor> withConverter(@Nullable Converter<TemporalAccessor> converter) {
         if (hasConverter(converter)) return this;
         return new FbTimestamp(converter);
     }

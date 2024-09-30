@@ -11,6 +11,8 @@ import nl.lawinegevaar.exttablegen.xmlconfig.ExtTableGenConfig;
 import nl.lawinegevaar.exttablegen.xmlconfig.InformationalType;
 import org.firebirdsql.management.FBManager;
 import org.firebirdsql.util.FirebirdSupportInfo;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.NullUnmarked;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -66,6 +68,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @ExtendWith(RequireIntegrationTestConfigurationCondition.class)
+@NullUnmarked
 class ExtTableIntegrationTests {
 
     private static final String TEST_DATA_RESOURCE_ROOT = "/integration-testdata/";
@@ -770,7 +773,7 @@ class ExtTableIntegrationTests {
                 int count = 0;
 
                 @Override
-                public ProcessingResult onRow(Row row) {
+                public @NonNull ProcessingResult onRow(@NonNull Row row) {
                     count++;
                     try {
                         assertTrue(rs.next(), "expected a result set row for received CSV file row " + row.line());

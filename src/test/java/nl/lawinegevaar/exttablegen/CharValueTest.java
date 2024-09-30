@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -32,6 +33,7 @@ class CharValueTest {
             """)
     void of_validValues(String stringValue, String expectedType, char charValue) {
         var characterValue = CharValue.of(stringValue);
+        assertNotNull(characterValue);
 
         assertEquals(expectedType, characterValue.getClass().getSimpleName(), "type");
         assertEquals(charValue, characterValue.value(), "value");

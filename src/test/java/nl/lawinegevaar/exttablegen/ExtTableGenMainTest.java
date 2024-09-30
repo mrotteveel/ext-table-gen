@@ -1,9 +1,11 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import jakarta.xml.bind.JAXBException;
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -489,7 +491,7 @@ class ExtTableGenMainTest {
     @ParameterizedTest
     @NullSource
     @ValueSource(booleans = { true, false })
-    void mergeConfig_tableFile(Boolean overwriteTableFile) {
+    void mergeConfig_tableFile(@Nullable Boolean overwriteTableFile) {
         var main = new ExtTableGenMain();
         EtgConfig originalConfig = testEtgConfig();
 
@@ -540,6 +542,7 @@ class ExtTableGenMainTest {
             UTF8, ,     INCOMPLETE
             UTF8, NONE, INCOMPLETE
             """)
+    @NullUnmarked
     void mergeConfig_tableDerivation(FbEncoding columnEncoding, EndColumn.Type endColumnType,
             TableDerivationMode tableDerivationMode) {
         var main = new ExtTableGenMain();
@@ -570,6 +573,7 @@ class ExtTableGenMainTest {
             other.dat, ,            true
             other.dat, ISO-8859-1,  true
             """)
+    @NullUnmarked
     void mergeConfig_csvFileConfig(Path csvFile, Charset csvCharset, Boolean csvHeader) {
         var main = new ExtTableGenMain();
         EtgConfig originalConfig = testEtgConfig();
@@ -598,6 +602,7 @@ class ExtTableGenMainTest {
             QUOT,      ',',       \\,         false,                   true,             true
             null,      TAB,       null,       true,                    false,            null
             """)
+    @NullUnmarked
     void testCsvParserConfigOptions(String quoteChar, String separator, String escapeChar,
             Boolean ignoreLeadingWhiteSpace, Boolean ignoreQuotations, Boolean strictQuotes) {
         var options = new ArrayList<>(
@@ -652,6 +657,7 @@ class ExtTableGenMainTest {
             RFC_4180, APOS,      TAB,       \\,         true,                    true,             true
             CUSTOM,   APOS,      TAB,       \\,         true,                    false,            true
             """)
+    @NullUnmarked
     void mergeConfig_csvParserConfig(CsvType type, CharValue quoteChar, CharValue separator, CharValue escapeChar,
             Boolean ignoreLeadingWhiteSpace, Boolean ignoreQuotations, Boolean strictQuotes) {
         var main = new ExtTableGenMain();

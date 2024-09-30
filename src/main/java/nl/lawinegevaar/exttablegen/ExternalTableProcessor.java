@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.System.Logger.Level.TRACE;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Derives an external table definition from row information.
@@ -19,7 +20,7 @@ final class ExternalTableProcessor extends MultiplexRowProcessor {
     private final MaximumColumnSizeFinder columnSizeFinder = new MaximumColumnSizeFinder();
 
     ExternalTableProcessor(ExternalTable.Config tableConfig) {
-        this.tableConfig = tableConfig;
+        this.tableConfig = requireNonNull(tableConfig, "tableConfig");
         subscribe(columnNameFinder);
         subscribe(columnSizeFinder);
     }

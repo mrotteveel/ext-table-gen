@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.ByteOrderType;
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -114,7 +115,8 @@ class FbDateTest {
         return writeAndGetValue(valueToWrite, null);
     }
 
-    LocalDate writeAndGetValue(String valueToWrite, Converter<TemporalAccessor> converter) throws IOException {
+    LocalDate writeAndGetValue(String valueToWrite, @Nullable Converter<TemporalAccessor> converter)
+            throws IOException {
         var baos = new ByteArrayOutputStream();
         dateType.withConverter(converter)
                 .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));

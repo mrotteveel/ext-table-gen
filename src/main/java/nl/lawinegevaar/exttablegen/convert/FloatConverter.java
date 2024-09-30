@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * A converter to {@link Float} with an additional method for conversion to the primitive {@code float}.
  *
@@ -31,7 +33,7 @@ public interface FloatConverter extends Converter<Float> {
         return convertToFloat(sourceValue);
     }
 
-    static FloatConverter wrap(Converter<Float> converter) {
+    static @Nullable FloatConverter wrap(@Nullable Converter<Float> converter) {
         final class FloatConverterAdapter extends AbstractConverterAdapter<Float> implements FloatConverter {
             FloatConverterAdapter(Converter<Float> converter) {
                 super(converter);

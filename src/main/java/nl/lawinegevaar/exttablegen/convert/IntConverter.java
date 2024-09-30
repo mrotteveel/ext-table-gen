@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * A converter to {@link Integer} with an additional method for conversion to the primitive {@code int}.
  *
@@ -31,7 +33,7 @@ public interface IntConverter extends Converter<Integer> {
         return convertToInt(sourceValue);
     }
 
-    static IntConverter wrap(Converter<Integer> converter) {
+    static @Nullable IntConverter wrap(@Nullable Converter<Integer> converter) {
         final class IntConverterAdapter extends AbstractConverterAdapter<Integer> implements IntConverter {
             IntConverterAdapter(Converter<Integer> converter) {
                 super(converter);

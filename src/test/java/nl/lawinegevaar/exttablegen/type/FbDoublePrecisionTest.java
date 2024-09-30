@@ -6,6 +6,7 @@ import nl.lawinegevaar.exttablegen.ByteOrderType;
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.DoubleConverter;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -18,6 +19,7 @@ import java.nio.ByteOrder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class FbDoublePrecisionTest {
@@ -49,6 +51,7 @@ class FbDoublePrecisionTest {
     @Test
     void testWriteValue_callsNonNullConverter() throws Exception {
         var normalConverter = DoubleConverter.wrap(Converter.of(Double.class, Double::valueOf));
+        assertNotNull(normalConverter);
         var offsetByTwoConverter = Converter.of(Double.class, v -> normalConverter.convertToDouble(v) + 2.5);
         assertEquals(5.2, writeAndGetValue("2.7", offsetByTwoConverter));
     }
@@ -78,7 +81,7 @@ class FbDoublePrecisionTest {
         return writeAndGetValue(valueToWrite, null);
     }
 
-    double writeAndGetValue(String valueToWrite, Converter<Double> converter) throws IOException {
+    double writeAndGetValue(String valueToWrite, @Nullable Converter<Double> converter) throws IOException {
         var baos = new ByteArrayOutputStream();
         doublePrecisionType.withConverter(converter)
                 .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));

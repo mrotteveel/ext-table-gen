@@ -3,10 +3,13 @@
 package nl.lawinegevaar.exttablegen.convert;
 
 import nl.lawinegevaar.exttablegen.TargetTypeMismatchException;
+import org.jspecify.annotations.Nullable;
 
 import java.time.temporal.TemporalAccessor;
 import java.util.Locale;
 import java.util.function.Function;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * A converter performs a conversion from a String value to a value of type {@code T}.
@@ -170,7 +173,7 @@ public interface Converter<T> {
      *         locale in a BCP 47 language tag, or {@code null} to use the default locale
      * @return converter to parse datetime values
      */
-    static ParseDatetime parseDatetime(String pattern, String locale) {
+    static ParseDatetime parseDatetime(String pattern, @Nullable String locale) {
         return parseDatetime(pattern, toLocale(locale));
     }
 
@@ -183,7 +186,7 @@ public interface Converter<T> {
      *         locale, or {@code null} to use the default locale
      * @return converter to parse datetime values
      */
-    static ParseDatetime parseDatetime(String pattern, Locale locale) {
+    static ParseDatetime parseDatetime(String pattern, @Nullable Locale locale) {
         return new ParseDatetime(pattern, locale);
     }
 
@@ -195,7 +198,7 @@ public interface Converter<T> {
      * @return converter to parse big decimal values
      */
     static ParseBigDecimal parseBigDecimal(String locale) {
-        return parseBigDecimal(toLocale(locale));
+        return parseBigDecimal(requireNonNull(toLocale(locale), "locale"));
     }
 
     /**
@@ -222,7 +225,7 @@ public interface Converter<T> {
      * @since 3
      */
     static Converter<? extends Number> parseFloatingPointNumber(String xmlTypeName, String locale) {
-        return parseFloatingPointNumber(xmlTypeName, toLocale(locale));
+        return parseFloatingPointNumber(xmlTypeName, requireNonNull(toLocale(locale), "locale"));
     }
 
     /**
@@ -253,7 +256,7 @@ public interface Converter<T> {
      * @return local instance, or {@code null} if {@code languageTag} is {@code null}
      * @since 3
      */
-    private static Locale toLocale(String languageTag) {
+    private static @Nullable Locale toLocale(@Nullable String languageTag) {
         return languageTag != null ? Locale.forLanguageTag(languageTag) : null;
     }
 

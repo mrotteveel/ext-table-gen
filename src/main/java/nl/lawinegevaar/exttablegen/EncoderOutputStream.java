@@ -15,6 +15,8 @@ import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Output stream for endian-sensitive operations.
  *
@@ -180,7 +182,7 @@ public final class EncoderOutputStream extends FilterOutputStream {
         private int columnCount;
 
         private Builder(ByteOrder byteOrder) {
-            this.byteOrder = byteOrder;
+            this.byteOrder = requireNonNull(byteOrder, "byteOrder");
         }
 
         public Builder withColumnCount(int columnCount) {

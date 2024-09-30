@@ -1,6 +1,8 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
+
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -48,7 +50,7 @@ final class MaximumColumnSizeFinder extends AbstractRowProcessor {
         return ProcessingResult.continueProcessing();
     }
 
-    private void updateColumnSize(int index, String columnValue) {
+    private void updateColumnSize(int index, @Nullable String columnValue) {
         if (columnValue == null) return;
         int lengthInChar = columnValue.length();
         // checking length in char first, because length in char is always greater than or equal to Unicode code points

@@ -6,6 +6,7 @@ import nl.lawinegevaar.exttablegen.ByteOrderType;
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.ParseInteger;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
@@ -77,7 +78,7 @@ class FbIntegerTest {
         return writeAndGetValue(valueToWrite, null);
     }
 
-    int writeAndGetValue(String valueToWrite, Converter<Integer> converter) throws IOException {
+    int writeAndGetValue(String valueToWrite, @Nullable Converter<Integer> converter) throws IOException {
         var baos = new ByteArrayOutputStream();
         integerType.withConverter(converter)
                 .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));

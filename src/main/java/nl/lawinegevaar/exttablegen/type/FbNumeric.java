@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,7 +28,7 @@ public final class FbNumeric extends AbstractFbFixedPointDatatype implements FbF
      * @throws IllegalArgumentException
      *         if {@code precision} or {@code scale} are out of range
      */
-    public FbNumeric(int precision, int scale, RoundingMode roundingMode) {
+    public FbNumeric(int precision, int scale, @Nullable RoundingMode roundingMode) {
         this(null, precision, scale, roundingMode);
     }
 
@@ -45,7 +46,8 @@ public final class FbNumeric extends AbstractFbFixedPointDatatype implements FbF
      * @throws IllegalArgumentException
      *         if {@code precision} or {@code scale} are out of range
      */
-    public FbNumeric(Converter<BigDecimal> converter, int precision, int scale, RoundingMode roundingMode) {
+    public FbNumeric(@Nullable Converter<BigDecimal> converter, int precision, int scale,
+            @Nullable RoundingMode roundingMode) {
         super(converter, numericBackingType(precision), precision, scale, roundingMode);
     }
 
@@ -55,7 +57,7 @@ public final class FbNumeric extends AbstractFbFixedPointDatatype implements FbF
     }
 
     @Override
-    public FbNumeric withConverter(Converter<BigDecimal> converter) {
+    public FbNumeric withConverter(@Nullable Converter<BigDecimal> converter) {
         if (hasConverter(converter)) return this;
         return new FbNumeric(converter, precision(), scale(), roundingMode());
     }

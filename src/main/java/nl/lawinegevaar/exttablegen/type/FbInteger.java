@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -6,6 +6,7 @@ import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.IntConverter;
 import nl.lawinegevaar.exttablegen.convert.ParseInteger;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -32,7 +33,7 @@ public final class FbInteger extends AbstractFbDatatype<Integer, IntConverter>
      * @param converter
      *         converter, or {@code null} for the default conversion
      */
-    public FbInteger(Converter<Integer> converter) {
+    public FbInteger(@Nullable Converter<Integer> converter) {
         super(Integer.class, IntConverter.wrap(converter), DEFAULT_CONVERTER);
     }
 
@@ -42,7 +43,7 @@ public final class FbInteger extends AbstractFbDatatype<Integer, IntConverter>
     }
 
     @Override
-    public void writeValue(String value, EncoderOutputStream out) throws IOException {
+    public void writeValue(@Nullable String value, EncoderOutputStream out) throws IOException {
         if (value == null || value.isEmpty()) {
             writeEmpty(out);
         } else {
@@ -66,7 +67,7 @@ public final class FbInteger extends AbstractFbDatatype<Integer, IntConverter>
     }
 
     @Override
-    public FbInteger withConverter(Converter<Integer> converter) {
+    public FbInteger withConverter(@Nullable Converter<Integer> converter) {
         IntConverter wrappedConverter = IntConverter.wrap(converter);
         if (hasConverter(wrappedConverter)) return this;
         return new FbInteger(wrappedConverter);

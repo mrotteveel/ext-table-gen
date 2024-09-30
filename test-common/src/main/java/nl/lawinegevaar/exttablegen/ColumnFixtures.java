@@ -4,6 +4,7 @@ package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.type.*;
+import org.jspecify.annotations.Nullable;
 
 import java.math.RoundingMode;
 import java.util.List;
@@ -56,7 +57,7 @@ final class ColumnFixtures {
         return integralNumber(name, typeName, null);
     }
 
-    static Column integralNumber(String name, String typeName, Converter<?> converter) {
+    static Column integralNumber(String name, String typeName, @Nullable Converter<?> converter) {
         return switch (typeName) {
             case "smallint" -> smallint(name, converter);
             case "integer" -> integer(name, converter);
@@ -75,7 +76,7 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column smallint(String name, Converter<?> converter) {
+    static Column smallint(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbSmallint().withConverterChecked(converter));
     }
 
@@ -88,7 +89,7 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column integer(String name, Converter<?> converter) {
+    static Column integer(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbInteger().withConverterChecked(converter));
     }
 
@@ -101,7 +102,7 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column bigint(String name, Converter<?> converter) {
+    static Column bigint(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbBigint().withConverterChecked(converter));
     }
 
@@ -114,7 +115,7 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column int128(String name, Converter<?> converter) {
+    static Column int128(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbInt128().withConverterChecked(converter));
     }
 
@@ -127,7 +128,7 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column date(String name, Converter<?> converter) {
+    static Column date(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbDate().withConverterChecked(converter));
     }
 
@@ -140,7 +141,7 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column time(String name, Converter<?> converter) {
+    static Column time(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbTime().withConverterChecked(converter));
     }
 
@@ -153,7 +154,7 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column timestamp(String name, Converter<?> converter) {
+    static Column timestamp(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbTimestamp().withConverterChecked(converter));
     }
 
@@ -188,7 +189,8 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column numeric(String name, int precision, int scale, RoundingMode roundingMode, Converter<?> converter) {
+    static Column numeric(String name, int precision, int scale, @Nullable RoundingMode roundingMode,
+            @Nullable Converter<?> converter) {
         return new Column(name, new FbNumeric(precision, scale, roundingMode).withConverterChecked(converter));
     }
 
@@ -223,7 +225,8 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column decimal(String name, int precision, int scale, RoundingMode roundingMode, Converter<?> converter) {
+    static Column decimal(String name, int precision, int scale, @Nullable RoundingMode roundingMode,
+            @Nullable Converter<?> converter) {
         return new Column(name, new FbDecimal(precision, scale, roundingMode).withConverterChecked(converter));
     }
 
@@ -236,7 +239,7 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column floatCol(String name, Converter<?> converter) {
+    static Column floatCol(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbFloat().withConverterChecked(converter));
     }
 
@@ -249,7 +252,7 @@ final class ColumnFixtures {
      *         converter, or {@code null} for default
      * @return column
      */
-    static Column doublePrecision(String name, Converter<?> converter) {
+    static Column doublePrecision(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbDoublePrecision().withConverterChecked(converter));
     }
 

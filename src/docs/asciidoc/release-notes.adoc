@@ -83,6 +83,7 @@ For more information, or to report issues or submit pull requests, go to https:/
 The following changes were made in _ext-table-gen_ 3.0:
 
 * Add support for binary floating point types (`FLOAT`, `DOUBLE PRECISION`) (https://github.com/mrotteveel/ext-table-gen/issues/20[#20^])
+* Add nullability annotations (https://github.com/mrotteveel/ext-table-gen/issues/22[#22^])
 
 ==== _ext-table-gen_ 2.0
 

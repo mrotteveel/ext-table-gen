@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.ParseInt128;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -35,7 +36,7 @@ public final class FbInt128 extends AbstractFbDatatype<BigInteger, Converter<Big
      * @param converter
      *         converter, or {@code null} for the default conversion
      */
-    public FbInt128(Converter<BigInteger> converter) {
+    public FbInt128(@Nullable Converter<BigInteger> converter) {
         super(BigInteger.class, converter, DEFAULT_CONVERTER);
     }
 
@@ -60,7 +61,7 @@ public final class FbInt128 extends AbstractFbDatatype<BigInteger, Converter<Big
     }
 
     @Override
-    public FbInt128 withConverter(Converter<BigInteger> converter) {
+    public FbInt128 withConverter(@Nullable Converter<BigInteger> converter) {
         if (hasConverter(converter)) return this;
         return new FbInt128(converter);
     }

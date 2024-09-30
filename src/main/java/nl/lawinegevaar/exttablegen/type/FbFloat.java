@@ -5,6 +5,7 @@ package nl.lawinegevaar.exttablegen.type;
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.FloatConverter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -45,7 +46,7 @@ public final class FbFloat extends AbstractFbDatatype<Float, FloatConverter> imp
      * @param converter
      *         converter, or {@code null} for the default conversion
      */
-    public FbFloat(Converter<Float> converter) {
+    public FbFloat(@Nullable Converter<Float> converter) {
         super(Float.class, FloatConverter.wrap(converter), DEFAULT_CONVERTER);
     }
 
@@ -55,7 +56,7 @@ public final class FbFloat extends AbstractFbDatatype<Float, FloatConverter> imp
     }
 
     @Override
-    public void writeValue(String value, EncoderOutputStream out) throws IOException {
+    public void writeValue(@Nullable String value, EncoderOutputStream out) throws IOException {
         if (value == null || value.isEmpty()) {
             writeEmpty(out);
         } else {
@@ -79,7 +80,7 @@ public final class FbFloat extends AbstractFbDatatype<Float, FloatConverter> imp
     }
 
     @Override
-    public FbDatatype<Float> withConverter(Converter<Float> converter) {
+    public FbDatatype<Float> withConverter(@Nullable Converter<Float> converter) {
         FloatConverter wrappedConverter = FloatConverter.wrap(converter);
         if (hasConverter(wrappedConverter)) return this;
         return new FbFloat(wrappedConverter);

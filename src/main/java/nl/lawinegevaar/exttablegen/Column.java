@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -27,6 +27,7 @@ sealed class Column permits EndColumn {
      * @throws IllegalArgumentException
      *         if {@code name} is {@code null} or blank
      */
+    @SuppressWarnings("ConstantValue")
     Column(String name, FbDatatype<?> datatype) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("name must not be null, empty or blank");

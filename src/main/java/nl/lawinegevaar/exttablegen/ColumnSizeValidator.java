@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -81,6 +81,7 @@ final class ColumnSizeValidator implements RowValidator {
                 .toList();
     }
 
+    @SuppressWarnings("ConstantValue")
     private boolean exceedsSize(int maxSize, String value) {
         if (maxSize == -1 || value == null) {
             return false;

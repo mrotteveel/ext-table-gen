@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 plugins {
     id 'java'
@@ -10,4 +10,5 @@ repositories {
 
 dependencies {
     implementation project(':')
+    implementation libs.jspecify
 }

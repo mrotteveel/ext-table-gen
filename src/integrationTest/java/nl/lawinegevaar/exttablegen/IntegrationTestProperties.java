@@ -1,14 +1,16 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import org.firebirdsql.management.FBManager;
+import org.jspecify.annotations.NullUnmarked;
 
 import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+@NullUnmarked
 final class IntegrationTestProperties {
 
     static final String DB_HOST = System.getProperty("test.db.host");

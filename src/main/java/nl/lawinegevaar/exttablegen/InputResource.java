@@ -1,6 +1,8 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
+
+import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -187,7 +189,7 @@ final class InMemoryInputResource implements InputResource {
  */
 final class ClasspathInputResource implements InputResource {
 
-    private final URL resourceUrl;
+    private final @Nullable URL resourceUrl;
     private final String resourcePath;
 
     /**
@@ -202,7 +204,7 @@ final class ClasspathInputResource implements InputResource {
         this(locatorClass.getResource(resourcePath), resourcePath);
     }
 
-    private ClasspathInputResource(URL resourceUrl, String resourcePath) {
+    private ClasspathInputResource(@Nullable URL resourceUrl, String resourcePath) {
         // NOTE: resourceUrl is null is handled on each invocation of createInputStream
         this.resourceUrl = resourceUrl;
         // Used for error messages only

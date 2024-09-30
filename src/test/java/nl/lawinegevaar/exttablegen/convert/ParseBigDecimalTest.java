@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
@@ -50,6 +50,7 @@ class ParseBigDecimalTest {
         assertThrows(NumberFormatException.class, () -> parseBigDecimal.convert(inputString));
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     void constructWithNullLocale_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new ParseBigDecimal(null));

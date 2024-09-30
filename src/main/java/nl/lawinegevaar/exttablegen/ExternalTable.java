@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -28,26 +29,23 @@ record ExternalTable(String name, List<Column> columns, OutputResource outputRes
      *         columns of the table (cannot be {@code null})
      * @param outputResource
      *         output resource of the external table (can be {@code null})
+     * @param byteOrder
+     *         byte order
      * @throws IllegalArgumentException
      *         When {@code columns} is empty, or contains an {@link EndColumn} <em>before</em> the last column
      */
-    ExternalTable {
-        if (outputResource == null) {
-            outputResource = OutputResource.nullOutputResource();
-        }
-
+    ExternalTable(@Nullable String name, List<Column> columns, @Nullable OutputResource outputResource,
+            ByteOrderType byteOrder) {
+        this.name = !(name == null || name.isBlank()) ? name.trim() : DEFAULT_TABLE_NAME;
         if (requireNonNull(columns, "columns").isEmpty()) {
             throw new IllegalArgumentException("External table requires at least one column");
         }
         if (columns.subList(0, columns.size() - 1).stream().anyMatch(column -> column instanceof EndColumn)) {
             throw new IllegalArgumentException("An EndColumn may only occur as the last column in columns");
         }
-        columns = List.copyOf(columns);
-
-        name = name != null ? name.trim() : null;
-        if (name == null || name.isBlank()) {
-            name = DEFAULT_TABLE_NAME;
-        }
+        this.columns = List.copyOf(columns);
+        this.outputResource = outputResource != null ? outputResource : OutputResource.nullOutputResource();
+        this.byteOrder = requireNonNull(byteOrder, "byteOrder");
     }
 
     /**
@@ -185,18 +183,19 @@ record ExternalTable(String name, List<Column> columns, OutputResource outputRes
      * @param byteOrder
      *         byte order
      */
-    record Config(String tableName, OutputResource outputResource, FbEncoding defaultEncoding,
+    record Config(@Nullable String tableName, OutputResource outputResource, FbEncoding defaultEncoding,
             EndColumn.Type endColumnType, ByteOrderType byteOrder) {
 
-        Config {
-            if (outputResource == null) {
-                outputResource = OutputResource.nullOutputResource();
-            }
-            requireNonNull(defaultEncoding, "defaultEncoding");
-            requireNonNull(endColumnType, "endColumnType");
+        Config(@Nullable String tableName, @Nullable OutputResource outputResource, FbEncoding defaultEncoding,
+                EndColumn.Type endColumnType, ByteOrderType byteOrder) {
+            this.tableName = tableName;
+            this.outputResource = outputResource != null ? outputResource : OutputResource.nullOutputResource();
+            this.defaultEncoding = requireNonNull(defaultEncoding, "defaultEncoding");
+            this.endColumnType = requireNonNull(endColumnType, "endColumnType");
+            this.byteOrder = requireNonNull(byteOrder, "byteOrder");
         }
 
-        Config(String tableName, Path externalTableFile, FbEncoding defaultEncoding, EndColumn.Type endColumnType,
+        Config(@Nullable String tableName, Path externalTableFile, FbEncoding defaultEncoding, EndColumn.Type endColumnType,
                 ByteOrderType byteOrder) {
             this(tableName, OutputResource.of(externalTableFile), defaultEncoding, endColumnType, byteOrder);
         }

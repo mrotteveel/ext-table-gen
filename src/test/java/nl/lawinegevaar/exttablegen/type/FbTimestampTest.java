@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.ByteOrderType;
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -104,7 +105,7 @@ class FbTimestampTest {
             SQL_TIMESTAMP,       ,       2023-07-18 11:47,      2023-07-18T11:47
             M-dd-yyyy h:mm:ss a, en-US,  7-18-2023 11:47:00 AM, 2023-07-18T11:47
             """)
-    void testWriteValue_callsNonNullConverter(String pattern, String localeString, String value,
+    void testWriteValue_callsNonNullConverter(String pattern, @Nullable String localeString, String value,
             LocalDateTime expectedLocalDateTime) throws Exception {
         var converter =
                 Converter.parseDatetime(pattern, localeString != null ? Locale.forLanguageTag(localeString) : null);
@@ -133,7 +134,8 @@ class FbTimestampTest {
         return writeAndGetValue(valueToWrite, null);
     }
 
-    LocalDateTime writeAndGetValue(String valueToWrite, Converter<TemporalAccessor> converter) throws IOException {
+    LocalDateTime writeAndGetValue(String valueToWrite, @Nullable Converter<TemporalAccessor> converter)
+            throws IOException {
         var baos = new ByteArrayOutputStream();
         timestampType.withConverter(converter)
                 .writeValue(valueToWrite, EncoderOutputStream.of(ByteOrderType.AUTO).withColumnCount(1).writeTo(baos));

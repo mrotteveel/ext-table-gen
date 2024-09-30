@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * A converter to {@link Double} with an additional method for conversion to the primitive {@code double}.
  *
@@ -31,7 +33,7 @@ public interface DoubleConverter extends Converter<Double> {
         return convertToDouble(sourceValue);
     }
 
-    static DoubleConverter wrap(Converter<Double> converter) {
+    static @Nullable DoubleConverter wrap(@Nullable Converter<Double> converter) {
         final class DoubleConverterAdapter extends AbstractConverterAdapter<Double> implements DoubleConverter {
             DoubleConverterAdapter(Converter<Double> converter) {
                 super(converter);

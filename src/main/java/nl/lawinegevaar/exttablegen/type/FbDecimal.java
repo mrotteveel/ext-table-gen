@@ -3,6 +3,7 @@
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,7 +28,7 @@ public final class FbDecimal extends AbstractFbFixedPointDatatype implements FbF
      * @throws IllegalArgumentException
      *         if {@code precision} or {@code scale} are out of range
      */
-    public FbDecimal(int precision, int scale, RoundingMode roundingMode) {
+    public FbDecimal(int precision, int scale, @Nullable RoundingMode roundingMode) {
         this(null, precision, scale, roundingMode);
     }
 
@@ -45,7 +46,8 @@ public final class FbDecimal extends AbstractFbFixedPointDatatype implements FbF
      * @throws IllegalArgumentException
      *         if {@code precision} or {@code scale} are out of range
      */
-    public FbDecimal(Converter<BigDecimal> converter, int precision, int scale, RoundingMode roundingMode) {
+    public FbDecimal(@Nullable Converter<BigDecimal> converter, int precision, int scale,
+            @Nullable RoundingMode roundingMode) {
         super(converter, decimalBackingType(precision), precision, scale, roundingMode);
     }
 
@@ -55,7 +57,7 @@ public final class FbDecimal extends AbstractFbFixedPointDatatype implements FbF
     }
 
     @Override
-    public FbDecimal withConverter(Converter<BigDecimal> converter) {
+    public FbDecimal withConverter(@Nullable Converter<BigDecimal> converter) {
         if (hasConverter(converter)) return this;
         return new FbDecimal(converter, precision(), scale(), roundingMode());
     }

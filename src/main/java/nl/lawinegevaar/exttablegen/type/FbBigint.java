@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -6,6 +6,7 @@ import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.LongConverter;
 import nl.lawinegevaar.exttablegen.convert.ParseBigint;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -31,7 +32,7 @@ public final class FbBigint extends AbstractFbDatatype<Long, LongConverter> impl
      * @param converter
      *         converter, or {@code null} for the default conversion
      */
-    public FbBigint(Converter<Long> converter) {
+    public FbBigint(@Nullable Converter<Long> converter) {
         super(Long.class, LongConverter.wrap(converter), DEFAULT_CONVERTER);
     }
 
@@ -41,7 +42,7 @@ public final class FbBigint extends AbstractFbDatatype<Long, LongConverter> impl
     }
 
     @Override
-    public void writeValue(String value, EncoderOutputStream out) throws IOException {
+    public void writeValue(@Nullable String value, EncoderOutputStream out) throws IOException {
         if (value == null || value.isEmpty()) {
             writeEmpty(out);
         } else {
@@ -65,7 +66,7 @@ public final class FbBigint extends AbstractFbDatatype<Long, LongConverter> impl
     }
 
     @Override
-    public FbDatatype<Long> withConverter(Converter<Long> converter) {
+    public FbDatatype<Long> withConverter(@Nullable Converter<Long> converter) {
         LongConverter wrappedConverter = LongConverter.wrap(converter);
         if (hasConverter(wrappedConverter)) return this;
         return new FbBigint(wrappedConverter);

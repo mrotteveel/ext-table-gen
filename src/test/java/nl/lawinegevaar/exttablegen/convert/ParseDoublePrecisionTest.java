@@ -49,6 +49,7 @@ class ParseDoublePrecisionTest {
         assertThrows(NumberFormatException.class, () -> parseDoublePrecision.convert(inputString));
     }
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     void constructWithNullLocale_throwsNullPointerException() {
         assertThrows(NullPointerException.class, () -> new ParseDoublePrecision(null));

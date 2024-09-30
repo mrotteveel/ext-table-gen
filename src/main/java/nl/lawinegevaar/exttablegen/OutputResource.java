@@ -1,6 +1,8 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
+
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -138,14 +140,14 @@ interface OutputResource {
      * @return null output resource with or without a path (method may return the same instance for repeated
      * invocations; in the current implementation, this only applies when {@code path} is {@code null})
      */
-    static OutputResource nullOutputResource(Path path) {
+    static OutputResource nullOutputResource(@Nullable Path path) {
         final class NullOutputResource implements OutputResource {
 
             static final NullOutputResource NULL_INSTANCE = new NullOutputResource(null);
 
-            private final Path path;
+            private final @Nullable Path path;
 
-            NullOutputResource(Path path) {
+            NullOutputResource(@Nullable Path path) {
                 this.path = path;
             }
 
@@ -252,7 +254,7 @@ record PathOutputResource(Path filePath, boolean allowOverwrite) implements Outp
  */
 final class OutputStreamResource implements OutputResource {
 
-    private OutputStream out;
+    private @Nullable OutputStream out;
 
     /**
      * Creates an output stream resource.

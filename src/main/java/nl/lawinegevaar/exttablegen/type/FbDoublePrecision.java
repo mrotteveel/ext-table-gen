@@ -5,6 +5,7 @@ package nl.lawinegevaar.exttablegen.type;
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
 import nl.lawinegevaar.exttablegen.convert.DoubleConverter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -46,7 +47,7 @@ public final class FbDoublePrecision extends AbstractFbDatatype<Double, DoubleCo
      * @param converter
      *         converter, or {@code null} for the default conversion
      */
-    public FbDoublePrecision(Converter<Double> converter) {
+    public FbDoublePrecision(@Nullable Converter<Double> converter) {
         super(Double.class, DoubleConverter.wrap(converter), DEFAULT_CONVERTER);
     }
 
@@ -56,11 +57,11 @@ public final class FbDoublePrecision extends AbstractFbDatatype<Double, DoubleCo
     }
 
     @Override
-    public void writeValue(String value, EncoderOutputStream out) throws IOException {
+    public void writeValue(@Nullable String value, EncoderOutputStream out) throws IOException {
         if (value == null || value.isEmpty()) {
             writeEmpty(out);
         } else {
-            writeDouble(finalConverter().convert(value), out);
+            writeDouble(finalConverter().convertToDouble(value), out);
         }
     }
 
@@ -80,7 +81,7 @@ public final class FbDoublePrecision extends AbstractFbDatatype<Double, DoubleCo
     }
 
     @Override
-    public FbDatatype<Double> withConverter(Converter<Double> converter) {
+    public FbDatatype<Double> withConverter(@Nullable Converter<Double> converter) {
         DoubleConverter wrappedConverter = DoubleConverter.wrap(converter);
         if (hasConverter(wrappedConverter)) return this;
         return new FbDoublePrecision(wrappedConverter);

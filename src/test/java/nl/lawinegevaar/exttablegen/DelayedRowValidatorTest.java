@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class DelayedRowValidatorTest {
 
+    @SuppressWarnings("DataFlowIssue")
     @Test
     void delay_null_throwsNPE() {
         assertThrows(NullPointerException.class, () -> DelayedRowValidator.delay(null));

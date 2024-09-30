@@ -4,6 +4,7 @@ package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -53,7 +54,7 @@ public sealed interface FbDatatype<T>
      * @throws IOException
      *         for errors writing to the stream
      */
-    void writeValue(String value, EncoderOutputStream out) throws IOException;
+    void writeValue(@Nullable String value, EncoderOutputStream out) throws IOException;
 
     /**
      * Writes an empty value to {@code out}.
@@ -81,7 +82,7 @@ public sealed interface FbDatatype<T>
      * @see #withConverterChecked(Converter)
      * @since 2
      */
-    FbDatatype<T> withConverter(Converter<T> converter);
+    FbDatatype<T> withConverter(@Nullable Converter<T> converter);
 
     /**
      * Variant of {@link #withConverter(Converter)} which checks if the target type of this data type and
@@ -93,7 +94,7 @@ public sealed interface FbDatatype<T>
      * @see #withConverter(Converter)
      * @since 2
      */
-    default FbDatatype<T> withConverterChecked(Converter<?> converter) {
+    default FbDatatype<T> withConverterChecked(@Nullable Converter<?> converter) {
         return withConverter(converter != null ? converter.checkedCast(targetType()) : null);
     }
 

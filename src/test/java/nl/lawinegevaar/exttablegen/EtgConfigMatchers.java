@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.NullUnmarked;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ import static org.hamcrest.Matchers.is;
 /**
  * Hamcrest matchers for {@link EtgConfig} and configuration classes used in {@code EtgConfig}.
  */
+@NullUnmarked
 final class EtgConfigMatchers {
 
     private EtgConfigMatchers() {

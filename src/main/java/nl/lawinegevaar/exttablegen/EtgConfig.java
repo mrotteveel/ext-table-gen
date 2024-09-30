@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
+import org.jspecify.annotations.Nullable;
 
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -34,7 +35,8 @@ record EtgConfig(TableConfig tableConfig, TableDerivationConfig tableDerivationC
         requireNonNull(csvFileConfig, "csvFileConfig");
     }
 
-    EtgConfig(TableConfig tableConfig, TableDerivationConfig tableDerivationConfig, CsvFileConfig csvFileConfig) {
+    EtgConfig(TableConfig tableConfig, TableDerivationConfig tableDerivationConfig,
+            @Nullable CsvFileConfig csvFileConfig) {
         this(tableConfig, tableDerivationConfig, Optional.ofNullable(csvFileConfig));
     }
 
@@ -56,7 +58,7 @@ record EtgConfig(TableConfig tableConfig, TableDerivationConfig tableDerivationC
         return withTableDerivationConfig(tableDerivationConfigGenerator.apply(tableDerivationConfig));
     }
 
-    EtgConfig withCsvFileConfig(CsvFileConfig csvFileConfig) {
+    EtgConfig withCsvFileConfig(@Nullable CsvFileConfig csvFileConfig) {
         if (Objects.equals(this.csvFileConfig.orElse(null), csvFileConfig)) return this;
         return new EtgConfig(tableConfig, tableDerivationConfig, csvFileConfig);
     }
@@ -185,18 +187,22 @@ record TableFile(Path path, boolean overwrite) {
  * @param byteOrder
  *         byte order
  */
-record TableConfig(String name, List<Column> columns, Optional<TableFile> tableFile, ByteOrderType byteOrder) {
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+record TableConfig(@Nullable String name, List<Column> columns, Optional<TableFile> tableFile,
+        ByteOrderType byteOrder) {
 
     private static final TableConfig EMPTY = new TableConfig(null, null, Optional.empty(), ByteOrderType.AUTO);
 
-    TableConfig {
-        columns = columns != null ? List.copyOf(columns) : List.of();
-        if (byteOrder == null) {
-            byteOrder = ByteOrderType.AUTO;
-        }
+    TableConfig(@Nullable String name, @Nullable List<Column> columns, Optional<TableFile> tableFile,
+            @Nullable ByteOrderType byteOrder) {
+        this.name = name;
+        this.tableFile = tableFile;
+        this.columns = columns != null ? List.copyOf(columns) : List.of();
+        this.byteOrder = byteOrder != null ? byteOrder : ByteOrderType.AUTO;
     }
 
-    TableConfig(String name, List<Column> columns, TableFile tableFile, ByteOrderType byteOrder) {
+    TableConfig(@Nullable String name, @Nullable List<Column> columns, @Nullable TableFile tableFile,
+            @Nullable ByteOrderType byteOrder) {
         this(name, columns, Optional.ofNullable(tableFile), byteOrder);
     }
 
@@ -235,22 +241,21 @@ record TableConfig(String name, List<Column> columns, Optional<TableFile> tableF
         return tableFile.map(TableFile::overwrite).orElse(Boolean.FALSE);
     }
 
-    TableConfig withName(String name) {
+    TableConfig withName(@Nullable String name) {
         if (Objects.equals(this.name, name)) return this;
         return new TableConfig(name, columns, tableFile, byteOrder);
     }
 
-    TableConfig withColumns(List<Column> columns) {
+    TableConfig withColumns(@Nullable List<Column> columns) {
         if (this.columns.equals(columns) || this.columns.isEmpty() && columns == null) return this;
         return new TableConfig(name, columns, tableFile, byteOrder);
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     TableConfig withTableFile(Optional<TableFile> tableFile) {
         return withTableFile(tableFile.orElse(null));
     }
 
-    TableConfig withTableFile(TableFile tableFile) {
+    TableConfig withTableFile(@Nullable TableFile tableFile) {
         if (Objects.equals(this.tableFile.orElse(null), tableFile)) return this;
         return new TableConfig(name, columns, tableFile, byteOrder);
     }
@@ -292,10 +297,11 @@ record TableDerivationConfig(FbEncoding columnEncoding, EndColumn.Type endColumn
     private static final TableDerivationConfig DEFAULT_CONFIG =
             new TableDerivationConfig(DEFAULT_COLUMN_ENCODING, DEFAULT_END_COLUMN_TYPE, TableDerivationMode.INCOMPLETE);
 
-    TableDerivationConfig {
-        columnEncoding = requireNonNullElse(columnEncoding, DEFAULT_COLUMN_ENCODING);
-        endColumnType = requireNonNullElse(endColumnType, DEFAULT_END_COLUMN_TYPE);
-        mode = requireNonNullElse(mode, TableDerivationMode.INCOMPLETE);
+    TableDerivationConfig(@Nullable FbEncoding columnEncoding, EndColumn.@Nullable  Type endColumnType,
+            @Nullable TableDerivationMode mode) {
+        this.columnEncoding = requireNonNullElse(columnEncoding, DEFAULT_COLUMN_ENCODING);
+        this.endColumnType = requireNonNullElse(endColumnType, DEFAULT_END_COLUMN_TYPE);
+        this.mode = requireNonNullElse(mode, TableDerivationMode.INCOMPLETE);
     }
 
     TableDerivationConfig withColumnEncoding(FbEncoding columnEncoding) {

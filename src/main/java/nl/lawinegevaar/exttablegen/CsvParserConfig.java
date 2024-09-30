@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -7,6 +7,8 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.ICSVParser;
 import com.opencsv.RFC4180Parser;
 import com.opencsv.RFC4180ParserBuilder;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -29,8 +31,9 @@ import java.util.Objects;
  *         strict quotes, {@code null} applies OpenCSV default; only applies to {@code CUSTOM}
  * @since 2
  */
-record CsvParserConfig(CsvType type, CharValue quoteChar, CharValue separator, CharValue escapeChar,
-        Boolean ignoreLeadingWhiteSpace, Boolean ignoreQuotations, Boolean strictQuotes) {
+record CsvParserConfig(@Nullable CsvType type, @Nullable CharValue quoteChar, @Nullable CharValue separator,
+        @Nullable CharValue escapeChar, @Nullable Boolean ignoreLeadingWhiteSpace, @Nullable Boolean ignoreQuotations,
+        @Nullable Boolean strictQuotes) {
 
     private static final CsvParserConfig DEFAULT_CONFIG = CsvParserConfig.rfc4180(null, null);
 
@@ -40,8 +43,14 @@ record CsvParserConfig(CsvType type, CharValue quoteChar, CharValue separator, C
         }
     }
 
+    @SuppressWarnings("DataFlowIssue")
+    @Override
+    public @NonNull CsvType type() {
+        return type;
+    }
+
     ICSVParser createParser() {
-        return switch (type) {
+        return switch (type()) {
             case RFC_4180 -> createRfc4180Parser();
             case CUSTOM -> createCustomParser();
         };
@@ -85,53 +94,54 @@ record CsvParserConfig(CsvType type, CharValue quoteChar, CharValue separator, C
         return DEFAULT_CONFIG;
     }
 
-    static CsvParserConfig rfc4180(CharValue quoteChar, CharValue separator) {
+    static CsvParserConfig rfc4180(@Nullable CharValue quoteChar, @Nullable CharValue separator) {
         return new CsvParserConfig(CsvType.RFC_4180, quoteChar, separator, null, null, null, null);
     }
 
-    static CsvParserConfig custom(CharValue quoteChar, CharValue separator, CharValue escapeChar,
-            Boolean ignoreLeadingWhiteSpace, Boolean ignoreQuotations, Boolean strictQuotes) {
+    static CsvParserConfig custom(@Nullable CharValue quoteChar, @Nullable CharValue separator,
+            @Nullable CharValue escapeChar, @Nullable Boolean ignoreLeadingWhiteSpace,
+            @Nullable Boolean ignoreQuotations, @Nullable Boolean strictQuotes) {
         return new CsvParserConfig(CsvType.CUSTOM, quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace,
                 ignoreQuotations, strictQuotes);
     }
 
-    CsvParserConfig withType(CsvType type) {
+    CsvParserConfig withType(@Nullable CsvType type) {
         if (this.type == type || type == null && this.type == CsvType.RFC_4180) return this;
         return new CsvParserConfig(type, quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace,
                 ignoreQuotations, strictQuotes);
     }
 
-    CsvParserConfig withQuoteChar(CharValue quoteChar) {
+    CsvParserConfig withQuoteChar(@Nullable CharValue quoteChar) {
         if (Objects.equals(this.quoteChar, quoteChar)) return this;
         return new CsvParserConfig(type, quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace,
                 ignoreQuotations, strictQuotes);
     }
 
-    CsvParserConfig withSeparator(CharValue separator) {
+    CsvParserConfig withSeparator(@Nullable CharValue separator) {
         if (Objects.equals(this.separator, separator)) return this;
         return new CsvParserConfig(type, quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace,
                 ignoreQuotations, strictQuotes);
     }
 
-    CsvParserConfig withEscapeChar(CharValue escapeChar) {
+    CsvParserConfig withEscapeChar(@Nullable CharValue escapeChar) {
         if (Objects.equals(this.escapeChar, escapeChar)) return this;
         return new CsvParserConfig(type, quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace,
                 ignoreQuotations, strictQuotes);
     }
 
-    CsvParserConfig withIgnoreLeadingWhiteSpace(Boolean ignoreLeadingWhiteSpace) {
+    CsvParserConfig withIgnoreLeadingWhiteSpace(@Nullable Boolean ignoreLeadingWhiteSpace) {
         if (Objects.equals(this.ignoreLeadingWhiteSpace, ignoreLeadingWhiteSpace)) return this;
         return new CsvParserConfig(type, quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace,
                 ignoreQuotations, strictQuotes);
     }
 
-    CsvParserConfig withIgnoreQuotations(Boolean ignoreQuotations) {
+    CsvParserConfig withIgnoreQuotations(@Nullable Boolean ignoreQuotations) {
         if (Objects.equals(this.ignoreQuotations, ignoreQuotations)) return this;
         return new CsvParserConfig(type, quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace,
                 ignoreQuotations, strictQuotes);
     }
 
-    CsvParserConfig withStrictQuotes(Boolean strictQuotes) {
+    CsvParserConfig withStrictQuotes(@Nullable Boolean strictQuotes) {
         if (Objects.equals(this.strictQuotes, strictQuotes)) return this;
         return new CsvParserConfig(type, quoteChar, separator, escapeChar, ignoreLeadingWhiteSpace,
                 ignoreQuotations, strictQuotes);

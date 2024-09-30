@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import com.opencsv.exceptions.CsvValidationException;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -17,7 +18,7 @@ final class ExtTableGen {
     private static final System.Logger log = System.getLogger(ExtTableGen.class.getName());
 
     private EtgConfig config;
-    private ExternalTable externalTable;
+    private @Nullable ExternalTable externalTable;
 
     private ExtTableGen(EtgConfig config) {
         this.config = requireNonNull(config, "config");

@@ -1,6 +1,8 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
+
+import org.jspecify.annotations.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -50,7 +52,7 @@ sealed interface CharValue permits CharMnemonic, SimpleChar, UnicodeEscape {
      * @throws IllegalArgumentException
      *         if {@code value} is not {@code null}, and is not a valid value
      */
-    static CharValue of(String value) {
+    static @Nullable CharValue of(@Nullable String value) {
         if (value == null) return null;
         if (value.length() == 1) {
             return new SimpleChar(value.charAt(0));

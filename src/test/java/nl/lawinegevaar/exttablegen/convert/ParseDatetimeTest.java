@@ -1,7 +1,8 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -49,7 +50,8 @@ class ParseDatetimeTest {
             yyyy-MM-dd['T'HH:mm:ss], ,            2021-12-13T00:00:00, 2021-12-13
             yyyy-MM-dd['T'HH:mm:ss], ,            2021-12-13,          2021-12-13
             """)
-    void testWithPatternAndLocale_localDate(String pattern, String languageTag, String input, LocalDate expectedLocalDate) {
+    void testWithPatternAndLocale_localDate(String pattern, @Nullable String languageTag, String input,
+            LocalDate expectedLocalDate) {
         Locale locale = languageTag != null ? Locale.forLanguageTag(languageTag) : null;
         var parseDateTime = new ParseDatetime(pattern, locale);
         assertEquals(pattern, parseDateTime.pattern());
@@ -68,7 +70,8 @@ class ParseDatetimeTest {
             ISO_LOCAL_TIME, ,            15:57:23.1234, 15:57:23.1234
             h:mm:ss a,      en-US,       3:57:23 PM,    15:57:23
             """)
-    void testWithPatternAndLocale_localTime(String pattern, String languageTag, String input, String expectedLocalTime) {
+    void testWithPatternAndLocale_localTime(String pattern, @Nullable String languageTag, String input,
+            String expectedLocalTime) {
         Locale locale = languageTag != null ? Locale.forLanguageTag(languageTag) : null;
         var parseDateTime = new ParseDatetime(pattern, locale);
         assertEquals(pattern, parseDateTime.pattern());
@@ -91,7 +94,8 @@ class ParseDatetimeTest {
             'E, MMMM, d yyyy h:mm:ss.SS a', en-US,       'Mon, July, 17 2023 3:57:23.12 PM', 2023-07-17T15:57:23.12
             yyyy-MM-dd['T'HH:mm:ss],        ,            2023-07-17T15:57:23,                2023-07-17T15:57:23
             """)
-    void testWithPatternAndLocale_localDateTime(String pattern, String languageTag, String input, String expectedLocalDateTime) {
+    void testWithPatternAndLocale_localDateTime(String pattern, @Nullable String languageTag, String input,
+            String expectedLocalDateTime) {
         Locale locale = languageTag != null ? Locale.forLanguageTag(languageTag) : null;
         var parseDateTime = new ParseDatetime(pattern, locale);
         assertEquals(pattern, parseDateTime.pattern());

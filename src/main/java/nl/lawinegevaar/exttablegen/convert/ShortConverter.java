@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * A converter to {@link Short} with an additional method for conversion to the primitive {@code short}.
  *
@@ -31,7 +33,7 @@ public interface ShortConverter extends Converter<Short> {
         return convertToShort(sourceValue);
     }
 
-    static ShortConverter wrap(Converter<Short> converter) {
+    static @Nullable ShortConverter wrap(@Nullable Converter<Short> converter) {
         final class ShortConverterAdapter extends AbstractConverterAdapter<Short> implements ShortConverter {
             ShortConverterAdapter(Converter<Short> converter) {
                 super(converter);

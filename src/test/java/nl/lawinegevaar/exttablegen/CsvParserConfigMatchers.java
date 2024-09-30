@@ -1,10 +1,12 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
+import org.jspecify.annotations.NullUnmarked;
 
+@NullUnmarked
 final class CsvParserConfigMatchers {
 
     private CsvParserConfigMatchers() {

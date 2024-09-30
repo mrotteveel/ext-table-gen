@@ -1,6 +1,8 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
+
+import org.jspecify.annotations.Nullable;
 
 import java.io.BufferedOutputStream;
 import java.io.Closeable;
@@ -21,7 +23,7 @@ final class ExternalTableWriter extends AbstractRowProcessor implements Closeabl
 
     private final ExternalTable externalTable;
     private final OutputResource outputResource;
-    private EncoderOutputStream out;
+    private @Nullable EncoderOutputStream out;
 
     /**
      * Creates a new external table writer, using the current output resource of the external table.

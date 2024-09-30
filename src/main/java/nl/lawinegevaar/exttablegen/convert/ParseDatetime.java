@@ -1,6 +1,8 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
+
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.time.chrono.IsoChronology;
@@ -32,8 +34,8 @@ public final class ParseDatetime implements Converter<TemporalAccessor> {
     private static final ParseDatetime DEFAULT_TIMESTAMP_INSTANCE =
             new ParseDatetime(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
-    private final String pattern;
-    private final Locale locale;
+    private final @Nullable String pattern;
+    private final @Nullable Locale locale;
     private final DateTimeFormatter formatter;
 
     /**
@@ -46,7 +48,7 @@ public final class ParseDatetime implements Converter<TemporalAccessor> {
      * @throws IllegalArgumentException
      *         if {@code pattern} is invalid
      */
-    ParseDatetime(String pattern, Locale locale) {
+    ParseDatetime(String pattern, @Nullable Locale locale) {
         this.pattern = requireNonNull(pattern, "pattern");
         this.locale = locale;
         formatter = createDateTimeFormatter(pattern, locale);
@@ -97,7 +99,7 @@ public final class ParseDatetime implements Converter<TemporalAccessor> {
     /**
      * @return pattern of this {@code ParseDatetime}, can be {@code null} only for the default instances.
      */
-    public String pattern() {
+    public @Nullable String pattern() {
         return pattern;
     }
 
@@ -155,7 +157,7 @@ public final class ParseDatetime implements Converter<TemporalAccessor> {
      * @throws IllegalArgumentException
      *         if {@code pattern} is invalid
      */
-    private static DateTimeFormatter createDateTimeFormatter(String pattern, Locale locale) {
+    private static DateTimeFormatter createDateTimeFormatter(String pattern, @Nullable Locale locale) {
         DateTimeFormatter formatter = FormatterHolder.getByName(pattern)
                 .orElseGet(() -> DateTimeFormatter.ofPattern(pattern));
         if (locale != null) {

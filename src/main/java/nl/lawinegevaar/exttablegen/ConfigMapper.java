@@ -14,6 +14,7 @@ import nl.lawinegevaar.exttablegen.convert.ParseBigDecimal;
 import nl.lawinegevaar.exttablegen.convert.ParseDatetime;
 import nl.lawinegevaar.exttablegen.type.*;
 import nl.lawinegevaar.exttablegen.xmlconfig.*;
+import org.jspecify.annotations.Nullable;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -140,7 +141,7 @@ final class ConfigMapper {
         return externalTableType;
     }
 
-    private ColumnListType toXmlColumnListType(List<Column> columnList) {
+    private ColumnListType toXmlColumnListType(@Nullable List<Column> columnList) {
         ColumnListType columnListType = factory.createColumnListType();
         if (columnList == null || columnList.isEmpty()) return columnListType;
 
@@ -292,7 +293,7 @@ final class ConfigMapper {
         return factory.createRfc4180CsvParser(parserType);
     }
 
-    private static String charValueAsStringOrNull(CharValue charValue) {
+    private static @Nullable String charValueAsStringOrNull(@Nullable CharValue charValue) {
         return charValue != null ? charValue.toString() : null;
     }
 
@@ -326,7 +327,7 @@ final class ConfigMapper {
         }
     }
 
-    private static TableConfig fromXmlExternalTableType(ExternalTableType externalTableType) {
+    private static TableConfig fromXmlExternalTableType(@Nullable ExternalTableType externalTableType) {
         if (externalTableType == null) {
             return TableConfig.empty();
         }
@@ -337,7 +338,7 @@ final class ConfigMapper {
                 fromXmlByteOrderEnum(externalTableType.getByteOrder()));
     }
 
-    private static List<Column> fromXmlColumnListType(ColumnListType columnListType) {
+    private static List<Column> fromXmlColumnListType(@Nullable ColumnListType columnListType) {
         if (columnListType == null) {
             return List.of();
         }
@@ -390,7 +391,7 @@ final class ConfigMapper {
         };
     }
 
-    private static Converter<?> fromXmlConverter(JAXBElement<? extends DatatypeType> datatype) {
+    private static @Nullable Converter<?> fromXmlConverter(JAXBElement<? extends DatatypeType> datatype) {
         ConverterType converterType = datatype.getValue().getConverter();
         if (converterType == null) return null;
         JAXBElement<? extends ConverterStepType> converterStepElement = converterType.getConverterStep();
@@ -437,7 +438,7 @@ final class ConfigMapper {
         }
     }
 
-    private static Optional<TableFile> fromXmlTableFileType(TableFileType tableFileType) {
+    private static Optional<TableFile> fromXmlTableFileType(@Nullable TableFileType tableFileType) {
         if (tableFileType == null) return Optional.empty();
         try {
             return Optional.of(
@@ -449,7 +450,7 @@ final class ConfigMapper {
         }
     }
 
-    private static ByteOrderType fromXmlByteOrderEnum(String byteOrderEnumValue) {
+    private static ByteOrderType fromXmlByteOrderEnum(@Nullable String byteOrderEnumValue) {
         if (byteOrderEnumValue == null) {
             return ByteOrderType.AUTO;
         }
@@ -467,7 +468,7 @@ final class ConfigMapper {
                 TableDerivationMode.NEVER);
     }
 
-    private static FbEncoding fromXmlColumnEncoding(TableDerivationType tableDerivationType) {
+    private static FbEncoding fromXmlColumnEncoding(@Nullable TableDerivationType tableDerivationType) {
         String columnEncoding = tableDerivationType != null ? tableDerivationType.getColumnEncoding() : null;
         if (columnEncoding == null) {
             return DEFAULT_COLUMN_ENCODING;
@@ -480,7 +481,7 @@ final class ConfigMapper {
         }
     }
 
-    private static EndColumn.Type fromXmlEndColumnTypeName(TableDerivationType tableDerivationType) {
+    private static EndColumn.Type fromXmlEndColumnTypeName(@Nullable TableDerivationType tableDerivationType) {
         String endColumnType = tableDerivationType != null ? tableDerivationType.getEndColumnType() : null;
         if (endColumnType == null) {
             return DEFAULT_END_COLUMN_TYPE;
@@ -493,7 +494,7 @@ final class ConfigMapper {
         }
     }
 
-    private static Optional<CsvFileConfig> fromXmlCsvFileType(CsvFileType csvFileType) {
+    private static Optional<CsvFileConfig> fromXmlCsvFileType(@Nullable CsvFileType csvFileType) {
         if (csvFileType == null) return Optional.empty();
         try {
             return Optional.of(
@@ -509,11 +510,12 @@ final class ConfigMapper {
         }
     }
 
-    private static CsvParserConfig fromXmlCsvParserConfig(JAXBElement<? extends CsvParserType> csvParserElement) {
+    private static CsvParserConfig fromXmlCsvParserConfig(
+            @Nullable JAXBElement<? extends CsvParserType> csvParserElement) {
         return fromXmlCsvParserConfig(csvParserElement != null ? csvParserElement.getValue() : null);
     }
 
-    private static CsvParserConfig fromXmlCsvParserConfig(CsvParserType csvParserType) {
+    private static CsvParserConfig fromXmlCsvParserConfig(@Nullable CsvParserType csvParserType) {
         if (csvParserType == null) {
             return CsvParserConfig.of();
         } else if (csvParserType instanceof Rfc4180CsvParserType rfc4180CsvParserType) {

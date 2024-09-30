@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
 import nl.lawinegevaar.exttablegen.EncoderOutputStream;
 import nl.lawinegevaar.exttablegen.convert.Converter;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -27,8 +28,8 @@ public abstract sealed class AbstractFbFixedPointDatatype extends AbstractFbData
     private final int scale;
     private final RoundingMode roundingMode;
 
-    AbstractFbFixedPointDatatype(Converter<BigDecimal> converter, BackingType backingType, int precision, int scale,
-            RoundingMode roundingMode) {
+    AbstractFbFixedPointDatatype(@Nullable Converter<BigDecimal> converter, BackingType backingType,
+            int precision, int scale, @Nullable RoundingMode roundingMode) {
         super(BigDecimal.class, converter, DEFAULT_CONVERTER);
         if (precision < 1 || precision > 38) {
             throw new IllegalArgumentException("precision must be between 1 and 38");

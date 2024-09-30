@@ -28,17 +28,6 @@ jaxb {
     }
 }
 
-dependencies {
-    implementation libs.picocli.core
-    annotationProcessor libs.picocli.codegen
-    implementation libs.opencsv
-    implementation libs.bundles.jaxb
-    implementation libs.commons.lang3
-    implementation libs.jspecify
-
-    testImplementation platform(testLibs.junit.bom)
-}
-
 testing {
     suites {
         configureEach {
@@ -93,6 +82,18 @@ testing {
             }
         }
     }
+}
+
+dependencies {
+    implementation libs.picocli.core
+    annotationProcessor libs.picocli.codegen
+    implementation libs.opencsv
+    implementation libs.bundles.jaxb
+    implementation libs.commons.lang3
+    implementation libs.jspecify
+
+    testImplementation platform(testLibs.junit.bom)
+    integrationTestImplementation platform(testLibs.junit.bom)
 }
 
 tasks.named('check') {

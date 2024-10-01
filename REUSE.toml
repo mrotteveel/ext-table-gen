@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright 2024 Mark Rotteveel
+# SPDX-FileCopyrightText: 2024 Mark Rotteveel
 # SPDX-License-Identifier: Apache-2.0
 
 version = 1
@@ -9,7 +9,7 @@ SPDX-PackageDownloadLocation = "https://github.com/mrotteveel/ext-table-gen"
 [[annotations]]
 path = "NOTICE"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "Copyright 2023 Mark Rotteveel"
+SPDX-FileCopyrightText = "2023 Mark Rotteveel"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
@@ -21,13 +21,13 @@ SPDX-License-Identifier = "Apache-2.0"
 [[annotations]]
 path = "src/docs/asciidoc/chapters/data/**"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "Copyright 2023-2024 Mark Rotteveel"
+SPDX-FileCopyrightText = "2023-2024 Mark Rotteveel"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
 path = ["src/test/resources/testdata/ATTRIBUTION.adoc", "src/test/resources/testdata/happypath-config.xml"]
 precedence = "aggregate"
-SPDX-FileCopyrightText = "Copyright 2023-2024 Mark Rotteveel"
+SPDX-FileCopyrightText = "2023-2024 Mark Rotteveel"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
@@ -39,13 +39,13 @@ SPDX-License-Identifier = "LicenseRef-Datablist"
 [[annotations]]
 path = "src/integrationTest/resources/integration-testcases/verify-alignment-testcases.csv"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "Copyright 2023-2024 Mark Rotteveel"
+SPDX-FileCopyrightText = "2023-2024 Mark Rotteveel"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
 path = "src/integrationTest/resources/integration-testdata/ATTRIBUTION.adoc"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "Copyright 2023 Mark Rotteveel"
+SPDX-FileCopyrightText = "2023 Mark Rotteveel"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]
@@ -57,5 +57,5 @@ SPDX-License-Identifier = "LicenseRef-Datablist"
 [[annotations]]
 path = "src/integrationTest/resources/integration-testdata/**-values-**.csv"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "Copyright 2023-2024 Mark Rotteveel"
+SPDX-FileCopyrightText = "2023-2024 Mark Rotteveel"
 SPDX-License-Identifier = "Apache-2.0"

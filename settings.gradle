@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 rootProject.name = 'ext-table-gen'
 

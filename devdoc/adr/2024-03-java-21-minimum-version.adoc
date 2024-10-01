@@ -1,0 +1,29 @@
+= jdp-2024-03: Java 21 minimum version
+
+// SPDX-FileCopyrightText: Copyright 2024 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Published: 2024-10-01
+* Proposed for: 3.0
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+At time of writing, 2024-10-01, Java 21 is the latest LTS of Java.
+Since Java 17, a lot of new features have been added, specifically for _ext-table-gen_, https://openjdk.org/jeps/441["`JEP 441: Pattern Matching for Switch`"^] seems very useful.
+
+As _ext-table_gen_ is a commandline tool, and not a library, it doesn't really need to support a wide-range of versions.
+
+== Decision
+
+Starting with _ext-table-gen_ 3.0, Java 21 is the minimum supported version.
+
+== Consequences
+
+Starting with _ext-table-gen_ 3.0, support for version before Java 21 will no longer be available.
+Users who cannot upgrade to Java 21 will need to continue to use _ext-table-gen_ 2.0 (which supports Java 17 or higher).

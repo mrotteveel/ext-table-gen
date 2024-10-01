@@ -1,15 +1,17 @@
 [#install]
 = Installation
 
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2024-2023 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 [#install-req]
 == Requirements
 
-The "`Firebird External Table Generator`" or _ext-table-gen_ requires Java 17.
+The "`Firebird External Table Generator`" or _ext-table-gen_ 3.0 requires Java 21.
 We have not tested it on higher versions, but expect it to work on higher versions as well.
-We will only fix issues reported against Java versions which are in support according to the OpenJDK project, at the time of writing this -- August 2023, that means Java 17 and Java 20.
+We will only fix issues reported against Java versions which are in support according to the OpenJDK project, at the time of writing this -- October 2024, that means Java 21 and Java 23.
+
+The previous versions of _ext-table-gen_ -- 1.0 and 2.0 -- require Java 17.
 
 [#install-dist]
 == Distribution package
@@ -49,7 +51,7 @@ It may be necessary to make `bin/ext-table-gen` explicitly executable with `chmo
 [#install-paths]
 === Setting environment variables
 
-To be able to call _ext-table-gen_, Java 17 or higher must be on the `PATH` (the `bin` directory of the Java installation), or alternatively, you need to set `JAVA_HOME` to point to the Java 17 installation directory (not its `bin` directory, but the directory which contains the `bin` directory).
+To be able to call _ext-table-gen_, Java 21 or higher must be on the `PATH` (the `bin` directory of the Java installation), or alternatively, you need to set `JAVA_HOME` to point to the Java 21 installation directory (not its `bin` directory, but the directory which contains the `bin` directory).
 
 If you don't have Java installed, install it using your package manager, https://sdkman.io/[sdkman^] (Linux/macOS), or download it, for example from https://adoptium.net/[Eclipse Adoptium^].
 

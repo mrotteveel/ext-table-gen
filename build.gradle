@@ -19,6 +19,11 @@ application {
     mainClass = 'nl.lawinegevaar.exttablegen.ExtTableGenMain'
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
 jaxb {
     javaGen {
         extTableGenConfig {

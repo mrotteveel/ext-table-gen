@@ -6,7 +6,7 @@
 == Status
 
 * Published: 2024-10-01
-* Proposed for: 3.0
+* Implemented in: 3.0
 
 == Type
 

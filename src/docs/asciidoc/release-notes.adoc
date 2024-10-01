@@ -13,7 +13,7 @@ Mark Rotteveel
 :sectnums:
 :link-rfc4180: https://www.rfc-editor.org/rfc/rfc4180
 
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 Copyright 2023-2024 Mark Rotteveel and all contributing authors under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
@@ -60,7 +60,7 @@ _ext-table-gen_ supports the following types of columns:
 [#about-version]
 == About this version
 
-Firebird External Table Generator version 3.0 is the thirs release of this application.
+Firebird External Table Generator version 3.0 is the third release of this application.
 
 This version introduces the following new features:
 
@@ -70,6 +70,9 @@ This version introduces the following new features:
 *** `doublePrecision`
 
 This application is licensed under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
+
+Version 3.0 requires Java 21.
+Versions 1.0 and 2.0 require Java 17.
 
 Consult the xref:ext-table-gen-user-manual.adoc[User Manual] for installation, usage examples and reference documentation.
 
@@ -84,6 +87,7 @@ The following changes were made in _ext-table-gen_ 3.0:
 
 * Add support for binary floating point types (`FLOAT`, `DOUBLE PRECISION`) (https://github.com/mrotteveel/ext-table-gen/issues/20[#20^])
 * Add nullability annotations (https://github.com/mrotteveel/ext-table-gen/issues/22[#22^])
+* Java 21 is now the minimum supported version (https://github.com/mrotteveel/ext-table-gen/issues/23[#23^])
 
 ==== _ext-table-gen_ 2.0
 

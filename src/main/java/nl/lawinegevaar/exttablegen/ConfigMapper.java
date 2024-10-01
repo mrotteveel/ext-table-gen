@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -173,38 +173,32 @@ final class ConfigMapper {
     }
 
     private JAXBElement<? extends DatatypeType> createXmlDataTypeElement(FbDatatype<?> datatype) {
-        return switch (datatype.getClass().getSimpleName()) {
-            case "FbChar" -> {
-                FbChar fbChar = (FbChar) datatype;
+        return switch (datatype) {
+            case FbChar fbChar -> {
                 CharType charType = factory.createCharType();
                 charType.setLength(fbChar.length());
                 charType.setEncoding(fbChar.encoding().firebirdName());
                 yield factory.createChar(charType);
             }
-            case "FbInteger" -> factory.createInteger(factory.createDatatypeType());
-            case "FbBigint" -> factory.createBigint(factory.createDatatypeType());
-            case "FbSmallint" -> factory.createSmallint(factory.createDatatypeType());
-            case "FbInt128" -> factory.createInt128(factory.createDatatypeType());
-            case "FbDate" -> factory.createDate(factory.createDatatypeType());
-            case "FbTime" -> factory.createTime(factory.createDatatypeType());
-            case "FbTimestamp" -> factory.createTimestamp(factory.createDatatypeType());
-            case "FbNumeric", "FbDecimal" -> {
-                FbFixedPointDatatype fbFixedPoint = (FbFixedPointDatatype) datatype;
+            case FbInteger ignored -> factory.createInteger(factory.createDatatypeType());
+            case FbBigint ignored -> factory.createBigint(factory.createDatatypeType());
+            case FbSmallint ignored -> factory.createSmallint(factory.createDatatypeType());
+            case FbInt128 ignored -> factory.createInt128(factory.createDatatypeType());
+            case FbDate ignored -> factory.createDate(factory.createDatatypeType());
+            case FbTime ignored -> factory.createTime(factory.createDatatypeType());
+            case FbTimestamp ignored -> factory.createTimestamp(factory.createDatatypeType());
+            case FbFixedPointDatatype fbFixedPointDatatype -> {
                 FixedPointType fixedPointType = factory.createFixedPointType();
-                fixedPointType.setPrecision(fbFixedPoint.precision());
-                fixedPointType.setScale(fbFixedPoint.scale());
-                fixedPointType.setRoundingMode(fbFixedPoint.roundingMode().name());
-                yield switch (datatype.getClass().getSimpleName()) {
-                    case "FbNumeric" -> factory.createNumeric(fixedPointType);
-                    case "FbDecimal" -> factory.createDecimal(fixedPointType);
-                    default -> throw new IllegalArgumentException(
-                            "Unsupported Datatype class: " + datatype.getClass().getName());
+                fixedPointType.setPrecision(fbFixedPointDatatype.precision());
+                fixedPointType.setScale(fbFixedPointDatatype.scale());
+                fixedPointType.setRoundingMode(fbFixedPointDatatype.roundingMode().name());
+                yield switch (fbFixedPointDatatype) {
+                    case FbNumeric ignored -> factory.createNumeric(fixedPointType);
+                    case FbDecimal ignored -> factory.createDecimal(fixedPointType);
                 };
             }
-            case "FbFloat" -> factory.createFloat(factory.createDatatypeType());
-            case "FbDoublePrecision" -> factory.createDoublePrecision(factory.createDatatypeType());
-            default ->
-                    throw new IllegalArgumentException("Unsupported Datatype class: " + datatype.getClass().getName());
+            case FbFloat ignored -> factory.createFloat(factory.createDatatypeType());
+            case FbDoublePrecision ignored -> factory.createDoublePrecision(factory.createDatatypeType());
         };
     }
 
@@ -396,17 +390,16 @@ final class ConfigMapper {
         if (converterType == null) return null;
         JAXBElement<? extends ConverterStepType> converterStepElement = converterType.getConverterStep();
         ConverterStepType converterStep = converterStepElement.getValue();
-        if (converterStep instanceof ParseIntegralType parseIntegralType) {
-            return fromXmlParseIntegralType(parseIntegralType, datatype);
-        } else if (converterStep instanceof ParseDatetimeType parseDatetimeType) {
-            return Converter.parseDatetime(parseDatetimeType.getPattern(), parseDatetimeType.getLocale());
-        } else if (converterStep instanceof ParseBigDecimalType parseBigDecimalType) {
-            return Converter.parseBigDecimal(parseBigDecimalType.getLocale());
-        } else if (converterStep instanceof ParseFloatingPointNumberType parseFloatingPointNumberType) {
-            return fromXmlParseFloatingPointNumberType(parseFloatingPointNumberType, datatype);
-        } else {
-            throw new InvalidConfigurationException("Unsupported element: " + converterStepElement.getName());
-        }
+        return switch (converterStep) {
+            case ParseIntegralType parseIntegralType -> fromXmlParseIntegralType(parseIntegralType, datatype);
+            case ParseDatetimeType parseDatetimeType ->
+                    Converter.parseDatetime(parseDatetimeType.getPattern(), parseDatetimeType.getLocale());
+            case ParseBigDecimalType parseBigDecimalType -> Converter.parseBigDecimal(parseBigDecimalType.getLocale());
+            case ParseFloatingPointNumberType parseFloatingPointNumberType ->
+                    fromXmlParseFloatingPointNumberType(parseFloatingPointNumberType, datatype);
+            default ->
+                    throw new InvalidConfigurationException("Unsupported element: " + converterStepElement.getName());
+        };
     }
 
     private static Converter<?> fromXmlParseIntegralType(ParseIntegralType parseIntegralType,
@@ -516,15 +509,13 @@ final class ConfigMapper {
     }
 
     private static CsvParserConfig fromXmlCsvParserConfig(@Nullable CsvParserType csvParserType) {
-        if (csvParserType == null) {
-            return CsvParserConfig.of();
-        } else if (csvParserType instanceof Rfc4180CsvParserType rfc4180CsvParserType) {
-            return fromXmlRfc4180CsvParserType(rfc4180CsvParserType);
-        } else if (csvParserType instanceof CustomCsvParserType customCsvParserType) {
-            return fromXmlCustomCsvParserType(customCsvParserType);
-        } else {
-            throw new InvalidConfigurationException("Unsupported CsvParserType: " + csvParserType.getClass().getName());
-        }
+        return switch (csvParserType) {
+            case null -> CsvParserConfig.of();
+            case Rfc4180CsvParserType rfc4180CsvParserType -> fromXmlRfc4180CsvParserType(rfc4180CsvParserType);
+            case CustomCsvParserType customCsvParserType -> fromXmlCustomCsvParserType(customCsvParserType);
+            default -> throw new InvalidConfigurationException(
+                    "Unsupported CsvParserType: " + csvParserType.getClass().getName());
+        };
     }
 
     private static CsvParserConfig fromXmlRfc4180CsvParserType(Rfc4180CsvParserType rfc4180CsvParserType) {

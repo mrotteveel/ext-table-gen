@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -29,7 +29,7 @@ public final class FbEncoding {
         this.firebirdName = requireNonNull(firebirdName, "firebirdName");
         this.charset = requireNonNull(charset, "charset");
         if (maxBytesPerCharacter < 1 || maxBytesPerCharacter > 4) {
-            // Technically bigger maxBytesPerCharacter should work fine, they just don't occur in practice)
+            // Technically bigger maxBytesPerCharacter should work fine, they just don't occur in practice
             throw new IllegalArgumentException(
                     "maxBytesPerCharacter out of range, should be between 1 and 4, but was " + maxBytesPerCharacter);
         }

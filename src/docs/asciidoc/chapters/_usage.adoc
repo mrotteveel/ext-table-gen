@@ -6,7 +6,7 @@ ifeval::["{includedir}" == "."]
 endif::[]
 ifndef::includedir[:includedir: ..]
 
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 This chapter illustrates how to use _ext-table-gen_ by showing basic usage examples.
@@ -316,7 +316,7 @@ include::{includedir}/chapters/data/persons-type-modified.xml[]
 For data types other than `char` the `byteOrder` is important for determining how to write out data.
 Absence of `byteOrder` will use `AUTO`, but when writing the configuration file, it will report the byte-order of the system that created the file.
 Specify `byteOrder="AUTO"` to use the endianness of the system where _ext-table-gen_ is run.
-However, if you generate the table file on a little-endian machine, while your Firebird server runs on a big-endian machine (or vice-versa), you'll need to set the `byteOrder` to match the endianness of the Firebird server.
+However, if you generate the table file on a little-endian machine, while your Firebird server runs on a big-endian machine (or vice versa), you'll need to set the `byteOrder` to match the endianness of the Firebird server.
 
 See <<ref-xml-externaltable>> for more information on `byteOrder`.
 

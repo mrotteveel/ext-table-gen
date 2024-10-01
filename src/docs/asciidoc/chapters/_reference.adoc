@@ -1,7 +1,7 @@
 [#ref]
 = Reference
 
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 This chapter describes the various configuration options.
@@ -241,7 +241,7 @@ The end column type option (`--end-column=TYPE`) specifies if an extra column is
 `LF`::
 linefeed, a.k.a. LF, \n, or 0x0a
 `CRLF`::
-carriage return + linefeed, a.k.a CR/LF, \r\n, or 0x0d0a
+carriage return + linefeed, a.k.a. CR/LF, \r\n, or 0x0d0a
 `NONE`::
 no end column
 

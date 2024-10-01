@@ -7,7 +7,7 @@ instead of the Apache boiler plate notice (which is included below). See also
 
 If files have a different annotation, they are licensed with that license. If a
 file has no SPDX annotation (inside the file, or in <filename>.license or in
-.reuse/dep5), assume the SPDX is NOASSERTION.
+REUSE.toml), assume the SPDX is NOASSERTION.
 
 Apache 2.0 license notice
 =========================

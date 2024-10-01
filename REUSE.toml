@@ -9,7 +9,7 @@ SPDX-PackageDownloadLocation = "https://github.com/mrotteveel/ext-table-gen"
 [[annotations]]
 path = "NOTICE"
 precedence = "aggregate"
-SPDX-FileCopyrightText = "2023 Mark Rotteveel"
+SPDX-FileCopyrightText = "2023-2024 Mark Rotteveel"
 SPDX-License-Identifier = "Apache-2.0"
 
 [[annotations]]

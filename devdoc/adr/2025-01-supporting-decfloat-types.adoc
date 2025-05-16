@@ -1,0 +1,52 @@
+= 2025-01: Supporting Decfloat types
+
+// SPDX-FileCopyrightText: 2025 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Draft
+* Proposed for: 3.0
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+Firebird 4.0 introduced the SQL standard `DECFLOAT[(__p__)]` with _p_ is `16` or `34`.
+A `DECFLOAT` is a decimal floating point type, with either 16 base-10 digits (`DECFLOAT(16)`) or 34 base-10 digits (`DECFLOAT`/`DECFLOAT(34)`).
+They are backed by an IEEE 754 `decimal64` or `decimal128`.
+
+Beyond the SQL standard defined behaviour, Firebird's `DECFLOAT` also accepts +/-Infinity, +/-Nan and +/-sNaN (signalling NaN).
+Whether these values are accepted might depend on configuration.
+
+When rounding (e.g. when casting a `DECFLOAT(34)` to a `DECFLOAT(16)`, or during calculations), Firebird applies a session-specific rounding, configured through `isc_dpb_decfloat_round` or `SET DECFLOAT ROUND`, defaulting to "`half up`" rounding.
+
+Overflow (value too large) or underflow (value too small) and other error behaviour is configured through `isc_dpb_decfloat_traps` or `SET DECFLOAT TRAPS`, defaulting to raise an error on overflow, but yield `0` on underflow.
+
+In external tables, the `DECFLOAT` types have an alignment of 8 bytes.
+
+The https://www.rfc-editor.org/rfc/rfc4180[RFC 4180 format^] does not specify specific handling for or formats of numbers.
+
+Formats of numbers are (or can be) locale-sensitive, especially for things like decimal separator and grouping symbols.
+
+Java provides the `java.text.NumberFormat` class (or more specifically, `java.text.DecimalFormat`) for parsing numbers in a locale-sensitive manner.
+A locale-specific instance can be obtained with `NumberFormat.getInstance(Locale)`.
+
+A standard for locale language tags is https://www.ietf.org/rfc/bcp/bcp47.txt[BCP 47^].
+Java supports this through `Locale.forLanguageTag(String)` and `Locale.toLanguageTag()`.
+
+For full range support of `DECFLOAT`, parsing scientific notation is required.
+
+Out of the box, Java does not provide support for the `decimal64` and `decimal128` formats.
+When `DECFLOAT` support was added to Jaybird, I developed https://github.com/FirebirdSQL/decimal-java[`org.firebirdsql:decimal-java`^].
+This library provides conversion between `java.math.BigDecimal` and a `Decimal64`/`Decimal128` object, with additional support for Infinities and (signalling) NaNs, and between that `DecimalNN` object and the IEEE-754 byte representation.
+
+During conversion from `BigDecimal` (or String) to `DecimalNN`, overflow can either round to +/-Infinity or throw an exception.
+Underflow is always handled by rounding to `0`.
+
+== Decision
+
+== Consequences
+

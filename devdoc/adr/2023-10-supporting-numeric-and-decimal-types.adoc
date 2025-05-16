@@ -53,7 +53,7 @@ When rounding (e.g. when casting a `NUMERIC(9,3)` to a `NUMERIC(9,2)`), Firebird
 
 In external tables, the `NUMERIC` and `DECIMAL` types follow the alignment rules of their backing data type (i.e. `SHORT` -- 2 bytes, `INTEGER` -- 4 bytes, `BIGINT` and `INT128` -- 8 bytes).
 
-The https://www.rfc-editor.org/rfc/rfc4180[RFC 4180 format^] does not specify specific handling for or formats of dates.
+The https://www.rfc-editor.org/rfc/rfc4180[RFC 4180 format^] does not specify specific handling for or formats of numbers.
 
 Formats of numbers are (or can be) locale-sensitive, especially for things like decimal separator and grouping symbols.
 

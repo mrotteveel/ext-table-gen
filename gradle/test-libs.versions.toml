@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: Copyright 2026 Mark Rotteveel
+# SPDX-License-Identifier: Apache-2.0
+[versions]
+junit = "5.11.1"
+hamcrest = "3.0"
+hamcrest-optional = "1.3.2"
+jaybird = "5.0.5.java11"
+
+[libraries]
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+hamcrest = { module = "org.hamcrest:hamcrest", version.ref = "hamcrest" }
+hamcrest-optional = { module = "com.spotify:hamcrest-optional", version.ref = "hamcrest-optional" }
+jaybird = { module = "org.firebirdsql.jdbc:jaybird", version.ref = "jaybird" }
+
+[bundles]
+junit = ["junit-jupiter"]
+hamcrest = ["hamcrest", "hamcrest-optional"]

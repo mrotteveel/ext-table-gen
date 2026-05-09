@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: Copyright 2026 Mark Rotteveel
+# SPDX-License-Identifier: Apache-2.0
+[versions]
+picocli = "4.7.6"
+opencsv = "5.9"
+jaxb-api = "4.0.2"
+jaxb-runtime = "4.0.5"
+commons-lang3 = "3.17.0"
+jspecify = "1.0.0"
+asciidoctor-jvm = "4.0.3"
+gradle-jaxb = "7.0.0"
+
+[libraries]
+picocli-core = { module = "info.picocli:picocli", version.ref = "picocli" }
+picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
+opencsv = { module = "com.opencsv:opencsv", version.ref = "opencsv" }
+jaxb-api = { module = "jakarta.xml.bind:jakarta.xml.bind-api", version.ref = "jaxb-api" }
+jaxb-runtime = { module = "org.glassfish.jaxb:jaxb-runtime", version.ref = "jaxb-runtime" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commons-lang3" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
+
+[bundles]
+jaxb = ["jaxb-api", "jaxb-runtime"]
+
+[plugins]
+asciidoctor-jvm-convert = { id = "org.asciidoctor.jvm.convert", version.ref = "asciidoctor-jvm" }
+gradle-jaxb = { id ="com.intershop.gradle.jaxb", version.ref = "gradle-jaxb" }

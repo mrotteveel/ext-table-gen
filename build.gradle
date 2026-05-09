@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 import java.time.Year
 
@@ -7,8 +7,8 @@ import org.apache.tools.ant.filters.ReplaceTokens
 
 plugins {
     id 'application'
-    id 'com.intershop.gradle.jaxb' version '7.0.0'
-    id 'org.asciidoctor.jvm.convert' version '4.0.3'
+    alias(libs.plugins.gradle.jaxb)
+    alias(libs.plugins.asciidoctor.jvm.convert)
 }
 
 group 'nl.lawinegevaar'
@@ -17,6 +17,16 @@ version '3.0-SNAPSHOT'
 application {
     mainModule = 'nl.lawinegevaar.exttablegen'
     mainClass = 'nl.lawinegevaar.exttablegen.ExtTableGenMain'
+}
+
+allprojects {
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        options.release = 21
+        javaCompiler = javaToolchains.compilerFor {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
 }
 
 java {
@@ -41,6 +51,7 @@ testing {
                 implementation.bundle(testLibs.bundles.junit)
                 implementation(project('test-common'))
                 implementation libs.opencsv
+                runtimeOnly testLibs.junit.platform.launcher
             }
             targets {
                 configureEach {

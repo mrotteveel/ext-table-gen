@@ -27,7 +27,7 @@ jobs:
         with:
           version: '5'
           firebird_root_password: 'masterkey'
-          firebird_conf: 'AuthServer=Srp256,DatabaseAccess="Restrict /var/lib/firebird/data",ExternalFileAccess="Restrict /var/lib/firebird/data"'
+          firebird_conf: 'AuthServer=Srp256,DatabaseAccess=Restrict /var/lib/firebird/data,ExternalFileAccess=Restrict /var/lib/firebird/data'
           volumes: '${{ runner.temp }}/testdata:/var/lib/firebird/data'
       - uses: actions/checkout@v6
       - name: Set up Java 21

@@ -82,10 +82,6 @@ testing {
                 configureEach {
                     testTask.configure {
                         shouldRunAfter(test)
-                        // Map commandline properties
-                        project.providers.gradlePropertiesPrefixedBy("test.db.").get().entrySet().each {
-                            systemProperty it.key, it.value
-                        }
                         // Optional local environment config from integration-test-local.properties
                         def localIntegrationTestPropertiesFile = file('integration-test-local.properties')
                         if (localIntegrationTestPropertiesFile.exists()) {

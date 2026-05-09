@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright 2026 Mark Rotteveel
 # SPDX-License-Identifier: Apache-2.0
 [versions]
-picocli = "4.7.6"
+picocli = "4.7.7"
 opencsv = "5.9"
 jaxb-api = "4.0.2"
 jaxb-runtime = "4.0.5"

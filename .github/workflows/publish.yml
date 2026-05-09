@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+# SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 # SPDX-License-Identifier: Apache-2.0
 name: Publish documentation and artifacts for tags
 on:
@@ -14,25 +14,25 @@ jobs:
   create-artifacts:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Set up Java 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@d156388eb19639ec20ade50009f3d199ce1e2808
+        uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e
       - name: Assemble with Gradle
         run: ./gradlew assemble
       - name: Pages artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pages-artifact
           path: build/docs/asciidoc
           compression-level: 9
           retention-days: 1
       - name: Distribution artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: distribution-artifact
           path: build/distributions
@@ -44,14 +44,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Get pages artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: pages-artifact
           path: pages
       - name: Deploy to GitHub pages
-        uses: JamesIves/github-pages-deploy-action@v4.6.8
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f
         with:
           branch: gh-pages
           folder: pages
@@ -61,14 +61,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Get distribution artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: distribution-artifact
           path: dist
       - name: Create Release
-        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd
         with:
           artifacts: dist/*.zip
           artifactContentType: application/x-zip-compressed

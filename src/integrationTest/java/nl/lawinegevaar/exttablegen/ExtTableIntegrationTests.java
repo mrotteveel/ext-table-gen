@@ -117,7 +117,7 @@ class ExtTableIntegrationTests {
     @BeforeAll
     static void setupDb() throws Exception {
         fbManager = IntegrationTestProperties.createFBManager();
-        fbManager.setFileName(databasePath.toString());
+        fbManager.setFileName(IntegrationTestProperties.databaseFirebirdFile(databasePath));
         fbManager.setCreateOnStart(true);
         fbManager.setDropOnStop(true);
         fbManager.start();
@@ -712,8 +712,10 @@ class ExtTableIntegrationTests {
         try (var in = Files.newInputStream(configPath)) {
             ExtTableGenConfig extTableGenConfig = configMapper.readAsExtTableGenConfig(in);
             InformationalType informational = requireNonNull(extTableGenConfig.getInformational(), "informational");
+            String remoteTableFilePath = IntegrationTestProperties.externalTableFirebirdFile(Path.of(extTableGenConfig.getExternalTable().getTableFile().getPath()));
             return requireNonNull(informational.getDdl(), "informational/ddl")
-                    .replaceFirst("(?i)^\\s*create table", "recreate table");
+                    .replaceFirst("(?i)^\\s*create table", "recreate table")
+                    .replaceFirst("(?i)(?<=external (?:file )?')[^']+(?=')", remoteTableFilePath);
         }
     }
 

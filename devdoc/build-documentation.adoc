@@ -28,26 +28,53 @@ To run all tests (including integration tests), use:
 === Integration test configuration
 
 The integration tests require some additional configuration.
-First of all, it needs a localhost Firebird server.
+First of all, it needs a (preferably localhost) Firebird server.
 
 Create a file called `integration-test-local.properties` in the root of the project (i.e. containing `gradlew`) with content like:
 
 [listing]
 ----
 test.db.host=localhost
-test.db.port=3050
+test.db.port=13055
 test.db.user=sysdba
 test.db.password=masterkey
-test.db.root-path=E:\\DB\\test-db
-test.db.ext-table-dir=E:\\DB\\exttables\\test-data
+test.db.path.prefix=
+test.db.path.local=./.test-db
+test.db.ext-table-dir.prefix=
+test.db.ext-table-dir.local=./.test-db
 ----
 
-The `test.db.user` must have the `CREATE DATABASE` privilege.
-Firebird server must be able to create databases in the path of `test.db.root-path`.
-The `ExternalFileAccess` setting of Firebird server must allow access to the path of `test.db.ext-table-dir`.
+This configuration is also in `integration-test-local-example.properties`, and matches the configuration in `podman-compose.yml`.
 
-In theory, a remote Firebird server could also work, but due to the configuration of _ext-table-gen_ and the tests, this would require the `test.db.ext-table-dir` to be a local path which maps to the remote file system, while for the Firebird server, that path is the same value locally.
-In practice, we think it will be simpler to just use a local Firebird server.
+.Settings
+`test.db.host`::
+Firebird hostname
+`test.db.port`::
+Firebird port
+`test.db.user`::
+Firebird user, must have the `CREATE DATABASE` privilege.
+`test.db.path.prefix`::
+Server-side path of the database directory.
++
+Can be left empty if `DatabaseAccess` is `Restrict /some/path`.
+`test.db.path.local`::
+Local path corresponding to `test.db.path.prefix`.
++
+This can for example be a local directory mapped as a volume into a Docker/Podman container, or a network share.
++
+If not specified, it will default to `test.db.path.prefix`, but if that's empty, it uses the current directory.
+`test.db.ext-table-dir.prefix`::
+Server-side path of the external table directory.
++
+Can be left empty if `ExternalFileAccess` is `Restrict /some/path`.
+`test.db.ext-table-dir.local`::
+Local path corresponding to `test.db.ext-table-dir.prefix`.
++
+This can for example be a local directory mapped as a volume into a Docker/Podman container, or a network share.
++
+If not specified, it will default to `test.db.ext-table-dir.prefix`, but if that's empty, it uses the current directory.
+
+A remote Firebird server or container will work, but due to the configuration of _ext-table-gen_ and the tests, the server-side directories for `test.db.path.prefix` and `test.db.ext-table-dir.prefix` must have a locally mapped directory (network share, Docker volume, etc.) available and specified in `test.db.path.local`/`test.db.ext-table-dir.local`.
 
 == Commit hooks
 

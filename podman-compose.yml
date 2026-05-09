@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: Copyright 2026 Mark Rotteveel
+# SPDX-License-Identifier: Apache-2.0
+services:
+  firebird5_0:
+    image: firebirdsql/firebird:5.0.4
+    environment:
+      - FIREBIRD_ROOT_PASSWORD=masterkey
+      - FIREBIRD_CONF_AuthServer=Srp256
+      - FIREBIRD_CONF_UserManager=Srp
+      - FIREBIRD_CONF_TcpRemoteBufferSize=32767
+      - FIREBIRD_CONF_MaxParallelWorkers=8
+      - FIREBIRD_CONF_DatabaseAccess=Restrict /var/lib/firebird/data
+      - FIREBIRD_CONF_ExternalFileAccess=Restrict /var/lib/firebird/data
+      - TZ=Europe/Amsterdam
+    ports:
+      - "13055:3050"
+    security_opt:
+      - label=disable
+    volumes:
+      - ./.test-db:/var/lib/firebird/data:U

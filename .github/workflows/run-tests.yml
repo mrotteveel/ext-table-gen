@@ -15,20 +15,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Login to Docker Hub
-        # PRs from forks don't have access to the secrets, skip Docker login and hope we don't hit the rate limit
-        if: ${{ !github.event.pull_request.head.repo.fork }}
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Setup Firebird 5
-        uses: juarezr/firebirdsql-github-action@v2.3.0
-        with:
-          version: '5'
-          firebird_root_password: 'masterkey'
-          firebird_conf: 'AuthServer=Srp256,DatabaseAccess=Restrict /var/lib/firebird/data,ExternalFileAccess=Restrict /var/lib/firebird/data'
-          volumes: '${{ runner.temp }}/testdata:/var/lib/firebird/data'
       - uses: actions/checkout@v6
       - name: Set up Java 21
         uses: actions/setup-java@v5
@@ -38,7 +24,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e
       - name: Test with Gradle
-        run: ./gradlew check -Ptest.db.host=localhost -Ptest.db.user=sysdba -Ptest.db.password=masterkey -Ptest.db.path.local=${{ runner.temp }}/testdata -Ptest.db.ext-file-dir.local=${{ runner.temp }}/testdata
+        run: ./gradlew test
       - name: Store Report Artifact
         uses: actions/upload-artifact@v7
         if: always()

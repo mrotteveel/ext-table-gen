@@ -11,8 +11,8 @@ plugins {
     alias(libs.plugins.asciidoctor.jvm.convert)
 }
 
-group 'nl.lawinegevaar'
-version '3.0-SNAPSHOT'
+group = 'nl.lawinegevaar'
+version = '3.0-SNAPSHOT'
 
 application {
     mainModule = 'nl.lawinegevaar.exttablegen'

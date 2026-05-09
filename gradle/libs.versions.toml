@@ -8,7 +8,7 @@ jaxb-runtime = "4.0.8"
 commons-lang3 = "3.20.0"
 jspecify = "1.0.0"
 asciidoctor-jvm = "4.0.5"
-gradle-jaxb = "7.0.0"
+gradle-jaxb = "8.0.1"
 
 [libraries]
 picocli-core = { module = "info.picocli:picocli", version.ref = "picocli" }
@@ -24,4 +24,4 @@ jaxb = ["jaxb-api", "jaxb-runtime"]
 
 [plugins]
 asciidoctor-jvm-convert = { id = "org.asciidoctor.jvm.convert", version.ref = "asciidoctor-jvm" }
-gradle-jaxb = { id ="com.intershop.gradle.jaxb", version.ref = "gradle-jaxb" }
+gradle-jaxb = { id = "com.intershop.gradle.jaxb", version.ref = "gradle-jaxb" }

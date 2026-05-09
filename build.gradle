@@ -117,8 +117,7 @@ tasks.named('check') {
 }
 
 asciidoctorj {
-    // asciidoctorj 3.0.0 doesn't seem to work with asciidoctor-gradle-plugin 4.0.3
-    version = '2.5.13'
+    version = '3.0.1'
 }
 
 distributions {

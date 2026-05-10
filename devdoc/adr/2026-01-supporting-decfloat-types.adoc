@@ -1,6 +1,6 @@
-= 2025-01: Supporting Decfloat types
+= 2026-01: Supporting Decfloat types
 
-// SPDX-FileCopyrightText: 2025 Mark Rotteveel
+// SPDX-FileCopyrightText: 2025-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 == Status

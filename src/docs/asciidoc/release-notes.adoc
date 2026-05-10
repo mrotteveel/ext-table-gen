@@ -16,7 +16,7 @@ Mark Rotteveel
 // SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
-Copyright 2023-2024 Mark Rotteveel and all contributing authors under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
+Copyright 2023-2026 Mark Rotteveel and all contributing authors under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
 
 toc::[]
 
@@ -88,6 +88,7 @@ The following changes were made in _ext-table-gen_ 3.0:
 * Add support for binary floating point types (`FLOAT`, `DOUBLE PRECISION`) (https://github.com/mrotteveel/ext-table-gen/issues/20[#20^])
 * Add nullability annotations (https://github.com/mrotteveel/ext-table-gen/issues/22[#22^])
 * Java 21 is now the minimum supported version (https://github.com/mrotteveel/ext-table-gen/issues/23[#23^])
+* Fixed compilation issue (static reference to a local class) under Java 24 and higher (https://github.com/mrotteveel/ext-table-gen/issues/24[#24^])
 
 ==== _ext-table-gen_ 2.0
 

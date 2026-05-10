@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -141,27 +141,6 @@ interface OutputResource {
      * invocations; in the current implementation, this only applies when {@code path} is {@code null})
      */
     static OutputResource nullOutputResource(@Nullable Path path) {
-        final class NullOutputResource implements OutputResource {
-
-            static final NullOutputResource NULL_INSTANCE = new NullOutputResource(null);
-
-            private final @Nullable Path path;
-
-            NullOutputResource(@Nullable Path path) {
-                this.path = path;
-            }
-
-            @Override
-            public OutputStream newOutputStream() throws IOException {
-                throw new IOException("cannot create output stream for NullOutputResource");
-            }
-
-            @Override
-            public Optional<Path> path() {
-                return Optional.ofNullable(path);
-            }
-
-        }
         return path != null ? new NullOutputResource(path) : NullOutputResource.NULL_INSTANCE;
     }
 
@@ -275,6 +254,28 @@ final class OutputStreamResource implements OutputResource {
         }
         this.out = null;
         return out;
+    }
+
+}
+
+final class NullOutputResource implements OutputResource {
+
+    static final NullOutputResource NULL_INSTANCE = new NullOutputResource(null);
+
+    private final @Nullable Path path;
+
+    NullOutputResource(@Nullable Path path) {
+        this.path = path;
+    }
+
+    @Override
+    public OutputStream newOutputStream() throws IOException {
+        throw new IOException("cannot create output stream for NullOutputResource");
+    }
+
+    @Override
+    public Optional<Path> path() {
+        return Optional.ofNullable(path);
     }
 
 }

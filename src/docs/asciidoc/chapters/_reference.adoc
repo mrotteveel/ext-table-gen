@@ -293,7 +293,7 @@ If `--config-in` is not specified, the default values are applied in the absence
 ==== Configuration output (`--config-out`)
 
 The configuration output (`--config-out=FILE`) specifies the path of the configuration XML file to write.
-`FILE` is the absolute or relative path to the file to read.
+`FILE` is the absolute or relative path to the file to write.
 
 If `--config-out` is not specified, no configuration file is written.
 By default, an existing configuration file is not overwritten.
@@ -489,9 +489,9 @@ Contrary to the <<ref-xml-parsebigdecimal>> converter, this converter can also p
 [horizontal]
 `precision`::
 Integer in the range [1, 38] for the precision in decimal digits (required). +
-Precision greater than 19 requires Firebird 4.0 and higher.
+Precision greater than 18 requires Firebird 4.0 and higher.
 `scale`::
-Integer in the range [0, _scale_] for the scale in decimal digits (required). +
+Integer in the range [0, _precision_] for the scale in decimal digits (required). +
 The XSD does not enforce that _scale_ must be less than or equal to _precision_.
 `roundingMode`::
 Rounding mode applied when reducing the scale of a parsed number with more digits after the decimal point than allowed by _scale_ (optional, defaults to `HALF_UP`). +
@@ -598,9 +598,9 @@ Contrary to the <<ref-xml-parsebigdecimal>> converter, this converter can also p
 [horizontal]
 `precision`::
 Integer in the range [1, 38] for the precision in decimal digits (required). +
-Precision greater than 19 requires Firebird 4.0 and higher.
+Precision greater than 18 requires Firebird 4.0 and higher.
 `scale`::
-Integer in the range [0, _scale_] for the scale in decimal digits (required). +
+Integer in the range [0, _precision_] for the scale in decimal digits (required). +
 The XSD does not enforce that _scale_ must be less than or equal to _precision_.
 `roundingMode`::
 Rounding mode applied when reducing the scale of a parsed number with more digits after the decimal point than allowed by _scale_ (optional, defaults to `HALF_UP`). +

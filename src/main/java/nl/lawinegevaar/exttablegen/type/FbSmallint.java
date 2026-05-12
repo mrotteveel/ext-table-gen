@@ -11,7 +11,7 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 
 /**
- * A data type representing the Firebird datatype {@code SMALLINT}.
+ * A datatype representing the Firebird datatype {@code SMALLINT}.
  *
  * @since 2
  */

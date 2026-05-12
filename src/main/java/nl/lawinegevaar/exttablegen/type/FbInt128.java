@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 /**
- * A data type representing the Firebird datatype {@code INT128}.
+ * A datatype representing the Firebird datatype {@code INT128}.
  *
  * @since 2
  */

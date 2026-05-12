@@ -15,22 +15,22 @@
 
 == Context
 
-CSV is a string based format, and non-`char` data types need a pattern to convert from the string format to the desired data type value.
-For the integral types we can use the common format of -- in regex -- `[+-]?\d+`, but other data types can have a wide variety of formats, consider dates, or decimal values with either a comma or dot as decimal separator, and others.
+CSV is a string based format, and non-`char` datatypes need a pattern to convert from the string format to the desired datatype value.
+For the integral types we can use the common format of -- in regex -- `[+-]?\d+`, but other datatypes can have a wide variety of formats, consider dates, or decimal values with either a comma or dot as decimal separator, and others.
 
 While we can use a sensible format as the default, for example ISO 8601 calendar date format -- `yyyy-MM-dd` -- for `date`, this would limit the usefulness to read real-world data (especially if you don't control the producer of the CSV).
 
-In short, we need a way to convert string input to a destination data type.
+In short, we need a way to convert string input to a destination datatype.
 
-In the future we may also need to perform the reverse operation: conversion from the column data type to a string value.
+In the future we may also need to perform the reverse operation: conversion from the column datatype to a string value.
 
 == Decision
 
-Columns receive a common way to define a conversion, or converter, to convert a string to the eventual data type of the column.
-If the converter is absent, a default conversion for the specific data type is applied.
+Columns receive a common way to define a conversion, or converter, to convert a string to the eventual datatype of the column.
+If the converter is absent, a default conversion for the specific datatype is applied.
 
-A converter consists of one step to convert from a string to a (Java) data type.
-The output data type of this step needs to be compatible with the Java data type of the column data type.
+A converter consists of one step to convert from a string to a (Java) datatype.
+The output datatype of this step needs to be compatible with the Java datatype of the column data type.
 In the future we may introduce support for chaining multiple steps together.
 
 For this design we're ignoring future plans to perform a reverse conversion (from external table to CSV).
@@ -41,7 +41,7 @@ The XML configuration is extended as follows:
 * Data types (abstract `DatatypeType`) receives an optional element `converter`
 * `converter` has one required element which specifies the converter
 * As a starting point, this ADR defines the following converter.
-The default conversion for the integral number data types is equivalent to using this with radix 10.
+The default conversion for the integral number datatypes is equivalent to using this with radix 10.
 ** `parseIntegralNumber` -- which will restrict values based on the enclosing type. It has one attribute:
 *** `radix` (optional, defaults to `10`) -- with value in range [2, 36]
 
@@ -65,13 +65,13 @@ If the XML defines an incompatible converter, it is rejected with an error when 
 
 === Rejected Design Decisions
 
-* Put the converter in the column instead of the data type.
+* Put the converter in the column instead of the datatype.
 +
 Initially, we implemented this design, with the reasoning that it bridges between the CSV column and the Firebird column, and as such, putting it in the column felt appropriate.
 +
-However, during implementation, putting the converter inside the data type turned out to result in simpler code and avoided some problems with generics.
-We think that making the converter an aspect of the data type in the XML config as well reduces the cognitive overhead by avoiding two diverging models.
-From a design perspective, we can also argue that the data type _is_ the bridge between CSV column and Firebird column, and so putting the converter inside the data type also make sense.
+However, during implementation, putting the converter inside the datatype turned out to result in simpler code and avoided some problems with generics.
+We think that making the converter an aspect of the datatype in the XML config as well reduces the cognitive overhead by avoiding two diverging models.
+From a design perspective, we can also argue that the datatype _is_ the bridge between CSV column and Firebird column, and so putting the converter inside the datatype also make sense.
 * Allow multiple steps in `converter`.
 +
 For example, consider a conversion from string to long, and then from long (epoch milliseconds) to a datetime value, or using converters to change formatting (e.g. from string to date, back to string with a different format).
@@ -82,10 +82,10 @@ While this may be useful to add in the future, all current known cases require a
 In our opinion, this results in unnecessary complexity, and fail-fast should be preferred.
 * Allow reading of incompatible converters, by converting the converter result back to string and then using the default converter.
 +
-Though this might work for integral types, it is unlikely to work for other data types.
+Though this might work for integral types, it is unlikely to work for other datatypes.
 Being explicit about such configuration errors is preferred over trying to make it work.
 See also previous item.
-* Restrict compatible converters by data type through the XSD.
+* Restrict compatible converters by datatype through the XSD.
 +
 This probably leads to a more complex XSD, and our XML/XSD-fu is also not that great.
 We decided to settle on validation when the internal _ext-table-gen_ model is derived from the XML.
@@ -104,14 +104,14 @@ Most of the consequences listed below should be considered implementation detail
 
 An interface `Converter<T>` is added, which provides a method `T convert(String)` to provide the actual conversion, and methods `Class<T> targetType()` to support runtime type checking.
 
-`FbDatatype` will have a property for the `Converter`, when no converter is provided, the default conversion for the data type will be used (which may or may not be implemented using a `Converter`).
+`FbDatatype` will have a property for the `Converter`, when no converter is provided, the default conversion for the datatype will be used (which may or may not be implemented using a `Converter`).
 
 In an earlier iteration, the converter was part of the `Column`, and would be applied before calling `writeValue`, and the first parameter of `writeValue` was parameterized with `T` instead of `String`.
-In a second iteration, the converter was passed from the column to the data type on each invocation of `writeValue`
-During a third iteration, it turned out that moving the converter into the data type and calling it in the `writeValue` method reduced issues with generic typing, and simplified handling of default behaviour.
+In a second iteration, the converter was passed from the column to the datatype on each invocation of `writeValue`
+During a third iteration, it turned out that moving the converter into the datatype and calling it in the `writeValue` method reduced issues with generic typing, and simplified handling of default behaviour.
 
-`FbDataType` will also receive a method `Class<T> targetType()` to specify its Java data type.
-A data type will have a _default_ conversion, which will be used when no converter has been configured.
+`FbDataType` will also receive a method `Class<T> targetType()` to specify its Java datatype.
+A datatype will have a _default_ conversion, which will be used when no converter has been configured.
 This conversion will not be exposed, and how it is performed is an implementation detail.
 Existing conversion from string will be moved to that default conversion.
 

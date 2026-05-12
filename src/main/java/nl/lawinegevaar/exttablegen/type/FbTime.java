@@ -19,7 +19,7 @@ import java.time.temporal.TemporalUnit;
 import java.time.temporal.ValueRange;
 
 /**
- * A data type representing the Firebird datatype {@code TIME [WITHOUT TIME ZONE]}.
+ * A datatype representing the Firebird datatype {@code TIME [WITHOUT TIME ZONE]}.
  *
  * @since 2
  */

@@ -17,13 +17,13 @@ public sealed interface FbDatatype<T>
         FbIntegralNumberDatatype {
 
     /**
-     * @return Java type used by this data type
+     * @return Java type used by this datatype
      * @since 2
      */
     Class<T> targetType();
 
     /**
-     * @return non-default converter configured for this data type
+     * @return non-default converter configured for this datatype
      * @since 2
      */
     Optional<? extends Converter<T>> converter();
@@ -70,7 +70,7 @@ public sealed interface FbDatatype<T>
     }
 
     /**
-     * Creates a new data type instance with the specified converter.
+     * Creates a new datatype instance with the specified converter.
      * <p>
      * Though not required, implementations may return the same instance if {@code converter} is equal to the
      * current converter.
@@ -78,19 +78,19 @@ public sealed interface FbDatatype<T>
      *
      * @param converter
      *         converter (can be {@code null})
-     * @return new data type with {@code converter}
+     * @return new datatype with {@code converter}
      * @see #withConverterChecked(Converter)
      * @since 2
      */
     FbDatatype<T> withConverter(@Nullable Converter<T> converter);
 
     /**
-     * Variant of {@link #withConverter(Converter)} which checks if the target type of this data type and
+     * Variant of {@link #withConverter(Converter)} which checks if the target type of this datatype and
      * {@code converter} are the same.
      *
      * @param converter
      *         converter (can be {@code null})
-     * @return new data type with {@code converter}
+     * @return new datatype with {@code converter}
      * @see #withConverter(Converter)
      * @since 2
      */

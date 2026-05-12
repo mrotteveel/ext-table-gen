@@ -14,7 +14,7 @@
 
 == Context
 
-Firebird external table files have a binary format, and support data types other than `CHAR` for columns.
+Firebird external table files have a binary format, and support datatypes other than `CHAR` for columns.
 External tables do not support the `NULL` value.
 
 For this ADR, we only cover the basic integer types:
@@ -27,7 +27,7 @@ For this ADR, we only cover the basic integer types:
 
 The storage is endian-sensitive, depending on the platform of the target Firebird server.
 
-The storage of the integral data types has alignment requirements.
+The storage of the integral datatypes has alignment requirements.
 This alignment is calculated for the offset in the current row, and takes into account the null mask of a row, which is not written for an external table.
 The null mask is 4 bytes per 32 columns.
 
@@ -44,7 +44,7 @@ If the first column needs alignment, it is not written to the file, but just lik
 
 Numeric presentation in CSV is not formalized in https://www.rfc-editor.org/rfc/rfc4180[RFC 4180^].
 
-In Java, the Firebird data types can be mapped as follows:
+In Java, the Firebird datatypes can be mapped as follows:
 
 * `SMALLINT` -> `java.lang.Short`/`short`
 * `INTEGER` -> `java.lang.Integer`/`int`
@@ -67,7 +67,7 @@ Its method `nativeOrder()` can be used to detect the byte order of the runtime p
 
 === Integer Support
 
-_ext-table-gen_ will support the four integer data types (`SMALLINT`, `INTEGER`, `BIGINT` and `INT128`).
+_ext-table-gen_ will support the four integer datatypes (`SMALLINT`, `INTEGER`, `BIGINT` and `INT128`).
 
 These types will only be available by editing the configuration file, they will not be derived automatically by parsing the CSV.
 
@@ -84,7 +84,7 @@ Other values not matching above pattern will produce an error.
 Values outside the range of their respective types will produce an error.
 Validation of format and range will only happen while writing the external table.
 
-In the XML config, the data types will be represented by elements:
+In the XML config, the datatypes will be represented by elements:
 
 * `smallint`
 * `integer`
@@ -110,6 +110,6 @@ This is the effective value of `AUTO`, but with the difference that explicitly s
 
 == Consequences
 
-The documentation must be updated to explain how to use these new data types, and to describe the configuration changes
+The documentation must be updated to explain how to use these new datatypes, and to describe the configuration changes
 
 See also previous section for some implementation consequences.

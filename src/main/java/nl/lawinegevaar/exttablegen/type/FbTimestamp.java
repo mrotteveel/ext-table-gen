@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.time.temporal.TemporalAccessor;
 
 /**
- * A data type representing the Firebird datatype {@code TIMESTAMP [WITHOUT TIME ZONE]}.
+ * A datatype representing the Firebird datatype {@code TIMESTAMP [WITHOUT TIME ZONE]}.
  *
  * @since 2
  */

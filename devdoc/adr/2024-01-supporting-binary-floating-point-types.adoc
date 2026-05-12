@@ -62,11 +62,11 @@ Java supports this through `Locale.forLanguageTag(String)` and `Locale.toLanguag
 
 == Decision
 
-_ext-table-gen_ will support the `FLOAT` and `DOUBLE PRECISION` data types.
+_ext-table-gen_ will support the `FLOAT` and `DOUBLE PRECISION` datatypes.
 
 These types will only be available by editing the configuration file, they will not be derived automatically by parsing the CSV.
 
-In the XML config, the data types will be represented by elements `float` and `doublePrecision`, without any attributes.
+In the XML config, the datatypes will be represented by elements `float` and `doublePrecision`, without any attributes.
 
 In Java code, the types will be represented by `FbFloat` and `FbDoublePrecision`.
 
@@ -93,6 +93,6 @@ Validation of format and range will only happen while writing the external table
 
 == Consequences
 
-The documentation must be updated to explain how to use this new data types, and to describe the configuration changes.
+The documentation must be updated to explain how to use this new datatypes, and to describe the configuration changes.
 
 See also previous section for some implementation consequences.

@@ -14,7 +14,7 @@ import java.math.RoundingMode;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Common implementation for fixed point number data type ({@code NUMERIC} and {@code DECIMAL}).
+ * Common implementation for fixed point number datatype ({@code NUMERIC} and {@code DECIMAL}).
  *
  * @since 2
  */
@@ -64,7 +64,7 @@ public abstract sealed class AbstractFbFixedPointDatatype extends AbstractFbData
     }
 
     /**
-     * @return Firebird name of this data type (in lowercase)
+     * @return Firebird name of this datatype (in lowercase)
      */
     abstract String typeName();
 
@@ -117,7 +117,7 @@ public abstract sealed class AbstractFbFixedPointDatatype extends AbstractFbData
         /**
          * Writes an unscaled value as the backing type.
          * <p>
-         * NOTE: If the value does not fit the backing data type, this method may throw a runtime exception. This is
+         * NOTE: If the value does not fit the backing datatype, this method may throw a runtime exception. This is
          * generally a {@link NumberFormatException} or an {@link ArithmeticException}.
          * </p>
          *

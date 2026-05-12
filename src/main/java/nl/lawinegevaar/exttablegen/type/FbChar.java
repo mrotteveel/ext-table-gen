@@ -14,7 +14,7 @@ import java.util.function.Function;
 import static java.util.Objects.requireNonNull;
 
 /**
- * A data type representing the Firebird datatype {@code CHAR} with a specific length and character set.
+ * A datatype representing the Firebird datatype {@code CHAR} with a specific length and character set.
  */
 public final class FbChar extends AbstractFbDatatype<String, Converter<String>> implements FbDatatype<String> {
 

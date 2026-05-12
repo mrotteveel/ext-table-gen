@@ -35,7 +35,7 @@ The following are ideas for things to implement in the future.
 These are not guaranteed to arrive, but during implementation it might be helpful to consider these to not paint yourself in a corner.
 
 * Make the project also usable as a library
-* Support more or all data types of the full binary format of external tables
+* Support more or all datatypes of the full binary format of external tables
 * Configuration of the CSV format
 * Importing from stdin
 * Exporting to stdout

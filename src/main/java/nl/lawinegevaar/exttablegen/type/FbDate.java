@@ -13,7 +13,7 @@ import java.time.temporal.JulianFields;
 import java.time.temporal.TemporalAccessor;
 
 /**
- * A data type representing the Firebird datatype {@code DATE}.
+ * A datatype representing the Firebird datatype {@code DATE}.
  *
  * @since 2
  */

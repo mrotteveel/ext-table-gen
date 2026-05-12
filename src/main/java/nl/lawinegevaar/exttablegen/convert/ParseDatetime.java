@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNull;
  * Converter from string to a temporal accessor, to be used with datetime types.
  * <p>
  * Be aware that depending on the {@code pattern} specified, the resulting value is not suitable for all datetime types;
- * it may result in an error when writing the value through a data type.
+ * it may result in an error when writing the value through a datatype.
  * </p>
  *
  * @since 2

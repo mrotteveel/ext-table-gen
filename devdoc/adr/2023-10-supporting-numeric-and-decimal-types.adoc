@@ -15,7 +15,7 @@
 
 == Context
 
-Firebird provides two data types for exact numeric, fixed point values:
+Firebird provides two datatypes for exact numeric, fixed point values:
 
 * `NUMERIC[(__precision__ [, __scale__])]`
 * `DECIMAL[(__precision__ [, __scale__])]`
@@ -25,7 +25,7 @@ For both, the default _precision_ is 9, and default _scale_ is 0.
 
 The _precision_ specifies the minimum supported digits.footnote:[This is the SQL standard behaviour for `DECIMAL`, for `NUMERIC`, the SQL standard defines that _precision_ is the maximum allowed digits]
 
-In practice, in Firebird, these types behave virtually identical, except there is a difference in the backing data type for small values of _precision_:
+In practice, in Firebird, these types behave virtually identical, except there is a difference in the backing datatype for small values of _precision_:
 
 * `NUMERIC`
 ** 1 ++<=++ precision ++<=++ 4 -> `SHORT`
@@ -38,7 +38,7 @@ In practice, in Firebird, these types behave virtually identical, except there i
 ** 19 ++<=++ precision ++<=++ 38 -> `INT128` (since Firebird 4.0)
 
 Although Firebird records the precision, it does not constrain values by that precision.
-Instead, the limits of the backing data type are used.
+Instead, the limits of the backing datatype are used.
 So, `NUMERIC(1)` -- `NUMERIC(4)` all behave the same, as do `NUMERIC(5)` -- `NUMERIC(9)` and `DECIMAL(1)` -- `DECIMAL(9)`, etc.
 
 The actual precision is slightly higher than listed, because Firebird allows the full range of values supported by the backing datatype.
@@ -51,7 +51,7 @@ The decimal value is stored by shifting the decimal point by the __scale__ to an
 
 When rounding (e.g. when casting a `NUMERIC(9,3)` to a `NUMERIC(9,2)`), Firebird applies "`half up`" rounding.
 
-In external tables, the `NUMERIC` and `DECIMAL` types follow the alignment rules of their backing data type (i.e. `SHORT` -- 2 bytes, `INTEGER` -- 4 bytes, `BIGINT` and `INT128` -- 8 bytes).
+In external tables, the `NUMERIC` and `DECIMAL` types follow the alignment rules of their backing datatype (i.e. `SHORT` -- 2 bytes, `INTEGER` -- 4 bytes, `BIGINT` and `INT128` -- 8 bytes).
 
 The https://www.rfc-editor.org/rfc/rfc4180[RFC 4180 format^] does not specify specific handling for or formats of numbers.
 
@@ -68,13 +68,13 @@ Java supports this through `Locale.forLanguageTag(String)` and `Locale.toLanguag
 _ext-table-gen_ will add support for `NUMERIC` and `DECIMAL`.
 This type will only be available by editing the configuration file, it will not be derived automatically by parsing the CSV.
 
-In the XML config, the data type will be represented by elements `numeric` and `decimal`.
+In the XML config, the datatype will be represented by elements `numeric` and `decimal`.
 These elements will have the following attributes:
 
 * `precision` (required) -- allowed value between 1 and 38
 +
-The implementation will apply the same rules as Firebird and ignore precision other than to use it to infer the backing data type and validate _scale_.
-Actual imposed value range depends on the backing data type.
+The implementation will apply the same rules as Firebird and ignore precision other than to use it to infer the backing datatype and validate _scale_.
+Actual imposed value range depends on the backing datatype.
 * `scale` (required) -- allowed value between 0 and _precision_ (not enforced by XSD)
 * `roundingMode` (optional) -- specifies the rounding mode to apply for numbers with a higher scale than _scale_;
 defaults to `HALF_UP`
@@ -103,7 +103,7 @@ The `parseBigDecimal` converter in its current incarnation cannot parse numbers 
 
 Empty or blank values from the CSV will be interpreted as value `0`.
 Other values not matching the rules of `BigDecimal(String)` or the locale-specific `NumberFormat` will produce an error.
-Unscaled values outside the range of the backing data type will produce an error.
+Unscaled values outside the range of the backing datatype will produce an error.
 Validation of format and range will only happen while writing the external table.
 
 We will not implement support for the dialect 1 variant of `NUMERIC`/`DECIMAL` with precision between 10 and 18 (i.e. backed by a scaled `DOUBLE PRECISION` instead of a `BIGINT`).
@@ -111,6 +111,6 @@ Dialect 1 has been deprecated for 20+ years.
 
 == Consequences
 
-The documentation must be updated to explain how to use this new data type, and to describe the configuration changes.
+The documentation must be updated to explain how to use this new datatype, and to describe the configuration changes.
 
 See also previous section for some implementation consequences.

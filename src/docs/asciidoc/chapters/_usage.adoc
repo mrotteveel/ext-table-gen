@@ -6,7 +6,7 @@ ifeval::["{includedir}" == "."]
 endif::[]
 ifndef::includedir[:includedir: ..]
 
-// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 This chapter illustrates how to use _ext-table-gen_ by showing basic usage examples.
@@ -34,7 +34,7 @@ The character set can be explicitly configured using <<#ref-cmd-csv-charset,`--c
 The external table definition derived from a CSV file uses only `CHAR` columns, and the default character set is `ISO8859_1`.
 This can be overridden by specifying <<ref-cmd-column-encoding,`--column-encoding=ENCODING`>>, where `ENCODING` is a Firebird character set name (e.g. `column-encoding=WIN1252`).
 Alternatively, an existing configuration file can be edited to change the column encoding.
-The configuration file allows you to configure the character set _per column_, and also allows you to use data types other than `CHAR`.
+The configuration file allows you to configure the character set _per column_, and also allows you to use datatypes other than `CHAR`.
 
 Given the overhead of using `UTF8` columns (e.g. a `CHAR(1000) CHARACTER SET UTF8` column will occupy 4000 bytes in an external table), we recommend using a single-byte character set where possible, and only defining columns as `UTF8` when absolutely necessary.
 
@@ -110,7 +110,7 @@ This needs to be explicitly enabled with <<ref-cmd-overwrite-table-file,`--overw
 
 Generating an external table file using the instructions of the previous section, <<usage-basic-csv>>, is simple and easy, but has some limitations and downsides:
 
-. The datatype is always `CHAR`, while using a different data type may be more efficient (both from a storage perspective, and in loading it into Firebird)
+. The datatype is always `CHAR`, while using a different datatype may be more efficient (both from a storage perspective, and in loading it into Firebird)
 . The maximum lengths of columns is derived from the CSV data.
 If you want to reuse the external table without dropping and recreating it, with data files derived from CSV files with the same layout, but columns have longer (or shorter!) maximum length, this will not work.
 +
@@ -180,7 +180,7 @@ Compared to the <<usage-ex-persons-dat,original persons.dat>>, you'll notice tha
 Keep in mind that external table files are a _binary_ data format.
 The examples up-to-now use only `CHAR` columns with the same character set, so these examples effectively behave as a fixed width text format.
 
-This changes once we start using multiple character sets, or other data types.
+This changes once we start using multiple character sets, or other datatypes.
 ====
 
 [#usage-config-regen]
@@ -277,12 +277,12 @@ In our example it just happens to work OK when shown as text, because all other 
 If some other column had ISO-8859-1 characters beyond 0x7f, they would have been rendered as Unicode replacement characters (because the AsciiDoctor tool used to create this manual also reads our example data as UTF-8).
 
 [#usage-config-datatype]
-=== Using a different column data type
+=== Using a different column datatype
 
 The default configuration file derived from a CSV file only uses `CHAR` columns.
 It can be more efficient -- both in terms of storage space and for performance of loading the data into Firebird -- to use a different datatype.
 
-In this example, we'll change the data type of the `ID` column from a `CHAR(1)`
+In this example, we'll change the datatype of the `ID` column from a `CHAR(1)`
 
 [source,xml]
 ----
@@ -300,9 +300,9 @@ to a `SMALLINT`
 </column>
 ----
 
-For a full list of possible data types and their attributes, see <<ref-xml-datatype>>.
+For a full list of possible datatypes and their attributes, see <<ref-xml-datatype>>.
 
-If you change the data type to anything other than `char`, the generated file becomes truly _binary_.
+If you change the datatype to anything other than `char`, the generated file becomes truly _binary_.
 Having an end-column makes less sense for this type of file, so we recommend removing it.
 
 Taking the original example from <<usage-basic-csv>>, modifying it like above, and then regenerating the file as described in <<usage-config-regen>> results in the following file:
@@ -313,7 +313,7 @@ Taking the original example from <<usage-basic-csv>>, modifying it like above, a
 include::{includedir}/chapters/data/persons-type-modified.xml[]
 ----
 
-For data types other than `char` the `byteOrder` is important for determining how to write out data.
+For datatypes other than `char` the `byteOrder` is important for determining how to write out data.
 Absence of `byteOrder` will use `AUTO`, but when writing the configuration file, it will report the byte-order of the system that created the file.
 Specify `byteOrder="AUTO"` to use the endianness of the system where _ext-table-gen_ is run.
 However, if you generate the table file on a little-endian machine, while your Firebird server runs on a big-endian machine (or vice versa), you'll need to set the `byteOrder` to match the endianness of the Firebird server.
@@ -321,13 +321,13 @@ However, if you generate the table file on a little-endian machine, while your F
 See <<ref-xml-externaltable>> for more information on `byteOrder`.
 
 [#usage-config-converter]
-=== Using a different data type conversion
+=== Using a different datatype conversion
 
-Each data type has a default conversion from the CSV string value to a Firebird data type value.
+Each datatype has a default conversion from the CSV string value to a Firebird datatype value.
 This default conversion is not always suitable.
 For example, a CSV with hexadecimal string values for integers cannot be read as an `integer`, because the default conversion uses radix 10.
 
-To address this, the data type elements in the configuration have an optional element, <<ref-xml-converter>>, to specify a conversion using a _converter step_.
+To address this, the datatype elements in the configuration have an optional element, <<ref-xml-converter>>, to specify a conversion using a _converter step_.
 We'll provide examples for each _converter step_ below.
 
 [#usage-config-parsebigdecimal]
@@ -335,7 +335,7 @@ We'll provide examples for each _converter step_ below.
 
 The converter step <<ref-xml-parsebigdecimal>> can be used to specify a locale for converter CSV values to exact numeric values.
 
-For example, to convert a number with `.` as the grouping symbol and `,` as the decimal separator (e.g. `"12.345,67"`), use the following data type definition:
+For example, to convert a number with `.` as the grouping symbol and `,` as the decimal separator (e.g. `"12.345,67"`), use the following datatype definition:
 
 [source,xml]
 ----
@@ -346,14 +346,14 @@ For example, to convert a number with `.` as the grouping symbol and `,` as the 
 </decimal>
 ----
 
-The allowed range of values is restricted by the enclosing data type and its precision (or more precisely, the backing datatype derived from the precision).
+The allowed range of values is restricted by the enclosing datatype and its precision (or more precisely, the backing datatype derived from the precision).
 
 [#usage-config-parsedatetime]
 ==== `parseDatetime`
 
 The converter step <<ref-xml-parsedatetime>> can be used to specify a different pattern and locale for converting CSV values to datetime values.
 
-For example, to convert a date in `d MMMM yyyy` format in Dutch (e.g. `15 juli 2023`), use the following data type definition:
+For example, to convert a date in `d MMMM yyyy` format in Dutch (e.g. `15 juli 2023`), use the following datatype definition:
 
 [source,xml]
 ----
@@ -369,7 +369,7 @@ For example, to convert a date in `d MMMM yyyy` format in Dutch (e.g. `15 juli 2
 
 The converter step <<ref-xml-parseintegralnumber>> can be used to specify a different radix for converting CSV values to integral numbers.
 
-For example, to convert integer values in radix 16 instead of radix 10, use the following data type definition:
+For example, to convert integer values in radix 16 instead of radix 10, use the following datatype definition:
 
 [source,xml]
 ----
@@ -380,7 +380,7 @@ For example, to convert integer values in radix 16 instead of radix 10, use the 
 </integer>
 ----
 
-The allowed range of values is restricted by the enclosing data type.
+The allowed range of values is restricted by the enclosing datatype.
 
 [#usage-workflow]
 == Recommended workflow
@@ -390,12 +390,12 @@ The previous examples are all that -- we think -- you'll need to create usable e
 For one-shot imports, the second example from <<usage-basic-csv>> can be sufficient.
 You may need to use <<ref-cmd-column-encoding,`--column-encoding`>> if you need something other than `ISO8859_1` for the external table columns, and <<ref-cmd-csv-charset,`--csv-charset`>> if the CSV file is not encoded in ASCII or UTF-8.
 
-For repeated imports, or where multiple character sets or other data types are needed, we recommend the following steps:
+For repeated imports, or where multiple character sets or other datatypes are needed, we recommend the following steps:
 
 . Generate a config file using <<usage-basic-csv>>,
 . Increase columns lengths to expected maximums (see <<usage-config-length>>),
 . If needed, change the encoding of columns (see <<usage-config-charset>>),
-. Determine if there are more appropriate data types for columns and change the type if needed (see <<usage-config-datatype>>),
+. Determine if there are more appropriate datatypes for columns and change the type if needed (see <<usage-config-datatype>>),
 . Determine if a custom converter is needed (see <<usage-config-converter>>),
 . Finally, regenerate the config file (see <<usage-config-regen>>) for up-to-date DDL.
 

@@ -1,7 +1,7 @@
 [#ref]
 = Reference
 
-// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 This chapter describes the various configuration options.
@@ -410,7 +410,7 @@ Name of the column (used for the DDL; required)
 [#ref-xml-datatype]
 ====== datatype
 
-A datatype is a placeholder for an element corresponding to a specific Firebird data type.
+A datatype is a placeholder for an element corresponding to a specific Firebird datatype.
 
 .Attributes
 None, though subtypes may define attributes
@@ -418,7 +418,7 @@ None, though subtypes may define attributes
 .Elements, in order
 * <<ref-xml-converter>> -- optional
 
-At this time, _ext-table-gen_ supports the following column data types:
+At this time, _ext-table-gen_ supports the following column datatypes:
 
 * <<ref-xml-bigint>>
 * <<ref-xml-char>>
@@ -686,8 +686,8 @@ None
 [#ref-xml-converter]
 ===== `converter`
 
-The `converter` element -- if present -- defines a conversion from the CSV string value to a Firebird data type value.
-If absent, a default conversion will be applied, specific to the column data type.
+The `converter` element -- if present -- defines a conversion from the CSV string value to a Firebird datatype value.
+If absent, a default conversion will be applied, specific to the column datatype.
 
 .Attributes
 None

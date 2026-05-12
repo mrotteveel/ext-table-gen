@@ -107,6 +107,7 @@ dependencies {
     implementation libs.bundles.jaxb
     implementation libs.commons.lang3
     implementation libs.jspecify
+    implementation libs.decimal.java
 
     testImplementation platform(testLibs.junit.bom)
     integrationTestImplementation platform(testLibs.junit.bom)

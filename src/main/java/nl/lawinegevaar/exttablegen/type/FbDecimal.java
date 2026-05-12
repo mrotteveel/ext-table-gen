@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -10,11 +10,11 @@ import java.math.RoundingMode;
 import java.util.Objects;
 
 /**
- * A data type representing the Firebird datatype {@code DECIMAL}.
+ * A datatype representing the Firebird datatype {@code DECIMAL}.
  *
  * @since 2
  */
-public final class FbDecimal extends AbstractFbFixedPointDatatype implements FbFixedPointDatatype {
+public final class FbDecimal extends AbstractFbFixedPointDatatype {
 
     /**
      * Constructs a {@code FbDecimal} with the default conversion

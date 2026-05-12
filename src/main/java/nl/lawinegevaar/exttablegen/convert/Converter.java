@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
@@ -7,6 +7,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.time.temporal.TemporalAccessor;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
@@ -73,7 +74,7 @@ public interface Converter<T> {
     }
 
     /**
-     * If this is wrapped converter (e.g. {@link IntConverter#wrap(Converter)}), return the unwrapped form.
+     * If this is a wrapped converter (e.g. {@link IntConverter#wrap(Converter)}), return the unwrapped form.
      * <p>
      * Default implementation: {@code return this}.
      * </p>
@@ -90,13 +91,35 @@ public interface Converter<T> {
     }
 
     /**
+     * Unwraps this converter to the specified type.
+     * <p>
+     * The default implementation returns {@code this} in an optional if this is an instance of {@code type}, otherwise
+     * empty. Implementations are not required to override this to unwrap their wrapped or decorated converter. This is
+     * primarily intended as an escape hatch for internal use.
+     * </p>
+     *
+     * @param type
+     *         desired converter type
+     * @param <X>
+     *         type of {@code type}
+     * @return non-empty of {@code type}, or empty
+     * @since 3
+     */
+    default <X extends Converter<?>> Optional<X> unwrap(Class<X> type) {
+        if (type.isInstance(this)) {
+            return Optional.of(type.cast(this));
+        }
+        return Optional.empty();
+    }
+
+    /**
      * Indicates whether some object is equal to this one.
      * <p>
      * Implementations should compare against the unwrapped variant (see {@link #unwrap()}).
      * </p>
      */
     @Override
-    boolean equals(Object obj);
+    boolean equals(@Nullable Object obj);
 
     /**
      * Returns a hash code value for this object.

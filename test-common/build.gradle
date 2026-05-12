@@ -11,6 +11,7 @@ repositories {
 dependencies {
     implementation project(':')
     implementation libs.jspecify
+    implementation libs.decimal.java
 }
 
 java {

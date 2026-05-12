@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -134,6 +134,19 @@ public final class EncoderOutputStream extends FilterOutputStream {
             System.arraycopy(bytes, 0, int128Bytes, startOfMinimum, bytes.length);
             bytes = int128Bytes;
         }
+        writeFromNetworkOrder(bytes);
+    }
+
+    /**
+     * Writes network order (big endian) bytes, converting to the appropriate byte order.
+     *
+     * @param bytes
+     *         bytes in network order
+     * @throws IOException
+     *         for errors writing to the stream
+     * @since 3
+     */
+    public void writeFromNetworkOrder(byte[] bytes) throws IOException{
         out.write(fromNetworkOrder(bytes));
     }
 

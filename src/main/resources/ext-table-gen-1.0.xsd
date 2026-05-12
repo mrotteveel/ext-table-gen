@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel -->
+<!-- SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel -->
 <!-- SPDX-License-Identifier: Apache-2.0 -->
 <!-- NOTE: Updates to /xs:schema[@version] also need to be reflected in ConfigMapper.CURRENT_SCHEMA_VERSION -->
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -72,6 +72,7 @@
     <xs:element name="decimal" type="FixedPointType" substitutionGroup="datatype"/>
     <xs:element name="float" type="DatatypeType" substitutionGroup="datatype"/>
     <xs:element name="doublePrecision" type="DatatypeType" substitutionGroup="datatype"/>
+    <xs:element name="decfloat" type="DecfloatType" substitutionGroup="datatype"/>
 
     <xs:complexType name="DatatypeType">
         <xs:sequence>
@@ -196,6 +197,34 @@
             <xs:enumeration value="HALF_UP"/>
             <xs:enumeration value="UNNECESSARY"/>
             <xs:enumeration value="UP"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="DecfloatType">
+        <xs:complexContent>
+            <xs:extension base="DatatypeType">
+                <xs:attribute name="precision" use="required">
+                    <xs:simpleType>
+                        <xs:restriction base="xs:int">
+                            <xs:enumeration value="16"/>
+                            <xs:enumeration value="34"/>
+                        </xs:restriction>
+                    </xs:simpleType>
+                </xs:attribute>
+                <xs:attribute name="onOverflow" type="overflowHandling" default="ROUND_TO_INFINITY"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <xs:simpleType name="overflowHandling">
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:typesafeEnumClass map="false"/>
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ROUND_TO_INFINITY"/>
+            <xs:enumeration value="THROW_EXCEPTION"/>
         </xs:restriction>
     </xs:simpleType>
 

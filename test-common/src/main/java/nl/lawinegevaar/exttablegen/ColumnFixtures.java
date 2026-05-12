@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -25,7 +25,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name} and data type {@code FbChar} with {@code length} and encoding
+     * Creates a column with {@code name} and datatype {@code FbChar} with {@code length} and encoding
      * {@code ISO8859_1}.
      *
      * @param name
@@ -39,7 +39,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name} and data type {@code FbChar} with {@code length} and {@code encoding}.
+     * Creates a column with {@code name} and datatype {@code FbChar} with {@code length} and {@code encoding}.
      *
      * @param name
      *         name of the column
@@ -68,7 +68,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbSmallint} and {@code converter}.
+     * Creates a column with {@code name}, datatype {@code FbSmallint} and {@code converter}.
      *
      * @param name
      *         name of the column
@@ -81,7 +81,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbInteger} and {@code converter}.
+     * Creates a column with {@code name}, datatype {@code FbInteger} and {@code converter}.
      *
      * @param name
      *         name of the column
@@ -94,7 +94,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbBigint} and {@code converter}.
+     * Creates a column with {@code name}, datatype {@code FbBigint} and {@code converter}.
      *
      * @param name
      *         name of the column
@@ -107,7 +107,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbInt128} and {@code converter}.
+     * Creates a column with {@code name}, datatype {@code FbInt128} and {@code converter}.
      *
      * @param name
      *         name of the column
@@ -120,7 +120,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbDate} and {@code converter}.
+     * Creates a column with {@code name}, datatype {@code FbDate} and {@code converter}.
      *
      * @param name
      *         name of the column
@@ -133,7 +133,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbTime} and {@code converter}.
+     * Creates a column with {@code name}, datatype {@code FbTime} and {@code converter}.
      *
      * @param name
      *         name of the column
@@ -146,7 +146,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbTimestamp} and {@code converter}.
+     * Creates a column with {@code name}, datatype {@code FbTimestamp} and {@code converter}.
      *
      * @param name
      *         name of the column
@@ -159,7 +159,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbNumeric} with {@code precision} and {@code scale}.
+     * Creates a column with {@code name}, datatype {@code FbNumeric} with {@code precision} and {@code scale}.
      *
      * @param name
      *         name of the column
@@ -174,7 +174,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbNumeric} with {@code precision}, {@code scale} and
+     * Creates a column with {@code name}, datatype {@code FbNumeric} with {@code precision}, {@code scale} and
      * {@code roundingMode}, and {@code converter}.
      *
      * @param name
@@ -195,7 +195,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbDecimal} with {@code precision} and {@code scale}.
+     * Creates a column with {@code name}, datatype {@code FbDecimal} with {@code precision} and {@code scale}.
      *
      * @param name
      *         name of the column
@@ -210,7 +210,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbDecimal} with {@code precision}, {@code scale} and
+     * Creates a column with {@code name}, datatype {@code FbDecimal} with {@code precision}, {@code scale} and
      * {@code roundingMode}, and {@code converter}.
      *
      * @param name
@@ -231,7 +231,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbFloat} and {@code converter}.
+     * Creates a column with {@code name}, datatype {@code FbFloat} and {@code converter}.
      *
      * @param name
      *         name of the column
@@ -244,7 +244,7 @@ final class ColumnFixtures {
     }
 
     /**
-     * Creates a column with {@code name}, data type {@code FbDoublePrecision} and {@code converter}.
+     * Creates a column with {@code name}, datatype {@code FbDoublePrecision} and {@code converter}.
      *
      * @param name
      *         name of the column
@@ -254,6 +254,42 @@ final class ColumnFixtures {
      */
     static Column doublePrecision(String name, @Nullable Converter<?> converter) {
         return new Column(name, new FbDoublePrecision().withConverterChecked(converter));
+    }
+
+    /**
+     * Creates a column with {@code name}, datatype {@code FbDecfloat16} or {@code FbDecfloat34} (depending on
+     * precision), overflow handling {@link DecfloatOnOverflow#ROUND_TO_INFINITY} and no converter.
+     *
+     * @param name
+     *         name of the column
+     * @param precision
+     *         precision (16 or 34)
+     * @return column
+     */
+    static Column decfloat(String name, int precision) {
+        return decfloat(name, precision, DecfloatOnOverflow.ROUND_TO_INFINITY, null);
+    }
+
+    /**
+     * Creates a column with {@code name}, datatype {@code FbDecfloat16} or {@code FbDecfloat34} (depending on
+     * precision)
+     *
+     * @param name
+     *         name of the column
+     * @param precision
+     *         precision (16 or 34)
+     * @param onOverflow
+     *         overflow handling
+     * @param converter
+     *         converter, or {@code null} for default
+     * @return column
+     */
+    static Column decfloat(String name, int precision, @Nullable DecfloatOnOverflow onOverflow,
+            @Nullable Converter<?> converter) {
+        assert precision == 16 || precision == 34 : "Invalid precision for decfloat: " + precision;
+        FbDecimalFloatingPointDatatype<?> decfloat =
+                precision == 34 ? new FbDecfloat34(onOverflow) : new FbDecfloat16(onOverflow);
+        return new Column(name, decfloat.withConverterChecked(converter));
     }
 
     /**

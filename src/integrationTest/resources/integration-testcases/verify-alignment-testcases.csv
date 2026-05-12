@@ -343,3 +343,17 @@ char_1,          char_1,          doublePrecision, 3
 doublePrecision, char_1,          doublePrecision, 33
 char_1,          doublePrecision, bigint,          33
 char_1,          char_1,          doublePrecision, 33
+# cases for DECFLOAT(16)
+decfloat_16,  char_1,       decfloat_16,  3
+char_1,       decfloat_16,  bigint,       3
+char_1,       char_1,       decfloat_16,  3
+decfloat_16,  char_1,       decfloat_16,  33
+char_1,       decfloat_16,  bigint,       33
+char_1,       char_1,       decfloat_16,  33
+# cases for DECFLOAT(34)
+decfloat_34,  char_1,       decfloat_34, 3
+char_1,       decfloat_34,  bigint,      3
+char_1,       char_1,       decfloat_34, 3
+decfloat_34,  char_1,       decfloat_34, 33
+char_1,       decfloat_34,  bigint,      33
+char_1,       char_1,       decfloat_34, 33

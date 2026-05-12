@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -199,6 +199,12 @@ final class ConfigMapper {
             }
             case FbFloat ignored -> factory.createFloat(factory.createDatatypeType());
             case FbDoublePrecision ignored -> factory.createDoublePrecision(factory.createDatatypeType());
+            case FbDecimalFloatingPointDatatype<?> fbDecimalFloatingPointDatatype -> {
+                DecfloatType decfloatType = factory.createDecfloatType();
+                decfloatType.setPrecision(fbDecimalFloatingPointDatatype.precision());
+                decfloatType.setOnOverflow(fbDecimalFloatingPointDatatype.onOverflow().name());
+                yield factory.createDecfloat(decfloatType);
+            }
         };
     }
 
@@ -221,7 +227,11 @@ final class ConfigMapper {
                 }
                 case "parseBigDecimal" -> {
                     ParseBigDecimalType parseBigDecimalType = factory.createParseBigDecimalType();
-                    ParseBigDecimal parseBigDecimal = (ParseBigDecimal) converter;
+                    ParseBigDecimal parseBigDecimal = converter.unwrap(ParseBigDecimal.class)
+                            .orElseThrow(() -> new InvalidConfigurationException(
+                                    "Converter named %s did not unwrap to %s, type was %s"
+                                            .formatted(converterName, ParseBigDecimal.class.getName(),
+                                                    converter.getClass().getName())));
                     parseBigDecimalType.setLocale(parseBigDecimal.locale().toLanguageTag());
                     yield factory.createParseBigDecimal(parseBigDecimalType);
                 }
@@ -380,6 +390,16 @@ final class ConfigMapper {
             }
             case "float" -> new FbFloat();
             case "doublePrecision" -> new FbDoublePrecision();
+            case "decfloat" -> {
+                DecfloatType decfloatType = (DecfloatType) datatype.getValue();
+                var onOverflow = DecfloatOnOverflow.valueOf(decfloatType.getOnOverflow());
+                yield switch (decfloatType.getPrecision()) {
+                    case 16 -> new FbDecfloat16(onOverflow);
+                    case 34 -> new FbDecfloat34(onOverflow);
+                    default -> throw new InvalidConfigurationException("Unsupported precision %d on DatatypeType %s"
+                            .formatted(decfloatType.getPrecision(), datatype.getDeclaredType().getName()));
+                };
+            }
             default -> throw new InvalidConfigurationException(
                     "Unsupported DatatypeType: " + datatype.getDeclaredType().getName());
         };
@@ -408,7 +428,7 @@ final class ConfigMapper {
             return Converter.parseIntegralNumber(datatype.getName().getLocalPart(), parseIntegralType.getRadix());
         } catch (RuntimeException e) {
             throw new InvalidConfigurationException(
-                    "Unsupported ParseIntegralType data type: " + datatype.getName(), e);
+                    "Unsupported ParseIntegralType datatype: " + datatype.getName(), e);
         }
     }
 
@@ -419,7 +439,7 @@ final class ConfigMapper {
                     datatype.getName().getLocalPart(), parseFloatingPointType.getLocale());
         } catch (RuntimeException e) {
             throw new InvalidConfigurationException(
-                    "Unsupported ParseFloatingPointNumberType data type: " + datatype.getName(), e);
+                    "Unsupported ParseFloatingPointNumberType datatype: " + datatype.getName(), e);
         }
     }
 

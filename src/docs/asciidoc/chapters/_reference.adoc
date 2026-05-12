@@ -423,6 +423,7 @@ At this time, _ext-table-gen_ supports the following column datatypes:
 * <<ref-xml-bigint>>
 * <<ref-xml-char>>
 * <<ref-xml-date>>
+* <<ref-xml-decfloat>>
 * <<ref-xml-decimal>>
 * <<ref-xml-doublePrecision>>
 * <<ref-xml-float>>
@@ -471,6 +472,34 @@ The default conversion parses the string using the ISO 8601 calendar date format
 
 .Attributes
 None
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
+[float#ref-xml-decfloat]
+====== `decfloat`
+
+The `decfloat` element represents the Firebird datatype https://firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref50/fblangref50-datatypes-floattypes.html#fblangref50-datatypes-decfloat[`DECFLOAT`^].
+
+The default conversion parses the string using https://firebirdsql.github.io/decimal-java/javadoc/org.firebirdsql.decimal/org/firebirdsql/decimal/Decimal64.html#valueOf(java.lang.String,org.firebirdsql.decimal.OverflowHandling)[`Decimal64.valueOf(String, OverflowHandling)`^] and https://firebirdsql.github.io/decimal-java/javadoc/org.firebirdsql.decimal/org/firebirdsql/decimal/Decimal128.html#valueOf(java.lang.String,org.firebirdsql.decimal.OverflowHandling)[`Decimal128.valueOf(String, OverflowHandling)`^] of https://github.com/FirebirdSQL/decimal-java[`org.firebirdsql:decimal-java`^].
+Indirectly, these `valueOf` methods uses the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^], with extra support for the {plus}/-Infinity, {plus}/-NaN, and {plus}/-sNaN values.
+Contrary to the <<ref-xml-parsebigdecimal>> converter, this converter can also parse strings in scientific notation.
+
+.Attributes
+[horizontal]
+`precision`::
+Integer in `16` or `34` for the precision in decimal digits (required).
+`onOverflow`::
+Overflow handling (optional, defaults to `ROUND_TO_INFINITY`).
+Possible values are:
++
+--
+[horizontal]
+`ROUND_TO_INFINITY`:::
+Overflow rounds to {plus}/-Infinity
+`THROW_EXCEPTION`:::
+Overflow throws a (subclass of) `ArithmeticException`
+--
 
 .Elements
 * <<ref-xml-converter>> -- optional
@@ -713,8 +742,9 @@ In the actual program code, a _converter step_ is also called a _converter_, but
 
 Parses a string using the Java `NumberFormat` instance for the specified locale to a `BigDecimal`.
 
-This converter step is only valid in <<ref-xml-decimal>> and <<ref-xml-numeric>>.
-Contrary to the default converter of `numeric` and `decimal`, this converter does not parse strings in scientific notation.
+This converter step is only valid in <<ref-xml-decfloat>>, <<ref-xml-decimal>>, and <<ref-xml-numeric>>.
+Contrary to the default converter of `decimal`, and `numeric`, this converter does not parse strings in scientific notation.
+Contrary to the default converter of `decfloat`, this converter does not parse strings in scientific notation nor the special values ({plus}/-Infinity, {plus}/-NaN, {plus}/-sNaN).
 
 .Attributes
 [horizontal]

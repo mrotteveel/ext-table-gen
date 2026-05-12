@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -11,7 +11,7 @@ import java.math.RoundingMode;
  * @since 2
  */
 public sealed interface FbFixedPointDatatype extends FbDatatype<BigDecimal>
-        permits AbstractFbFixedPointDatatype, FbDecimal, FbNumeric {
+        permits AbstractFbFixedPointDatatype {
 
     /**
      * @return precision in decimal digits

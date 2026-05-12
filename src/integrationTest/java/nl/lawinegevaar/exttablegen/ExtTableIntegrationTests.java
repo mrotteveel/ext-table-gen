@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -13,6 +13,7 @@ import org.firebirdsql.management.FBManager;
 import org.firebirdsql.util.FirebirdSupportInfo;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,15 +52,8 @@ import java.util.regex.Pattern;
 
 import static java.lang.System.Logger.Level.WARNING;
 import static java.util.Objects.requireNonNull;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.col;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.date;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.decimal;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.doublePrecision;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.floatCol;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.integralNumber;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.numeric;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.time;
-import static nl.lawinegevaar.exttablegen.ColumnFixtures.timestamp;
+import static java.util.Objects.requireNonNullElse;
+import static nl.lawinegevaar.exttablegen.ColumnFixtures.*;
 import static nl.lawinegevaar.exttablegen.IntegrationTestProperties.externalTableFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -93,6 +87,10 @@ class ExtTableIntegrationTests {
     private static final int FLOAT_VALUES_ROW_COUNT = 6;
     private static final String DOUBLE_PRECISION_VALUES_BASELINE_PREFIX = "doublePrecision-values-baseline";
     private static final int DOUBLE_PRECISION_VALUES_ROW_COUNT = 6;
+    private static final String DECFLOAT_16_VALUES_BASELINE_PREFIX = "decfloat16-values-baseline";
+    private static final int DECFLOAT_16_VALUES_ROW_COUNT = 9;
+    private static final String DECFLOAT_34_VALUES_BASELINE_PREFIX = "decfloat34-values-baseline";
+    private static final int DECFLOAT_34_VALUES_ROW_COUNT = 11;
 
     private static FBManager fbManager;
     private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
@@ -112,6 +110,8 @@ class ExtTableIntegrationTests {
     private static Path fixedPointValuesBaselineCsvFile;
     private static Path floatValuesBaselineCsvFile;
     private static Path doublePrecisionValuesBaselineCsvFile;
+    private static Path decfloat16ValuesBaselineCsvFile;
+    private static Path decfloat34ValuesBaselineCsvFile;
     private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
@@ -149,6 +149,12 @@ class ExtTableIntegrationTests {
         doublePrecisionValuesBaselineCsvFile = copyForAllResource(
                 testDataResource(csvFilename(DOUBLE_PRECISION_VALUES_BASELINE_PREFIX)),
                 csvFilename(DOUBLE_PRECISION_VALUES_BASELINE_PREFIX));
+        decfloat16ValuesBaselineCsvFile = copyForAllResource(
+                testDataResource(csvFilename(DECFLOAT_16_VALUES_BASELINE_PREFIX)),
+                csvFilename(DECFLOAT_16_VALUES_BASELINE_PREFIX));
+        decfloat34ValuesBaselineCsvFile = copyForAllResource(
+                testDataResource(csvFilename(DECFLOAT_34_VALUES_BASELINE_PREFIX)),
+                csvFilename(DECFLOAT_34_VALUES_BASELINE_PREFIX));
     }
 
     @AfterAll
@@ -197,21 +203,27 @@ class ExtTableIntegrationTests {
     @ParameterizedTest
     @CsvSource(useHeadersInDisplayName = true, textBlock =
             """
-            configName,                           columnToCheck, expectedJdbcType
-            customers-1000-index-smallint.xml,    1,             SMALLINT
-            customers-1000-index-integer.xml,     1,             INTEGER
-            customers-1000-index-bigint.xml,      1,             BIGINT
-            customers-1000-index-int128.xml,      1,             NUMERIC
-            customers-1000-index-decimal_9_0.xml, 1,             DECIMAL
-            customers-1000-index-numeric_9_0.xml, 1,             NUMERIC
-            customers-1000-index-float.xml,       1,             FLOAT
-            customers-1000-index-date.xml,        11,            DATE
+            configName,                           columnToCheck, expectedJdbcType, expectedTypeCode
+            customers-1000-index-smallint.xml,    1,             SMALLINT,
+            customers-1000-index-integer.xml,     1,             INTEGER,
+            customers-1000-index-bigint.xml,      1,             BIGINT,
+            customers-1000-index-int128.xml,      1,             NUMERIC,
+            customers-1000-index-decimal_9_0.xml, 1,             DECIMAL,
+            customers-1000-index-numeric_9_0.xml, 1,             NUMERIC,
+            customers-1000-index-float.xml,       1,             FLOAT,
+            customers-1000-index-date.xml,        11,            DATE,
+            # DECFLOAT JDBCType only available in Java 26+, so using code
+            customers-1000-index-decfloat16.xml,  1,             ,                 2015
+            customers-1000-index-decfloat34.xml,  1,             ,                 2015
             """)
-    void testCustomersCustomTypes_simple(String configName, int columnToCheck, JDBCType expectedJdbcType)
+    void testCustomersCustomTypes_simple(String configName, int columnToCheck, @Nullable JDBCType expectedJdbcType, @Nullable Integer expectedTypeCode)
             throws Throwable {
         if (expectedJdbcType == JDBCType.NUMERIC && configName.contains("int128")) {
             assumeTrue(firebirdSupportInfo.supportsInt128(), "Test requires INT128 support");
         }
+        int resolvedExpectedTypeCode = expectedTypeCode != null
+                ? expectedTypeCode
+                : requireNonNullElse(expectedJdbcType, JDBCType.OTHER).getVendorTypeNumber();
         Path configIn = copyForEachResource(testDataResource(configName), configName);
         Path tableFile = registerForCleanup(externalTableFile(tableFilename(CUSTOMERS_1000_PREFIX)));
         Path configOutFile = forEachTempDir.resolve(configFilename(CUSTOMERS_1000_PREFIX));
@@ -219,7 +231,7 @@ class ExtTableIntegrationTests {
                 customers1000CsvFile, tableFile, configOutFile);
 
         assertExternalTable(configOutFile, CUSTOMERS_TABLE_NAME, customers1000CsvFile, 1000, EndColumn.Type.NONE,
-                rsmd -> assertEquals(expectedJdbcType.getVendorTypeNumber(), rsmd.getColumnType(columnToCheck)));
+                rsmd -> assertEquals(resolvedExpectedTypeCode, rsmd.getColumnType(columnToCheck)));
     }
 
     @Test
@@ -464,11 +476,13 @@ class ExtTableIntegrationTests {
     @ParameterizedTest
     @CsvSource(useHeadersInDisplayName = true, textBlock =
             """
-            type,    locale
-            numeric, en-US
-            numeric, nl-NL
-            numeric, en-US
-            decimal, nl-NL
+            type,       locale
+            numeric,    en-US
+            numeric,    nl-NL
+            numeric,    en-US
+            decimal,    nl-NL
+            decfloat16, en-US
+            decfloat34, en-US
             """)
     void testWithExplicitConverter_parseBigDecimal(String type, String locale) throws Throwable {
         String prefix = type + "-values";
@@ -479,6 +493,8 @@ class ExtTableIntegrationTests {
         Column column = switch (type) {
             case "numeric" -> numeric("Value", 9, 2, null, converter);
             case "decimal" -> decimal("Value", 9, 2, null, converter);
+            case "decfloat16" -> decfloat("Value", 16, null, converter);
+            case "decfloat34" -> decfloat("Value", 34, null, converter);
             default -> throw new AssertionError("Unsupported type: " + type);
         };
         var columns = List.of(column);
@@ -493,8 +509,14 @@ class ExtTableIntegrationTests {
         }
         createExternalTableFileFromExistingConfig(configFile, prefix, csvFile, tableFile, configFile);
 
-        assertExternalTable(configFile, prefix, fixedPointValuesBaselineCsvFile,
-                FIXED_POINT_VALUES_ROW_COUNT, EndColumn.Type.NONE);
+        record TestData(int rowCount, Path baseLineCsvFile) {}
+        TestData testData = switch (type) {
+            case "decfloat16" -> new TestData(DECFLOAT_16_VALUES_ROW_COUNT, decfloat16ValuesBaselineCsvFile);
+            case "decfloat34" -> new TestData(DECFLOAT_34_VALUES_ROW_COUNT, decfloat34ValuesBaselineCsvFile);
+            default -> new TestData(FIXED_POINT_VALUES_ROW_COUNT, fixedPointValuesBaselineCsvFile);
+        };
+
+        assertExternalTable(configFile, prefix, testData.baseLineCsvFile, testData.rowCount, EndColumn.Type.NONE);
     }
 
     @ParameterizedTest
@@ -577,6 +599,41 @@ class ExtTableIntegrationTests {
         assertExternalTable(configFile, tableName, csvFile, parserConfig, 3, EndColumn.Type.NONE);
     }
 
+    @Test
+    void decfloatIntegrationTest_boundaries() throws Throwable {
+        Path csvFile = forEachTempDir.resolve("decfloat-boundary.csv");
+        Path tableFile = registerForCleanup(externalTableFile("decfloat-boundary.dat"));
+        Files.writeString(csvFile,
+                """
+                name,decfloat_16,decfloat_34
+                minimum,-9.999999999999999E+384,-9.999999999999999999999999999999999E+6144
+                minus one,-1,-1
+                minus 1/100,-0.01,-0.01
+                minus smallest,-1E-398,-1E-6176
+                zero,0,0
+                plus smallest,1E-398,1E-6176
+                plus 1/100,0.01,0.01
+                plus one,1,1
+                maximum,9.999999999999999E+384,9.999999999999999999999999999999999E+6144
+                """);
+        String tableName = "DECFLOAT_BOUNDARY";
+        Path configFile = forEachTempDir.resolve("decfloat-boundary.xml");
+        try (var out = Files.newOutputStream(configFile)) {
+            var etgConfig = new EtgConfig(
+                    createTableConfig(tableName,
+                            List.of(new Column("name", new FbChar(15, FbEncoding.ASCII)),
+                                    new Column("decfloat_16", new FbDecfloat16(null)),
+                                    new Column("decfloat_34", new FbDecfloat34(null))),
+                            tableFile),
+                    TableDerivationConfig.getDefault(),
+                    createCsvFileConfig(csvFile));
+            configMapper.write(etgConfig, out);
+        }
+        createExternalTableFileFromExistingConfig(configFile, tableName, csvFile, tableFile, configFile);
+
+        assertExternalTable(configFile, tableName, csvFile, 9, EndColumn.Type.NONE);
+    }
+
     // TODO Maybe some or all of the following methods should be moved to test-common
 
     private static CsvFileConfig createCsvFileConfig(Path csvFile) {
@@ -589,12 +646,18 @@ class ExtTableIntegrationTests {
 
     private static Column createColumn(String name, String columnType) {
         class Holder {
-            static final Pattern CHAR_PATTERN = Pattern.compile("char_(\\d+)");
+            static final Pattern LENGTH_PARAM_PATTERN = Pattern.compile("(char|decfloat)_(\\d+)");
             static final Pattern FIXED_POINT_PATTERN = Pattern.compile("(decimal|numeric)_(\\d+)_(\\d+)");
         }
-        Matcher charMatcher = Holder.CHAR_PATTERN.matcher(columnType);
-        if (charMatcher.matches()) {
-            return col(name, Integer.parseInt(charMatcher.group(1)));
+        Matcher lengthParamMatcher = Holder.LENGTH_PARAM_PATTERN.matcher(columnType);
+        if (lengthParamMatcher.matches()) {
+            String type = lengthParamMatcher.group(1);
+            int length = Integer.parseInt(lengthParamMatcher.group(2));
+            return switch (type) {
+                case "char" -> col(name, length);
+                case "decfloat" -> decfloat(name, length);
+                default -> throw new AssertionError("invalid type: " + type);
+            };
         }
         Matcher fixedPointMatcher = Holder.FIXED_POINT_PATTERN.matcher(columnType);
         if (fixedPointMatcher.matches()) {
@@ -678,6 +741,7 @@ class ExtTableIntegrationTests {
             }
             case "FbFloat" -> Float.toString((float) value);
             case "FbDoublePrecision" -> Double.toString((double) value);
+            case "FbDecfloat16", "FbDecfloat34" -> BigDecimal.valueOf(value).toPlainString();
             default -> throw new IllegalArgumentException("Unsupported datatype: " + typeName);
         };
     }

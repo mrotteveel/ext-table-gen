@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2024-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -7,6 +7,6 @@ package nl.lawinegevaar.exttablegen.type;
  *
  * @since 3
  */
-public sealed interface FbFloatingPointDatatype<T extends Number> extends FbDatatype<T>
-        permits FbDoublePrecision, FbFloat {
+public sealed interface FbFloatingPointDatatype<T> extends FbDatatype<T>
+        permits FbBinaryFloatingPointDatatype, FbDecimalFloatingPointDatatype {
 }

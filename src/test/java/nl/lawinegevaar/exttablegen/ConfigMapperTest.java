@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -8,6 +8,7 @@ import nl.lawinegevaar.exttablegen.convert.ParseBigint;
 import nl.lawinegevaar.exttablegen.convert.ParseInt128;
 import nl.lawinegevaar.exttablegen.convert.ParseInteger;
 import nl.lawinegevaar.exttablegen.convert.ParseSmallint;
+import nl.lawinegevaar.exttablegen.type.DecfloatOnOverflow;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -151,7 +152,11 @@ class ConfigMapperTest {
                 doublePrecision("COLUMN_IN", null),
                 doublePrecision("COLUMN_IN", Converter.parseFloatingPointNumber("doublePrecision", "nl-NL")),
                 floatCol("COLUMN_IN", null),
-                floatCol("COLUMN_IN", Converter.parseFloatingPointNumber("float", "nl-NL")));
+                floatCol("COLUMN_IN", Converter.parseFloatingPointNumber("float", "nl-NL")),
+                decfloat("COLUMN_IN", 16, DecfloatOnOverflow.THROW_EXCEPTION, null),
+                decfloat("COLUMN_IN", 16, DecfloatOnOverflow.ROUND_TO_INFINITY, Converter.parseBigDecimal("en-US")),
+                decfloat("COLUMN_IN", 34, DecfloatOnOverflow.THROW_EXCEPTION, null),
+                decfloat("COLUMN_IN", 34, DecfloatOnOverflow.ROUND_TO_INFINITY, Converter.parseBigDecimal("en-US")));
     }
 
     @Test

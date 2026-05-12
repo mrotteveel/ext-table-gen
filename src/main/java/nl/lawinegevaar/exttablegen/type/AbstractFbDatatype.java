@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -14,7 +14,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 
 /**
- * Abstract partial implementation of {@link FbDatatype} for common code of data type implementations.
+ * Abstract partial implementation of {@link FbDatatype} for common code of datatype implementations.
  *
  * @param <T>
  *         target type
@@ -23,8 +23,8 @@ import static java.util.Objects.requireNonNullElse;
  * @since 2
  */
 public abstract sealed class AbstractFbDatatype<T, C extends Converter<T>> implements FbDatatype<T>
-        permits AbstractFbFixedPointDatatype, FbBigint, FbChar, FbDate, FbDoublePrecision, FbFloat, FbInt128, FbInteger,
-        FbSmallint, FbTime, FbTimestamp {
+        permits AbstractFbDecimalFloatingPointDatatype, AbstractFbFixedPointDatatype, FbBigint, FbChar, FbDate,
+        FbDoublePrecision, FbFloat, FbInt128, FbInteger, FbSmallint, FbTime, FbTimestamp {
 
     private final Class<T> targetType;
     // The configured converter (can be null)
@@ -33,7 +33,7 @@ public abstract sealed class AbstractFbDatatype<T, C extends Converter<T>> imple
     private final C finalConverter;
 
     /**
-     * Initializes this abstract data type.
+     * Initializes this abstract datatype.
      * <p>
      * We're separating {@code converter} and {@code defaultConverter}, so we can distinguish the explicitly configured
      * converter from the default (e.g. when generating a configuration file we don't want to include the default).
@@ -95,7 +95,7 @@ public abstract sealed class AbstractFbDatatype<T, C extends Converter<T>> imple
     }
 
     /**
-     * Checks if the (non-default) converter of this data type is equal to {@code converter}.
+     * Checks if the (non-default) converter of this datatype is equal to {@code converter}.
      *
      * @param converter
      *         converter

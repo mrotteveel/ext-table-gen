@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2024-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -10,12 +10,12 @@ import org.jspecify.annotations.Nullable;
 import java.io.IOException;
 
 /**
- * A data type representing the Firebird datatype {@code DOUBLE PRECISION}.
+ * A datatype representing the Firebird datatype {@code DOUBLE PRECISION}.
  *
  * @since 3
  */
 public final class FbDoublePrecision extends AbstractFbDatatype<Double, DoubleConverter>
-        implements FbFloatingPointDatatype<Double> {
+        implements FbBinaryFloatingPointDatatype<Double> {
 
     private static final DoubleConverter DEFAULT_CONVERTER = new DoubleConverter() {
         @Override

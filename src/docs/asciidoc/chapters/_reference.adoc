@@ -437,7 +437,7 @@ At this time, _ext-table-gen_ supports the following column datatypes:
 [float#ref-xml-bigint]
 ====== `bigint`
 
-The `bigint` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-bigint[`BIGINT`^].
+The `bigint` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes.html#fblangref50-datatypes-bigint[`BIGINT`^].
 
 .Attributes
 None
@@ -448,7 +448,7 @@ None
 [float#ref-xml-char]
 ====== `char`
 
-The `char` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-chartypes.html#fblangref40-datatypes-chartypes-char[`CHAR`^].
+The `char` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-chartypes.html#fblangref50-datatypes-chartypes-char[`CHAR`^].
 
 .Attributes
 [horizontal]
@@ -465,7 +465,7 @@ The XSD uses an enum-type, `encoding`, with supported names.
 [float#ref-xml-date]
 ====== `date`
 
-The `date` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-date[`DATE`^].
+The `date` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-datetime.html#fblangref50-datatypes-date[`DATE`^].
 The Firebird `DATE` type only accepts values between 0001-01-01 and 9999-12-31.
 
 The default conversion parses the string using the ISO 8601 calendar date format (pattern `yyyy-MM-dd`, or named pattern `ISO_LOCAL_DATE`).
@@ -509,7 +509,7 @@ Overflow throws a (subclass of) `ArithmeticException`
 
 // NOTE: keep in-sync with ref-xml-numeric
 
-The `decimal` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-decimal[`DECIMAL`^].
+The `decimal` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-fixedtypes.html#fblangref50-datatypes-decimal[`DECIMAL`^].
 
 The default conversion parses the string using the rules described in the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^].
 Contrary to the <<ref-xml-parsebigdecimal>> converter, this converter can also parse strings in scientific notation.
@@ -566,7 +566,7 @@ For `DECIMAL`, that means:
 [float#ref-xml-doublePrecision]
 ====== `doublePrecision`
 
-The `doublePrecision` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-floattypes.html#fblangref40-datatypes-double[`DOUBLE PRECISION`^].
+The `doublePrecision` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-floattypes.html#fblangref50-datatypes-double[`DOUBLE PRECISION`^].
 
 The default conversion parses the string using the rules described in https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Float.html#valueOf(java.lang.String)[`Float.valueOf(String)`^].
 Contrary to the <<ref-xml-parsefloatingpointnumber>> converter, this converter can also parse strings in scientific notation.
@@ -580,7 +580,7 @@ None
 [float#ref-xml-float]
 ====== `float`
 
-The `float` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-floattypes.html#fblangref40-datatypes-double[`DOUBLE PRECISION`^].
+The `float` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-floattypes.html#fblangref50-datatypes-float[`FLOAT`^].
 
 The default conversion parses the string using the rules described in https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Float.html#valueOf(java.lang.String)[`Float.valueOf(String)`^].
 Contrary to the <<ref-xml-parsefloatingpointnumber>> converter, this converter can also parse strings in scientific notation.
@@ -594,7 +594,7 @@ None
 [float#ref-xml-int128]
 ====== `int128`
 
-The `int128` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-int128[`INT128`^].
+The `int128` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes.html#fblangref50-datatypes-int128[`INT128`^].
 
 .Attributes
 None
@@ -605,7 +605,7 @@ None
 [float#ref-xml-integer]
 ====== `integer`
 
-The `integer` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-int[`INTEGER`^].
+The `integer` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes.html#fblangref50-datatypes-int[`INTEGER`^].
 
 .Attributes
 None
@@ -618,7 +618,7 @@ None
 
 // NOTE: keep in-sync with ref-xml-decimal
 
-The `numeric` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-numeric[`NUMERIC`^].
+The `numeric` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-fixedtypes.html#fblangref50-datatypes-numeric[`NUMERIC`^].
 
 The default conversion parses the string using the rules described in the constructor https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)[`BigDecimal(String)`^].
 Contrary to the <<ref-xml-parsebigdecimal>> converter, this converter can also parse strings in scientific notation.
@@ -677,7 +677,7 @@ For `NUMERIC`, that means:
 [float#ref-xml-smallint]
 ====== `smallint`
 
-The `smallint` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-smallint[`SMALLINT`^].
+The `smallint` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes.html#fblangref50-datatypes-smallint[`SMALLINT`^].
 
 .Attributes
 None
@@ -688,7 +688,7 @@ None
 [float#ref-xml-time]
 ====== `time`
 
-The `time` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-time[`++TIME [WITHOUT TIME ZONE]++`^].
+The `time` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-datetime.html#fblangref50-datatypes-time[`++TIME [WITHOUT TIME ZONE]++`^].
 The Firebird `TIME` type only accepts values between 00:00:00.0000 and 23:59:59.9999.
 
 .Attributes
@@ -700,7 +700,7 @@ None
 [float#ref-xml-timestamp]
 ====== `timestamp`
 
-The `timestamp` element represents the Firebird datatype https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-timestamp[`++TIMESTAMP [WITHOUT TIME ZONE]++`^].
+The `timestamp` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-datetime.html#fblangref50-datatypes-timestamp[`++TIMESTAMP [WITHOUT TIME ZONE]++`^].
 See also the limitations of <<ref-xml-date>> and <<ref-xml-time>>.
 
 For additional flexibility, the time part is not required.
@@ -980,7 +980,7 @@ None
 [#ref-xml-ddl]
 ==== `ddl`
 
-The `ddl` element contains the Firebird https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-ddl-table.html#fblangref40-ddl-tbl-create[`CREATE TABLE`^] statement derived from <<ref-xml-externaltable>>.
+The `ddl` element contains the Firebird https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-ddl-table.html#fblangref50-ddl-tbl-create[`CREATE TABLE`^] statement derived from <<ref-xml-externaltable>>.
 
 .Attributes
 None

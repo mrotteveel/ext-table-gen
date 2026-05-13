@@ -76,6 +76,8 @@ testing {
                 implementation testLibs.jaybird
                 implementation.bundle(libs.bundles.jaxb)
                 implementation libs.jspecify
+                implementation testLibs.testcontainers.junit
+                implementation testLibs.firebird.testcontainers.java
             }
 
             targets {
@@ -111,6 +113,7 @@ dependencies {
 
     testImplementation platform(testLibs.junit.bom)
     integrationTestImplementation platform(testLibs.junit.bom)
+    integrationTestImplementation platform(testLibs.testcontainers.bom)
 }
 
 tasks.named('check') {

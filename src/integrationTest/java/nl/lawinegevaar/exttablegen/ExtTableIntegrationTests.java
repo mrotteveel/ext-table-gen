@@ -18,7 +18,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -54,14 +53,12 @@ import static java.lang.System.Logger.Level.WARNING;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.*;
-import static nl.lawinegevaar.exttablegen.IntegrationTestProperties.externalTableFile;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@ExtendWith(RequireIntegrationTestConfigurationCondition.class)
 @NullUnmarked
 class ExtTableIntegrationTests {
 
@@ -92,10 +89,15 @@ class ExtTableIntegrationTests {
     private static final String DECFLOAT_34_VALUES_BASELINE_PREFIX = "decfloat34-values-baseline";
     private static final int DECFLOAT_34_VALUES_ROW_COUNT = 11;
 
+    private static IntegrationTestConfig integrationTestConfig;
+
+    private static final String DATABASE_NAME = "integration-test.fdb";
     private static FBManager fbManager;
-    private static final Path databasePath = IntegrationTestProperties.databasePath("integration-test.fdb");
+    private static FirebirdTestPath databasePath;
     private final ConfigMapper configMapper = new ConfigMapper();
 
+    @TempDir
+    static Path firebirdDataDir;
     @TempDir
     static Path forAllTempDir;
     @TempDir
@@ -116,12 +118,14 @@ class ExtTableIntegrationTests {
 
     @BeforeAll
     static void setupDb() throws Exception {
-        fbManager = IntegrationTestProperties.createFBManager();
-        fbManager.setFileName(IntegrationTestProperties.databaseFirebirdFile(databasePath));
+        integrationTestConfig = new IntegrationTestConfig(firebirdDataDir);
+        databasePath = integrationTestConfig.resolveFile(DATABASE_NAME);
+        fbManager = integrationTestConfig.createFBManager();
+        fbManager.setFileName(databasePath.firebirdPath());
         fbManager.setCreateOnStart(true);
         fbManager.setDropOnStop(true);
         fbManager.start();
-        try (Connection connection = IntegrationTestProperties.createConnection(databasePath)) {
+        try (Connection connection = integrationTestConfig.createConnection(databasePath)) {
             firebirdSupportInfo = FirebirdSupportInfo.supportInfoFor(connection);
         }
     }
@@ -159,10 +163,23 @@ class ExtTableIntegrationTests {
 
     @AfterAll
     static void tearDownDb() throws Exception {
+        FBManager manager = fbManager;
+        if (manager == null) return;
         try {
-            fbManager.stop();
+            manager.stop();
         } finally {
             fbManager = null;
+        }
+    }
+
+    @AfterAll
+    static void shutdownContainer() {
+        IntegrationTestConfig config = integrationTestConfig;
+        if (config == null) return;
+        try {
+            config.close();
+        } finally {
+            integrationTestConfig = null;
         }
     }
 
@@ -193,7 +210,7 @@ class ExtTableIntegrationTests {
     @ParameterizedTest
     @EnumSource(EndColumn.Type.class)
     void compareOriginalDataWithDataFromFirebird(EndColumn.Type endColumnType) throws Throwable {
-        Path tableFile = registerForCleanup(externalTableFile(tableFilename(CUSTOMERS_1000_PREFIX)));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile(tableFilename(CUSTOMERS_1000_PREFIX));
         Path configFile = forEachTempDir.resolve(configFilename(CUSTOMERS_1000_PREFIX));
         createExternalTableFile(CUSTOMERS_TABLE_NAME, customers1000CsvFile, tableFile, endColumnType, configFile);
 
@@ -225,7 +242,7 @@ class ExtTableIntegrationTests {
                 ? expectedTypeCode
                 : requireNonNullElse(expectedJdbcType, JDBCType.OTHER).getVendorTypeNumber();
         Path configIn = copyForEachResource(testDataResource(configName), configName);
-        Path tableFile = registerForCleanup(externalTableFile(tableFilename(CUSTOMERS_1000_PREFIX)));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile(tableFilename(CUSTOMERS_1000_PREFIX));
         Path configOutFile = forEachTempDir.resolve(configFilename(CUSTOMERS_1000_PREFIX));
         createExternalTableFileFromExistingConfig(configIn, CUSTOMERS_TABLE_NAME,
                 customers1000CsvFile, tableFile, configOutFile);
@@ -237,7 +254,7 @@ class ExtTableIntegrationTests {
     @Test
     void integralNumberIntegrationTest_boundaries() throws Throwable {
         Path csvFile = forEachTempDir.resolve("integral-boundary.csv");
-        Path tableFile = registerForCleanup(externalTableFile("integral-boundary.dat"));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile("integral-boundary.dat");
         Files.writeString(csvFile,
                 """
                 name,smallint,integer,bigint,int128
@@ -285,7 +302,7 @@ class ExtTableIntegrationTests {
         Path csvFile = forEachTempDir.resolve("verify-alignment.csv");
         int rowCount = 5;
         generateCsvFile(csvFile, columns, rowCount);
-        Path tableFile = registerForCleanup(externalTableFile("verify-alignment.dat"));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile("verify-alignment.dat");
         String tableName = "VERIFY_ALIGNMENT";
         Path configFile = forEachTempDir.resolve("verify-alignment.xml");
         try (var out = Files.newOutputStream(configFile)) {
@@ -304,7 +321,7 @@ class ExtTableIntegrationTests {
     void testWithExplicitConverter_fromFile() throws Throwable {
         Path configFile = copyForEachResource(testDataResource(configFilename(ID_VALUES_HEX_PREFIX + "-integer")),
                 configFilename(ID_VALUES_HEX_PREFIX + "-integer"));
-        Path tableFile = registerForCleanup(externalTableFile(tableFilename(ID_VALUES_PREFIX)));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile(tableFilename(ID_VALUES_PREFIX));
         createExternalTableFileFromExistingConfig(configFile, ID_VALUES_PREFIX, idValueHexCsvFile, tableFile, configFile);
 
         // NOTE: We're using the "dec" value for comparison, because we compare as decimal values
@@ -331,7 +348,7 @@ class ExtTableIntegrationTests {
         assert radix == 10 || radix == 16 : "Test only works for radix 10 or 16 (due to available test data)";
         Path csvFile = radix == 10 ? idValueDecCsvFile : idValueHexCsvFile;
         var columns = List.of(integralNumber("Id", typeName, Converter.parseIntegralNumber(typeName, radix)));
-        Path tableFile = registerForCleanup(externalTableFile(tableFilename(ID_VALUES_PREFIX)));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile(tableFilename(ID_VALUES_PREFIX));
         Path configFile = forEachTempDir.resolve(configFilename(ID_VALUES_PREFIX));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
@@ -359,7 +376,7 @@ class ExtTableIntegrationTests {
         String testCsvFilename = csvFilename(testName);
         Path csvFile = copyForEachResource(testDataResource(testCsvFilename), testCsvFilename);
         var columns = List.of(date("Date", Converter.parseDatetime(pattern, locale)));
-        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile(tableFilename(testName));
         Path configFile = forEachTempDir.resolve(configFilename(testName));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
@@ -389,7 +406,7 @@ class ExtTableIntegrationTests {
         String testCsvFilename = csvFilename(testName);
         Path csvFile = copyForEachResource(testDataResource(testCsvFilename), testCsvFilename);
         var columns = List.of(time("Time", Converter.parseDatetime(pattern, locale)));
-        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile(tableFilename(testName));
         Path configFile = forEachTempDir.resolve(configFilename(testName));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
@@ -418,7 +435,7 @@ class ExtTableIntegrationTests {
         String testCsvFilename = csvFilename(testName);
         Path csvFile = copyForEachResource(testDataResource(testCsvFilename), testCsvFilename);
         var columns = List.of(timestamp("Time", Converter.parseDatetime(pattern, locale)));
-        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile(tableFilename(testName));
         Path configFile = forEachTempDir.resolve(configFilename(testName));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
@@ -436,7 +453,7 @@ class ExtTableIntegrationTests {
     @Test
     void fixedPointIntegrationTest_boundaries() throws Throwable {
         Path csvFile = forEachTempDir.resolve("fixed-point-boundary.csv");
-        Path tableFile = registerForCleanup(externalTableFile("fixed-point-boundary.dat"));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile("fixed-point-boundary.dat");
         Files.writeString(csvFile,
                 """
                 name,numeric_4_2,numeric_9_2,numeric_18_2,numeric_38_2,decimal_9_2,decimal_18_2,decimal_38_2
@@ -498,7 +515,7 @@ class ExtTableIntegrationTests {
             default -> throw new AssertionError("Unsupported type: " + type);
         };
         var columns = List.of(column);
-        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile(tableFilename(testName));
         Path configFile = forEachTempDir.resolve(configFilename(testName));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
@@ -540,7 +557,7 @@ class ExtTableIntegrationTests {
             default -> throw new AssertionError("Unsupported type: " + type);
         };
         var columns = List.of(column);
-        Path tableFile = registerForCleanup(externalTableFile(tableFilename(testName)));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile(tableFilename(testName));
         Path configFile = forEachTempDir.resolve(configFilename(testName));
         try (var out = Files.newOutputStream(configFile)) {
             var etgConfig = new EtgConfig(
@@ -571,7 +588,7 @@ class ExtTableIntegrationTests {
     @Test
     void testWithCustomCsvParser() throws Throwable {
         Path csvFile = forEachTempDir.resolve("custom-csv-format.csv");
-        Path tableFile = registerForCleanup(externalTableFile("custom-csv-format.dat"));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile("custom-csv-format.dat");
         Files.writeString(csvFile,
                 """
                 'COLUMN_1'\t'COLUMN_2'
@@ -602,7 +619,7 @@ class ExtTableIntegrationTests {
     @Test
     void decfloatIntegrationTest_boundaries() throws Throwable {
         Path csvFile = forEachTempDir.resolve("decfloat-boundary.csv");
-        Path tableFile = registerForCleanup(externalTableFile("decfloat-boundary.dat"));
+        FirebirdTestPath tableFile = integrationTestConfig.resolveFile("decfloat-boundary.dat");
         Files.writeString(csvFile,
                 """
                 name,decfloat_16,decfloat_34
@@ -640,8 +657,8 @@ class ExtTableIntegrationTests {
         return new CsvFileConfig(csvFile, StandardCharsets.UTF_8, true, CsvParserConfig.of());
     }
 
-    private static TableConfig createTableConfig(String tableName, List<Column> columns, Path tableFile) {
-        return new TableConfig(tableName, columns, new TableFile(tableFile, false), ByteOrderType.AUTO);
+    private static TableConfig createTableConfig(String tableName, List<Column> columns, FirebirdTestPath tableFile) {
+        return new TableConfig(tableName, columns, new TableFile(tableFile.localPath(), false), ByteOrderType.AUTO);
     }
 
     private static Column createColumn(String name, String columnType) {
@@ -746,12 +763,12 @@ class ExtTableIntegrationTests {
         };
     }
 
-    private static void createExternalTableFile(String tableName, Path csvFile, Path tableFile,
+    private static void createExternalTableFile(String tableName, Path csvFile, FirebirdTestPath tableFile,
             EndColumn.Type endColumnType, Path configOut) {
         int exitCode = ExtTableGenMain.parseAndExecute(
                 "--csv-file", csvFile.toString(),
                 "--table-name", tableName,
-                "--table-file", tableFile.toString(),
+                "--table-file", tableFile.localPath().toString(),
                 "--overwrite-table-file",
                 "--end-column", endColumnType.name(),
                 "--config-out", configOut.toString(),
@@ -760,12 +777,12 @@ class ExtTableIntegrationTests {
     }
 
     private static void createExternalTableFileFromExistingConfig(Path configIn, String tableName, Path csvFile,
-            Path tableFile, Path configOut) {
+            FirebirdTestPath tableFile, Path configOut) {
         int exitCode = ExtTableGenMain.parseAndExecute(
                 "--config-in", configIn.toString(),
                 "--table-name", tableName,
                 "--csv-file", csvFile.toString(),
-                "--table-file", tableFile.toString(),
+                "--table-file", tableFile.localPath().toString(),
                 "--overwrite-table-file",
                 "--config-out", configOut.toString(),
                 "--overwrite-config");
@@ -776,7 +793,9 @@ class ExtTableIntegrationTests {
         try (var in = Files.newInputStream(configPath)) {
             ExtTableGenConfig extTableGenConfig = configMapper.readAsExtTableGenConfig(in);
             InformationalType informational = requireNonNull(extTableGenConfig.getInformational(), "informational");
-            String remoteTableFilePath = IntegrationTestProperties.externalTableFirebirdFile(Path.of(extTableGenConfig.getExternalTable().getTableFile().getPath()));
+            String remoteTableFilePath = integrationTestConfig
+                    .resolveFile(Path.of(extTableGenConfig.getExternalTable().getTableFile().getPath()))
+                    .firebirdPath();
             return requireNonNull(informational.getDdl(), "informational/ddl")
                     .replaceFirst("(?i)^\\s*create table", "recreate table")
                     .replaceFirst("(?i)(?<=external (?:file )?')[^']+(?=')", remoteTableFilePath);
@@ -807,7 +826,7 @@ class ExtTableIntegrationTests {
             CsvParserConfig csvParserConfig, int expectedRowCount, EndColumn.Type expectedEndColumnType,
             ThrowingConsumer<ResultSetMetaData> resultSetMetaDataAssertions) throws Throwable {
         String ddl = getDdl(configFile);
-        try (Connection connection = IntegrationTestProperties.createConnection(databasePath);
+        try (Connection connection = integrationTestConfig.createConnection(databasePath);
              var statement = connection.createStatement()) {
             statement.execute(ddl);
 

@@ -15,7 +15,6 @@ classes/
 .project
 .classpath
 
-/integration-test-local.properties
 /.test-db/
 
 # Ignore Gradle project-specific cache directory

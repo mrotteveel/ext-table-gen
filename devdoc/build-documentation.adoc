@@ -27,54 +27,33 @@ To run all tests (including integration tests), use:
 
 === Integration test configuration
 
-The integration tests require some additional configuration.
-First of all, it needs a (preferably localhost) Firebird server.
+The integration tests use testcontainers-java, which may require some additional configuration when using Podman instead of Docker.
 
-Create a file called `integration-test-local.properties` in the root of the project (i.e. containing `gradlew`) with content like:
+Specifically, it may be necessary to configure the podman socket.
 
 [listing]
 ----
-test.db.host=localhost
-test.db.port=13055
-test.db.user=sysdba
-test.db.password=masterkey
-test.db.path.prefix=
-test.db.path.local=./.test-db
-test.db.ext-table-dir.prefix=
-test.db.ext-table-dir.local=./.test-db
+export DOCKER_HOST=unix://${XDG_RUNTIME_DIR}/podman/podman.sock
 ----
 
-This configuration is also in `integration-test-local-example.properties`, and matches the configuration in `podman-compose.yml`.
+Or its equivalent.
+For example, when configuring environment variables in the IntelliJ run settings, you'll need to put in the resolved value as it will not expand `++${XDG_RUNTIME_DIR}++` (on my system the expansion is `/run/user/1000`).
 
-.Settings
-`test.db.host`::
-Firebird hostname
-`test.db.port`::
-Firebird port
-`test.db.user`::
-Firebird user, must have the `CREATE DATABASE` privilege.
-`test.db.path.prefix`::
-Server-side path of the database directory.
-+
-Can be left empty if `DatabaseAccess` is `Restrict /some/path`.
-`test.db.path.local`::
-Local path corresponding to `test.db.path.prefix`.
-+
-This can for example be a local directory mapped as a volume into a Docker/Podman container, or a network share.
-+
-If not specified, it will default to `test.db.path.prefix`, but if that's empty, it uses the current directory.
-`test.db.ext-table-dir.prefix`::
-Server-side path of the external table directory.
-+
-Can be left empty if `ExternalFileAccess` is `Restrict /some/path`.
-`test.db.ext-table-dir.local`::
-Local path corresponding to `test.db.ext-table-dir.prefix`.
-+
-This can for example be a local directory mapped as a volume into a Docker/Podman container, or a network share.
-+
-If not specified, it will default to `test.db.ext-table-dir.prefix`, but if that's empty, it uses the current directory.
+Alternatively, in your home directory, create a `.testcontainers.properties` with:
 
-A remote Firebird server or container will work, but due to the configuration of _ext-table-gen_ and the tests, the server-side directories for `test.db.path.prefix` and `test.db.ext-table-dir.prefix` must have a locally mapped directory (network share, Docker volume, etc.) available and specified in `test.db.path.local`/`test.db.ext-table-dir.local`.
+[listing]
+----
+docker.host=unix\:///run/user/1000/podman/podman.sock
+----
+
+(Replace that `/run/user/1000` as appropriate.)
+
+Some sources (like https://www.baeldung.com/java-podman-configure-testcontainers[this article^]) suggest you may also need to disable Ryuk:
+
+[listing]
+----
+export TESTCONTAINERS_RYUK_DISABLED=true
+----
 
 == Commit hooks
 

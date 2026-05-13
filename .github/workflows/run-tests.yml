@@ -24,7 +24,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e
       - name: Test with Gradle
-        run: ./gradlew test
+        run: ./gradlew check
       - name: Store Report Artifact
         uses: actions/upload-artifact@v7
         if: always()

@@ -15,8 +15,6 @@ classes/
 .project
 .classpath
 
-/.test-db/
-
 # Ignore Gradle project-specific cache directory
 .gradle
 

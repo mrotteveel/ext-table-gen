@@ -15,7 +15,6 @@ import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.NullUnmarked;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingConsumer;
@@ -49,7 +48,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.System.Logger.Level.WARNING;
 import static java.util.Objects.requireNonNull;
 import static java.util.Objects.requireNonNullElse;
 import static nl.lawinegevaar.exttablegen.ColumnFixtures.*;
@@ -114,7 +112,6 @@ class ExtTableIntegrationTests {
     private static Path doublePrecisionValuesBaselineCsvFile;
     private static Path decfloat16ValuesBaselineCsvFile;
     private static Path decfloat34ValuesBaselineCsvFile;
-    private final List<Path> filesToDelete = new ArrayList<>();
 
     @BeforeAll
     static void setupDb() throws Exception {
@@ -181,30 +178,6 @@ class ExtTableIntegrationTests {
         } finally {
             integrationTestConfig = null;
         }
-    }
-
-    @AfterEach
-    void cleanupFiles() {
-        filesToDelete.forEach(path -> {
-            try {
-                Files.deleteIfExists(path);
-            } catch (IOException e) {
-                System.getLogger(ExtTableIntegrationTests.class.getName())
-                        .log(WARNING, "Exception cleaning up file " + path, e);
-            }
-        });
-    }
-
-    /**
-     * Registers a file path for clean up after the test completes.
-     *
-     * @param path
-     *         file path
-     * @return {@code path} for convenience
-     */
-    private Path registerForCleanup(Path path) {
-        filesToDelete.add(path);
-        return path;
     }
 
     @ParameterizedTest

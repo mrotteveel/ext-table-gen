@@ -42,6 +42,8 @@ The only benefit of `VARCHAR` in an external table is preserving the actual data
 == Decision
 
 _ext-table-gen_ will support the `VARCHAR` datatype with the same feature set and character sets as `CHAR`.
+In XML, it will be represented by an element `varchar`, using the same XSD `CharType` as the `char` element.
+In code, it's represented by the `FbVarchar` type defined in similar vein as `FbChar`.
 
 .Rationale
 Although we think `CHAR` is generally sufficient, preserving actual length can have its benefit for users -- for example, querying data from the external table will not require use of an explicit `TRIM`.
@@ -49,3 +51,7 @@ Although we think `CHAR` is generally sufficient, preserving actual length can h
 == Consequences
 
 The documentation must be updated to explain how to use this new datatype, and to describe the configuration changes.
+
+As we reuse the XSD `CharType` for `varchar`, the XSD will not enforce the lower limit of 32765.
+As the XSD already did not enforce the correct limits for multibyte character sets, we think this is a small price to pay for keeping it simple.
+This may be revisited at a later time.

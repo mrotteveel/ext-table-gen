@@ -1,0 +1,51 @@
+= 2026-02: Supporting Varchar type
+
+// SPDX-FileCopyrightText: 2026 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Draft
+* Proposed for: 3.0
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+Firebird has a `VARCHAR` datatype for variable length text data (and binary data when using character set `OCTETS`).
+The storage for `VARCHAR` supports a maximum of 32765 bytes.
+Depending on the character set, this means it supports up to 32765 codepoints (characters).
+For example, for character set `UTF8`, the maximum is actually 8191 codepoints as a Unicode codepoint takes 1 - 4 bytes in UTF-8.
+
+Since _ext-table-gen_ 1.0, we've supported the `CHAR` data type.
+The major differences between `CHAR` and `VARCHAR` is that `CHAR` is fixed length (shorter values are padded up to the declared length), and that `CHAR` has 2 bytes more available (for 0 - 2 extra codepoints depending on the character set).
+
+Storage-wise, `VARCHAR` has no benefit in an external table.
+In fact, it uses two to three bytes extra compared to a `CHAR` with the same declared length (0-1 bytes to achieve an alignment of 2 (for details on alignment, see https://github.com/mrotteveel/ext-table-gen/blob/main/devdoc/adr/2023-06-supporting-basic-integer-types.adoc[ADR 2023-06]), and 2 bytes for actual length).
+For "`normal`" tables in Firebird, this is compensated by the RLE compression.
+
+Given, a declared length _l_, and a character set _c_ using _bpc_ (max) bytes per character, and  a _value_ encoded using _c_ with a byte length _m_, a `VARCHAR(__l__) CHARACTER SET _c_` has the following format:
+
+[horizontal]
+0-1 bytes:: padding for alignment
+2 bytes:: actual data length _m_ (effectively a `SMALLINT`)
+_m_ bytes:: _value_ bytes (encoded with _c_)
+_l_ * _bpc_ - _m_ bytes:: padding with byte 0x00 -- NUL)
+
+Where the padding of `CHAR` (usually with byte 0x20 -- SPACE) is -- simplifiedfootnote:[Ignoring the intricacies of variable length character sets like UTF8] -- part of the actual value, this padding is *not* part of the value for `VARCHAR`.
+That is, in case of `VARCHAR(__l__)` the actual value *is* _value_, where with `CHAR(__l__)` the actual value is _value_ {plus} padding to declared length _l_.
+
+The only benefit of `VARCHAR` in an external table is preserving the actual data length.
+
+== Decision
+
+_ext-table-gen_ will support the `VARCHAR` datatype with the same feature set and character sets as `CHAR`.
+
+.Rationale
+Although we think `CHAR` is generally sufficient, preserving actual length can have its benefit for users -- for example, querying data from the external table will not require use of an explicit `TRIM`.
+
+== Consequences
+
+The documentation must be updated to explain how to use this new datatype, and to describe the configuration changes.

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
 <meta name="keywords" content="firebird, database, external table">
 <meta name="author" content="Mark Rotteveel">
 <title>Firebird External Table Generator: Release notes</title>
@@ -118,7 +118,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -142,7 +141,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -164,6 +163,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -220,6 +220,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -329,7 +330,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -442,7 +443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>Firebird External Table Generator: Release notes</h1>
 <div class="details">
 <span id="author" class="author">Mark Rotteveel</span><br>
-<span id="revdate">2.0</span>
+<span id="revdate">3.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -460,7 +461,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Copyright 2023 Mark Rotteveel and all contributing authors under the <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache 2.0 license</a>.</p>
+<p>Copyright 2023-2026 Mark Rotteveel and all contributing authors under the <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache 2.0 license</a>.</p>
 </div>
 <!-- toc disabled -->
 </div>
@@ -469,7 +470,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="intro"><a class="anchor" href="#intro"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> is a commandline tool to convert <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> CSV files and CSV files with custom formats to <a href="https://www.firebirdsql.org/" target="_blank" rel="noopener">Firebird</a> external tables (a binary format for Firebird external table data).</p>
+<p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> is a commandline tool to convert <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> CSV files and CSV files with custom formats to <a href="https://firebirdsql.org/" target="_blank" rel="noopener">Firebird</a> external tables (a binary format for Firebird external table data).</p>
 </div>
 <div class="paragraph">
 <p>External tables are a good way for bulk-loading data into Firebird.
@@ -504,6 +505,9 @@ However, you can modify the configuration file to make <em>ext-table-gen</em> ge
 <li>
 <p><code>char</code></p>
 </li>
+<li>
+<p><code>varchar</code></p>
+</li>
 </ul>
 </div>
 </li>
@@ -527,7 +531,11 @@ However, you can modify the configuration file to make <em>ext-table-gen</em> ge
 </div>
 </li>
 <li>
-<p>Exact numeric types (fixed point):</p>
+<p>Exact numeric types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Fixed point types:</p>
 <div class="ulist">
 <ul>
 <li>
@@ -535,6 +543,32 @@ However, you can modify the configuration file to make <em>ext-table-gen</em> ge
 </li>
 <li>
 <p><code>decimal</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Decimal floating point type:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>decfloat</code></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Approximate numeric types (binary floating point)</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>float</code></p>
+</li>
+<li>
+<p><code>doublePrecision</code></p>
 </li>
 </ul>
 </div>
@@ -563,75 +597,61 @@ However, you can modify the configuration file to make <em>ext-table-gen</em> ge
 <h2 id="about-version"><a class="anchor" href="#about-version"></a>2. About this version</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Firebird External Table Generator version 2.0 is the second release of this application.</p>
+<p>Firebird External Table Generator version 3.0 is the third release of this application.</p>
 </div>
 <div class="paragraph">
-<p>This version introduces two major new features:</p>
+<p>This version introduces the following new features:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Support for additional data types:</p>
+<p>Support for additional datatypes:</p>
 <div class="ulist">
 <ul>
 <li>
-<p>Integral number types:</p>
+<p>Approximate numeric types (binary floating point)</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>smallint</code></p>
+<p><code>float</code></p>
 </li>
 <li>
-<p><code>integer</code></p>
-</li>
-<li>
-<p><code>bigint</code></p>
-</li>
-<li>
-<p><code>int128</code></p>
+<p><code>doublePrecision</code></p>
 </li>
 </ul>
 </div>
 </li>
 <li>
-<p>Exact numeric types (fixed point):</p>
+<p>Decimal floating point type:</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>numeric</code></p>
-</li>
-<li>
-<p><code>decimal</code></p>
+<p><code>decfloat</code></p>
 </li>
 </ul>
 </div>
 </li>
 <li>
-<p>Datetime types:</p>
+<p>String types</p>
 <div class="ulist">
 <ul>
 <li>
-<p><code>date</code></p>
-</li>
-<li>
-<p><code>time</code> (without time zone)</p>
-</li>
-<li>
-<p><code>timestamp</code> (without time zone)</p>
+<p><code>varchar</code></p>
 </li>
 </ul>
 </div>
 </li>
 </ul>
 </div>
-</li>
-<li>
-<p>Customizing the CSV parser configuration</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
 <p>This application is licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache 2.0 license</a>.</p>
+</div>
+<div class="paragraph">
+<p>Version 3.0 requires Java 21.
+Versions 1.0 and 2.0 require Java 17.</p>
 </div>
 <div class="paragraph">
 <p>Consult the <a href="ext-table-gen-user-manual.html">User Manual</a> for installation, usage examples and reference documentation.</p>
@@ -642,9 +662,37 @@ However, you can modify the configuration file to make <em>ext-table-gen</em> ge
 <div class="sect2">
 <h3 id="version-history"><a class="anchor" href="#version-history"></a>2.1. Version history</h3>
 <div class="sect3">
-<h4 id="_ext_table_gen_2_0"><a class="anchor" href="#_ext_table_gen_2_0"></a>2.1.1. <em>ext-table-gen</em> 2.0</h4>
+<h4 id="_ext_table_gen_3_0"><a class="anchor" href="#_ext_table_gen_3_0"></a>2.1.1. <em>ext-table-gen</em> 3.0</h4>
 <div class="paragraph">
-<p>The following changes were made in <em>ext-table-gen</em> 2.0</p>
+<p>The following changes were made in <em>ext-table-gen</em> 3.0:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Add support for binary floating point types (<code>FLOAT</code>, <code>DOUBLE PRECISION</code>) (<a href="https://github.com/mrotteveel/ext-table-gen/issues/20" target="_blank" rel="noopener">#20</a>)</p>
+</li>
+<li>
+<p>Add nullability annotations (<a href="https://github.com/mrotteveel/ext-table-gen/issues/22" target="_blank" rel="noopener">#22</a>)</p>
+</li>
+<li>
+<p>Java 21 is now the minimum supported version (<a href="https://github.com/mrotteveel/ext-table-gen/issues/23" target="_blank" rel="noopener">#23</a>)</p>
+</li>
+<li>
+<p>Fixed compilation issue (static reference to a local class) under Java 24 and higher (<a href="https://github.com/mrotteveel/ext-table-gen/issues/24" target="_blank" rel="noopener">#24</a>)</p>
+</li>
+<li>
+<p>Add support for decimal floating point types (<code>DECFLOAT</code>) (<a href="https://github.com/mrotteveel/ext-table-gen/issues/21" target="_blank" rel="noopener">#21</a>)</p>
+</li>
+<li>
+<p>Add support for variable length string type (<code>VARCHAR</code>) (<a href="https://github.com/mrotteveel/ext-table-gen/issues/27" target="_blank" rel="noopener">#27</a>)</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_ext_table_gen_2_0"><a class="anchor" href="#_ext_table_gen_2_0"></a>2.1.2. <em>ext-table-gen</em> 2.0</h4>
+<div class="paragraph">
+<p>The following changes were made in <em>ext-table-gen</em> 2.0:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -717,7 +765,7 @@ For example:</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_ext_table_gen_1_0"><a class="anchor" href="#_ext_table_gen_1_0"></a>2.1.2. <em>ext-table-gen</em> 1.0</h4>
+<h4 id="_ext_table_gen_1_0"><a class="anchor" href="#_ext_table_gen_1_0"></a>2.1.3. <em>ext-table-gen</em> 1.0</h4>
 <div class="paragraph">
 <p>Initial release</p>
 </div>
@@ -734,7 +782,7 @@ For example:</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-09-01 13:33:02 UTC
+Last updated 2026-05-15 09:03:02 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>

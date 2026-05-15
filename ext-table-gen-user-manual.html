@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="">
 <head>
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="generator" content="Asciidoctor 2.0.20">
+<meta name="generator" content="Asciidoctor 2.0.26">
 <meta name="keywords" content="firebird, database, external table">
 <meta name="author" content="Mark Rotteveel">
 <title>Firebird External Table Generator: User Manual</title>
@@ -118,7 +118,6 @@ h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title str
 :not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed}
 pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
 pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
-pre>code{display:block}
 pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
 em em{font-style:normal}
 strong strong{font-weight:400}
@@ -142,7 +141,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #content::before{content:none}
 #header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
 #header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
-#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header>h1:only-child{border-bottom:1px solid #dddddf;padding-bottom:8px}
 #header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:flex;flex-flow:row wrap}
 #header .details span:first-child{margin-left:-.125em}
 #header .details span.email a{color:rgba(0,0,0,.85)}
@@ -164,6 +163,7 @@ p a>code:hover{color:rgba(0,0,0,.9)}
 #toctitle{color:#7a2518;font-size:1.2em}
 @media screen and (min-width:768px){#toctitle{font-size:1.375em}
 body.toc2{padding-left:15em;padding-right:0}
+body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
 #toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
 #toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
 #toc.toc2>ul{font-size:.9em;margin-bottom:0}
@@ -220,6 +220,7 @@ table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
 .literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class=highlight],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
 .literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
 .listingblock>.content{position:relative}
+.listingblock pre>code{display:block}
 .listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
 .listingblock:hover code[data-lang]::before{display:block}
 .listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
@@ -329,7 +330,7 @@ a.image{text-decoration:none;display:inline-block}
 a.image object{pointer-events:none}
 sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
 sup.footnote a,sup.footnoteref a{text-decoration:none}
-sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+sup.footnote a:active,sup.footnoteref a:active,#footnotes .footnote a:first-of-type:active{text-decoration:underline}
 #footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
 #footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
 #footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
@@ -442,7 +443,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h1>Firebird External Table Generator: User Manual</h1>
 <div class="details">
 <span id="author" class="author">Mark Rotteveel</span><br>
-<span id="revdate">2.0</span>
+<span id="revdate">3.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
@@ -488,7 +489,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>Copyright 2023 Mark Rotteveel and all contributing authors under the <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache 2.0 license</a>.</p>
+<p>Copyright 2023-2026 Mark Rotteveel and all contributing authors under the <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener">Apache 2.0 license</a>.</p>
 </div>
 <!-- toc disabled -->
 </div>
@@ -497,7 +498,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="intro"><a class="anchor" href="#intro"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> is a commandline tool to convert <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> CSV files and CSV files with custom formats to <a href="https://www.firebirdsql.org/" target="_blank" rel="noopener">Firebird</a> external tables (a binary format for Firebird external table data).</p>
+<p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> is a commandline tool to convert <a href="https://www.rfc-editor.org/rfc/rfc4180" target="_blank" rel="noopener">RFC 4180</a> CSV files and CSV files with custom formats to <a href="https://firebirdsql.org/" target="_blank" rel="noopener">Firebird</a> external tables (a binary format for Firebird external table data).</p>
 </div>
 <div class="paragraph">
 <p>External tables are a good way for bulk-loading data into Firebird.
@@ -532,6 +533,9 @@ However, you can modify the configuration file to make <em>ext-table-gen</em> ge
 <li>
 <p><code>char</code></p>
 </li>
+<li>
+<p><code>varchar</code></p>
+</li>
 </ul>
 </div>
 </li>
@@ -555,7 +559,11 @@ However, you can modify the configuration file to make <em>ext-table-gen</em> ge
 </div>
 </li>
 <li>
-<p>Exact numeric types (fixed point):</p>
+<p>Exact numeric types:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Fixed point types:</p>
 <div class="ulist">
 <ul>
 <li>
@@ -563,6 +571,32 @@ However, you can modify the configuration file to make <em>ext-table-gen</em> ge
 </li>
 <li>
 <p><code>decimal</code></p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Decimal floating point type:</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>decfloat</code></p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Approximate numeric types (binary floating point)</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>float</code></p>
+</li>
+<li>
+<p><code>doublePrecision</code></p>
 </li>
 </ul>
 </div>
@@ -599,9 +633,12 @@ However, you can modify the configuration file to make <em>ext-table-gen</em> ge
 <div class="sect2">
 <h3 id="install-req"><a class="anchor" href="#install-req"></a>2.1. Requirements</h3>
 <div class="paragraph">
-<p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> requires Java 17.
-We have not tested it on higher versions, but expect it to work on higher versions as well.
-We will only fix issues reported against Java versions which are in support according to the OpenJDK project, at the time of writing this&#8201;&#8212;&#8201;August 2023, that means Java 17 and Java 20.</p>
+<p>The &#8220;Firebird External Table Generator&#8221; or <em>ext-table-gen</em> 3.0 requires Java 21.
+We will only fix issues reported and reproducible against Java versions which are in support according to the OpenJDK project.
+At the time of writing this&#8201;&#8212;&#8201;May 2026&#8201;&#8212;&#8201;that means Java 21, Java 25, and Java 26.</p>
+</div>
+<div class="paragraph">
+<p>The previous versions of <em>ext-table-gen</em>&#8201;&#8212;&#8201;1.0 and 2.0&#8201;&#8212;&#8201;require Java 17.</p>
 </div>
 </div>
 <div class="sect2">
@@ -612,7 +649,7 @@ We will only fix issues reported against Java versions which are in support acco
 <div class="ulist">
 <ul>
 <li>
-<p><code>ext-table-gen-2.0.zip</code>&#8201;&#8212;&#8201;for Linux, macOS and Windows</p>
+<p><code>ext-table-gen-3.0.zip</code>&#8201;&#8212;&#8201;for Linux, macOS and Windows</p>
 </li>
 </ul>
 </div>
@@ -622,7 +659,7 @@ We will only fix issues reported against Java versions which are in support acco
 <div class="ulist">
 <ul>
 <li>
-<p><code>ext-table-gen-2.0</code>&#8201;&#8212;&#8201;root directory with application files</p>
+<p><code>ext-table-gen-3.0</code>&#8201;&#8212;&#8201;root directory with application files</p>
 <div class="ulist">
 <ul>
 <li>
@@ -665,7 +702,7 @@ Improvements are always welcome through pull requests.</p>
 <div class="paragraph">
 <div class="title">Windows</div>
 <p>When copying or extracting to <code>C:\Program Files\</code> or <code>C:\Program Files (x86)\</code>, be aware that the archive tool must be run as administrator.
-You can also use Explorer to open ZIP files, and copy or extract the <code>ext-table-gen-2.0</code> directory from the zip.</p>
+You can also use Explorer to open ZIP files, and copy or extract the <code>ext-table-gen-3.0</code> directory from the zip.</p>
 </div>
 <div class="paragraph">
 <div class="title">Linux/macOS</div>
@@ -675,7 +712,7 @@ You can also use Explorer to open ZIP files, and copy or extract the <code>ext-t
 <div class="sect3">
 <h4 id="install-paths"><a class="anchor" href="#install-paths"></a>2.3.2. Setting environment variables</h4>
 <div class="paragraph">
-<p>To be able to call <em>ext-table-gen</em>, Java 17 or higher must be on the <code>PATH</code> (the <code>bin</code> directory of the Java installation), or alternatively, you need to set <code>JAVA_HOME</code> to point to the Java 17 installation directory (not its <code>bin</code> directory, but the directory which contains the <code>bin</code> directory).</p>
+<p>To be able to call <em>ext-table-gen</em>, Java 21 or higher must be on the <code>PATH</code> (the <code>bin</code> directory of the Java installation), or alternatively, you need to set <code>JAVA_HOME</code> to point to the Java 21 installation directory (not its <code>bin</code> directory, but the directory which contains the <code>bin</code> directory).</p>
 </div>
 <div class="paragraph">
 <p>If you don&#8217;t have Java installed, install it using your package manager, <a href="https://sdkman.io/" target="_blank" rel="noopener">sdkman</a> (Linux/macOS), or download it, for example from <a href="https://adoptium.net/" target="_blank" rel="noopener">Eclipse Adoptium</a>.</p>
@@ -813,7 +850,7 @@ db_two = C:\FirebirdData\databases\db_two.fdb
 </td>
 <td class="content">
 <div class="paragraph">
-<p>The author primarily uses Windows, so most examples are based on Windows.
+<p>These examples are based on Windows.
 In most cases, the only relevant differences are file paths.</p>
 </div>
 <div class="paragraph">
@@ -840,7 +877,7 @@ The character set can be explicitly configured using <a href="#ref-cmd-csv-chars
 <p>The external table definition derived from a CSV file uses only <code>CHAR</code> columns, and the default character set is <code>ISO8859_1</code>.
 This can be overridden by specifying <a href="#ref-cmd-column-encoding"><code>--column-encoding=ENCODING</code></a>, where <code>ENCODING</code> is a Firebird character set name (e.g. <code>column-encoding=WIN1252</code>).
 Alternatively, an existing configuration file can be edited to change the column encoding.
-The configuration file allows you to configure the character set <em>per column</em>, and also allows you to use data types other than <code>CHAR</code>.</p>
+The configuration file allows you to configure the character set <em>per column</em>, and also allows you to use datatypes other than <code>CHAR</code>.</p>
 </div>
 <div class="paragraph">
 <p>Given the overhead of using <code>UTF8</code> columns (e.g. a <code>CHAR(1000) CHARACTER SET UTF8</code> column will occupy 4000 bytes in an external table), we recommend using a single-byte character set where possible, and only defining columns as <code>UTF8</code> when absolutely necessary.</p>
@@ -982,7 +1019,7 @@ This needs to be explicitly enabled with <a href="#ref-cmd-overwrite-table-file"
 <div class="olist arabic">
 <ol class="arabic">
 <li>
-<p>The datatype is always <code>CHAR</code>, while using a different data type may be more efficient (both from a storage perspective, and in loading it into Firebird)</p>
+<p>The datatype is always <code>CHAR</code>, while using a different datatype may be more efficient (both from a storage perspective, and in loading it into Firebird)</p>
 </li>
 <li>
 <p>The maximum lengths of columns is derived from the CSV data.
@@ -1112,7 +1149,7 @@ We didn&#8217;t change the DDL, as we&#8217;ll demonstrate later how to regenera
 The examples up-to-now use only <code>CHAR</code> columns with the same character set, so these examples effectively behave as a fixed width text format.</p>
 </div>
 <div class="paragraph">
-<p>This changes once we start using multiple character sets, or other data types.</p>
+<p>This changes once we start using multiple character sets, or other datatypes.</p>
 </div>
 </td>
 </tr>
@@ -1311,13 +1348,13 @@ If some other column had ISO-8859-1 characters beyond 0x7f, they would have been
 </div>
 </div>
 <div class="sect3">
-<h4 id="usage-config-datatype"><a class="anchor" href="#usage-config-datatype"></a>3.3.4. Using a different column data type</h4>
+<h4 id="usage-config-datatype"><a class="anchor" href="#usage-config-datatype"></a>3.3.4. Using a different column datatype</h4>
 <div class="paragraph">
 <p>The default configuration file derived from a CSV file only uses <code>CHAR</code> columns.
 It can be more efficient&#8201;&#8212;&#8201;both in terms of storage space and for performance of loading the data into Firebird&#8201;&#8212;&#8201;to use a different datatype.</p>
 </div>
 <div class="paragraph">
-<p>In this example, we&#8217;ll change the data type of the <code>ID</code> column from a <code>CHAR(1)</code></p>
+<p>In this example, we&#8217;ll change the datatype of the <code>ID</code> column from a <code>CHAR(1)</code></p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1337,10 +1374,10 @@ It can be more efficient&#8201;&#8212;&#8201;both in terms of storage space and 
 </div>
 </div>
 <div class="paragraph">
-<p>For a full list of possible data types and their attributes, see <a href="#ref-xml-datatype">datatype</a>.</p>
+<p>For a full list of possible datatypes and their attributes, see <a href="#ref-xml-datatype">datatype</a>.</p>
 </div>
 <div class="paragraph">
-<p>If you change the data type to anything other than <code>char</code>, the generated file becomes truly <em>binary</em>.
+<p>If you change the datatype to anything other than <code>char</code>, the generated file becomes truly <em>binary</em>.
 Having an end-column makes less sense for this type of file, so we recommend removing it.</p>
 </div>
 <div class="paragraph">
@@ -1385,24 +1422,24 @@ Having an end-column makes less sense for this type of file, so we recommend rem
 </div>
 </div>
 <div class="paragraph">
-<p>For data types other than <code>char</code> the <code>byteOrder</code> is important for determining how to write out data.
+<p>For datatypes other than <code>char</code> the <code>byteOrder</code> is important for determining how to write out data.
 Absence of <code>byteOrder</code> will use <code>AUTO</code>, but when writing the configuration file, it will report the byte-order of the system that created the file.
 Specify <code>byteOrder="AUTO"</code> to use the endianness of the system where <em>ext-table-gen</em> is run.
-However, if you generate the table file on a little-endian machine, while your Firebird server runs on a big-endian machine (or vice-versa), you&#8217;ll need to set the <code>byteOrder</code> to match the endianness of the Firebird server.</p>
+However, if you generate the table file on a little-endian machine, while your Firebird server runs on a big-endian machine (or vice versa), you&#8217;ll need to set the <code>byteOrder</code> to match the endianness of the Firebird server.</p>
 </div>
 <div class="paragraph">
 <p>See <a href="#ref-xml-externaltable"><code>externalTable</code></a> for more information on <code>byteOrder</code>.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="usage-config-converter"><a class="anchor" href="#usage-config-converter"></a>3.3.5. Using a different data type conversion</h4>
+<h4 id="usage-config-converter"><a class="anchor" href="#usage-config-converter"></a>3.3.5. Using a different datatype conversion</h4>
 <div class="paragraph">
-<p>Each data type has a default conversion from the CSV string value to a Firebird data type value.
+<p>Each datatype has a default conversion from the CSV string value to a Firebird datatype value.
 This default conversion is not always suitable.
 For example, a CSV with hexadecimal string values for integers cannot be read as an <code>integer</code>, because the default conversion uses radix 10.</p>
 </div>
 <div class="paragraph">
-<p>To address this, the data type elements in the configuration have an optional element, <a href="#ref-xml-converter"><code>converter</code></a>, to specify a conversion using a <em>converter step</em>.
+<p>To address this, the datatype elements in the configuration have an optional element, <a href="#ref-xml-converter"><code>converter</code></a>, to specify a conversion using a <em>converter step</em>.
 We&#8217;ll provide examples for each <em>converter step</em> below.</p>
 </div>
 <div class="sect4">
@@ -1411,7 +1448,7 @@ We&#8217;ll provide examples for each <em>converter step</em> below.</p>
 <p>The converter step <a href="#ref-xml-parsebigdecimal"><code>parseBigDecimal</code></a> can be used to specify a locale for converter CSV values to exact numeric values.</p>
 </div>
 <div class="paragraph">
-<p>For example, to convert a number with <code>.</code> as the grouping symbol and <code>,</code> as the decimal separator (e.g. <code>"12.345,67"</code>), use the following data type definition:</p>
+<p>For example, to convert a number with <code>.</code> as the grouping symbol and <code>,</code> as the decimal separator (e.g. <code>"12.345,67"</code>), use the following datatype definition:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1423,7 +1460,7 @@ We&#8217;ll provide examples for each <em>converter step</em> below.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The allowed range of values is restricted by the enclosing data type and its precision (or more precisely, the backing datatype derived from the precision).</p>
+<p>The allowed range of values is restricted by the enclosing datatype and its precision (or more precisely, the backing datatype derived from the precision).</p>
 </div>
 </div>
 <div class="sect4">
@@ -1432,7 +1469,7 @@ We&#8217;ll provide examples for each <em>converter step</em> below.</p>
 <p>The converter step <a href="#ref-xml-parsedatetime"><code>parseDatetime</code></a> can be used to specify a different pattern and locale for converting CSV values to datetime values.</p>
 </div>
 <div class="paragraph">
-<p>For example, to convert a date in <code>d MMMM yyyy</code> format in Dutch (e.g. <code>15 juli 2023</code>), use the following data type definition:</p>
+<p>For example, to convert a date in <code>d MMMM yyyy</code> format in Dutch (e.g. <code>15 juli 2023</code>), use the following datatype definition:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1450,7 +1487,7 @@ We&#8217;ll provide examples for each <em>converter step</em> below.</p>
 <p>The converter step <a href="#ref-xml-parseintegralnumber"><code>parseIntegralNumber</code></a> can be used to specify a different radix for converting CSV values to integral numbers.</p>
 </div>
 <div class="paragraph">
-<p>For example, to convert integer values in radix 16 instead of radix 10, use the following data type definition:</p>
+<p>For example, to convert integer values in radix 16 instead of radix 10, use the following datatype definition:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1462,7 +1499,7 @@ We&#8217;ll provide examples for each <em>converter step</em> below.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The allowed range of values is restricted by the enclosing data type.</p>
+<p>The allowed range of values is restricted by the enclosing datatype.</p>
 </div>
 </div>
 </div>
@@ -1477,7 +1514,7 @@ We&#8217;ll provide examples for each <em>converter step</em> below.</p>
 You may need to use <a href="#ref-cmd-column-encoding"><code>--column-encoding</code></a> if you need something other than <code>ISO8859_1</code> for the external table columns, and <a href="#ref-cmd-csv-charset"><code>--csv-charset</code></a> if the CSV file is not encoded in ASCII or UTF-8.</p>
 </div>
 <div class="paragraph">
-<p>For repeated imports, or where multiple character sets or other data types are needed, we recommend the following steps:</p>
+<p>For repeated imports, or where multiple character sets or other datatypes are needed, we recommend the following steps:</p>
 </div>
 <div class="olist arabic">
 <ol class="arabic">
@@ -1491,10 +1528,10 @@ You may need to use <a href="#ref-cmd-column-encoding"><code>--column-encoding</
 <p>If needed, change the encoding of columns (see <a href="#usage-config-charset">Changing column character set</a>),</p>
 </li>
 <li>
-<p>Determine if there are more appropriate data types for columns and change the type if needed (see <a href="#usage-config-datatype">Using a different column data type</a>),</p>
+<p>Determine if there are more appropriate datatypes for columns and change the type if needed (see <a href="#usage-config-datatype">Using a different column datatype</a>),</p>
 </li>
 <li>
-<p>Determine if a custom converter is needed (see <a href="#usage-config-converter">Using a different data type conversion</a>),</p>
+<p>Determine if a custom converter is needed (see <a href="#usage-config-converter">Using a different datatype conversion</a>),</p>
 </li>
 <li>
 <p>Finally, regenerate the config file (see <a href="#usage-config-regen">Regenerating the configuration file</a>) for up-to-date DDL.</p>
@@ -2064,7 +2101,7 @@ It does not override the column encoding of existing columns (unless you use an 
 <code>CRLF</code>
 </td>
 <td class="hdlist2">
-<p>carriage return + linefeed, a.k.a CR/LF, \r\n, or 0x0d0a</p>
+<p>carriage return + linefeed, a.k.a. CR/LF, \r\n, or 0x0d0a</p>
 </td>
 </tr>
 <tr>
@@ -2155,7 +2192,7 @@ If <code>--config-in</code> is not specified, the default values are applied in 
 <h5 id="ref-cmd-config-out"><a class="anchor" href="#ref-cmd-config-out"></a>Configuration output (<code>--config-out</code>)</h5>
 <div class="paragraph">
 <p>The configuration output (<code>--config-out=FILE</code>) specifies the path of the configuration XML file to write.
-<code>FILE</code> is the absolute or relative path to the file to read.</p>
+<code>FILE</code> is the absolute or relative path to the file to write.</p>
 </div>
 <div class="paragraph">
 <p>If <code>--config-out</code> is not specified, no configuration file is written.
@@ -2211,9 +2248,51 @@ This section follows the structure of the XSD.</p>
 <div class="paragraph">
 <p>The root of the XML is <code>extTableGenConfig</code>.</p>
 </div>
-<div class="paragraph">
+<div class="hdlist">
 <div class="title">Attributes</div>
-<p>None</p>
+<table>
+<tr>
+<td class="hdlist1">
+<code>schemaVersion</code>
+</td>
+<td class="hdlist2">
+<p>Version of the schema (required)<br>
+Possible values:</p>
+<div class="openblock">
+<div class="content">
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>3.0</code>
+</td>
+<td class="hdlist2">
+<p>Schema of <em>ext-table-gen</em> 3.0</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>2.0</code>
+</td>
+<td class="hdlist2">
+<p>Schema of <em>ext-table-gen</em> 2.0</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>1.0</code>
+</td>
+<td class="hdlist2">
+<p>Schema of <em>ext-table-gen</em> 1.0</p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</td>
+</tr>
+</table>
 </div>
 <div class="ulist">
 <div class="title">Elements</div>
@@ -2254,7 +2333,7 @@ The columns it contains are used by <em>ext-table-gen</em> to validate the colum
 <code>byteOrder</code>
 </td>
 <td class="hdlist2">
-<p>Byte order of the table (optional)
+<p>Byte order of the table (optional)<br>
 Possible values:</p>
 <div class="openblock">
 <div class="content">
@@ -2355,7 +2434,7 @@ Possible values:</p>
 <div class="sect6">
 <h7 id="ref-xml-datatype"><a class="anchor" href="#ref-xml-datatype"></a>datatype</h7>
 <div class="paragraph">
-<p>A datatype is a placeholder for an element corresponding to a specific Firebird data type.</p>
+<p>A datatype is a placeholder for an element corresponding to a specific Firebird datatype.</p>
 </div>
 <div class="paragraph">
 <div class="title">Attributes</div>
@@ -2370,7 +2449,7 @@ Possible values:</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>At this time, <em>ext-table-gen</em> supports the following column data types:</p>
+<p>At this time, <em>ext-table-gen</em> supports the following column datatypes:</p>
 </div>
 <div class="ulist">
 <ul>
@@ -2384,7 +2463,16 @@ Possible values:</p>
 <p><a href="#ref-xml-date"><code>date</code></a></p>
 </li>
 <li>
+<p><a href="#ref-xml-decfloat"><code>decfloat</code></a></p>
+</li>
+<li>
 <p><a href="#ref-xml-decimal"><code>decimal</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-doublePrecision"><code>doublePrecision</code></a></p>
+</li>
+<li>
+<p><a href="#ref-xml-float"><code>float</code></a></p>
 </li>
 <li>
 <p><a href="#ref-xml-int128"><code>int128</code></a></p>
@@ -2404,11 +2492,14 @@ Possible values:</p>
 <li>
 <p><a href="#ref-xml-timestamp"><code>timestamp</code></a></p>
 </li>
+<li>
+<p><a href="#ref-xml-varchar"><code>varchar</code></a></p>
+</li>
 </ul>
 </div>
 <h7 id="ref-xml-bigint" class="float"><code>bigint</code></h7>
 <div class="paragraph">
-<p>The <code>bigint</code> elements represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-bigint" target="_blank" rel="noopener"><code>BIGINT</code></a>.</p>
+<p>The <code>bigint</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes.html#fblangref50-datatypes-bigint" target="_blank" rel="noopener"><code>BIGINT</code></a>.</p>
 </div>
 <div class="paragraph">
 <div class="title">Attributes</div>
@@ -2424,7 +2515,10 @@ Possible values:</p>
 </div>
 <h7 id="ref-xml-char" class="float"><code>char</code></h7>
 <div class="paragraph">
-<p>The <code>char</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-chartypes.html#fblangref40-datatypes-chartypes-char" target="_blank" rel="noopener"><code>CHAR</code></a>.</p>
+<p>The <code>char</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-chartypes.html#fblangref50-datatypes-chartypes-char" target="_blank" rel="noopener"><code>CHAR</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>See also <a href="#ref-xml-varchar"><code>varchar</code></a>.</p>
 </div>
 <div class="hdlist">
 <div class="title">Attributes</div>
@@ -2457,9 +2551,36 @@ The XSD uses an enum-type, <code>encoding</code>, with supported names.</p>
 </li>
 </ul>
 </div>
+<div id="ref-xml-char-vs-varchar" class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="title">Choosing between <code>char</code> and <code>varchar</code></div>
+<div class="paragraph">
+<p>When in doubt, use <code>char</code>, not <code>varchar</code>.</p>
+</div>
+<div class="paragraph">
+<p>Given how its stored, using <code>varchar</code> will make the external table file a truly binary format.
+A <code>VARCHAR</code> takes 2-3 bytes more than a <code>CHAR</code> column (2 bytes for actual length, 0-1 bytes for alignment)<sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
+</div>
+<div class="paragraph">
+<p>The benefit of using <code>VARCHAR</code> is that the resulting value (when queried) preserves its original length;
+unlike <code>CHAR</code>, it is not padded with spaces to the declared length.</p>
+</div>
+<div class="paragraph">
+<p>So, if you want or need values to preserve their original length, use <code>varchar</code>.
+We think that is the only reason to choose <code>varchar</code> over <code>char</code>.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
 <h7 id="ref-xml-date" class="float"><code>date</code></h7>
 <div class="paragraph">
-<p>The <code>date</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-date" target="_blank" rel="noopener"><code>DATE</code></a>.
+<p>The <code>date</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-datetime.html#fblangref50-datatypes-date" target="_blank" rel="noopener"><code>DATE</code></a>.
 The Firebird <code>DATE</code> type only accepts values between 0001-01-01 and 9999-12-31.</p>
 </div>
 <div class="paragraph">
@@ -2477,13 +2598,76 @@ The Firebird <code>DATE</code> type only accepts values between 0001-01-01 and 9
 </li>
 </ul>
 </div>
+<h7 id="ref-xml-decfloat" class="float"><code>decfloat</code></h7>
+<div class="paragraph">
+<p>The <code>decfloat</code> element represents the Firebird datatype <a href="https://firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref50/fblangref50-datatypes-floattypes.html#fblangref50-datatypes-decfloat" target="_blank" rel="noopener"><code>DECFLOAT</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>The default conversion parses the string using <a href="https://firebirdsql.github.io/decimal-java/javadoc/org.firebirdsql.decimal/org/firebirdsql/decimal/Decimal64.html#valueOf(java.lang.String,org.firebirdsql.decimal.OverflowHandling)" target="_blank" rel="noopener"><code>Decimal64.valueOf(String, OverflowHandling)</code></a> and <a href="https://firebirdsql.github.io/decimal-java/javadoc/org.firebirdsql.decimal/org/firebirdsql/decimal/Decimal128.html#valueOf(java.lang.String,org.firebirdsql.decimal.OverflowHandling)" target="_blank" rel="noopener"><code>Decimal128.valueOf(String, OverflowHandling)</code></a> of <a href="https://github.com/FirebirdSQL/decimal-java" target="_blank" rel="noopener"><code>org.firebirdsql:decimal-java</code></a>.
+Indirectly, these <code>valueOf</code> methods uses the constructor <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)" target="_blank" rel="noopener"><code>BigDecimal(String)</code></a>, with extra support for the &#43;/-Infinity, &#43;/-NaN, and &#43;/-sNaN values.
+Contrary to the <a href="#ref-xml-parsebigdecimal"><code>parseBigDecimal</code></a> converter, this converter can also parse strings in scientific notation.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>precision</code>
+</td>
+<td class="hdlist2">
+<p>Integer in <code>16</code> or <code>34</code> for the precision in decimal digits (required).</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>onOverflow</code>
+</td>
+<td class="hdlist2">
+<p>Overflow handling (optional, defaults to <code>ROUND_TO_INFINITY</code>).
+Possible values are:</p>
+<div class="openblock">
+<div class="content">
+<div class="hdlist">
+<table>
+<tr>
+<td class="hdlist1">
+<code>ROUND_TO_INFINITY</code>
+</td>
+<td class="hdlist2">
+<p>Overflow rounds to &#43;/-Infinity</p>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>THROW_EXCEPTION</code>
+</td>
+<td class="hdlist2">
+<p>Overflow throws a (subclass of) <code>ArithmeticException</code></p>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
 <h7 id="ref-xml-decimal" class="float"><code>decimal</code></h7>
 <div class="paragraph">
-<p>The <code>decimal</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-decimal" target="_blank" rel="noopener"><code>DECIMAL</code></a>.</p>
+<p>The <code>decimal</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-fixedtypes.html#fblangref50-datatypes-decimal" target="_blank" rel="noopener"><code>DECIMAL</code></a>.</p>
 </div>
 <div class="paragraph">
 <p>The default conversion parses the string using the rules described in the constructor <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)" target="_blank" rel="noopener"><code>BigDecimal(String)</code></a>.
-Contrary to the <code>parseBigDecimal</code> converter, this converter can also parse strings in scientific notation.</p>
+Contrary to the <a href="#ref-xml-parsebigdecimal"><code>parseBigDecimal</code></a> converter, this converter can also parse strings in scientific notation.</p>
 </div>
 <div class="hdlist">
 <div class="title">Attributes</div>
@@ -2494,7 +2678,7 @@ Contrary to the <code>parseBigDecimal</code> converter, this converter can also 
 </td>
 <td class="hdlist2">
 <p>Integer in the range [1, 38] for the precision in decimal digits (required).<br>
-Precision greater than 19 requires Firebird 4.0 and higher.</p>
+Precision greater than 18 requires Firebird 4.0 and higher.</p>
 </td>
 </tr>
 <tr>
@@ -2502,7 +2686,7 @@ Precision greater than 19 requires Firebird 4.0 and higher.</p>
 <code>scale</code>
 </td>
 <td class="hdlist2">
-<p>Integer in the range [0, <em>scale</em>] for the scale in decimal digits (required).<br>
+<p>Integer in the range [0, <em>precision</em>] for the scale in decimal digits (required).<br>
 The XSD does not enforce that <em>scale</em> must be less than or equal to <em>precision</em>.</p>
 </td>
 </tr>
@@ -2632,9 +2816,49 @@ For <code>DECIMAL</code>, that means:</p>
 </li>
 </ul>
 </div>
+<h7 id="ref-xml-doublePrecision" class="float"><code>doublePrecision</code></h7>
+<div class="paragraph">
+<p>The <code>doublePrecision</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-floattypes.html#fblangref50-datatypes-double" target="_blank" rel="noopener"><code>DOUBLE PRECISION</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>The default conversion parses the string using the rules described in <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Float.html#valueOf(java.lang.String)" target="_blank" rel="noopener"><code>Float.valueOf(String)</code></a>.
+Contrary to the <a href="#ref-xml-parsefloatingpointnumber"><code>parseFloatingPointNumber</code></a> converter, this converter can also parse strings in scientific notation.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
+<h7 id="ref-xml-float" class="float"><code>float</code></h7>
+<div class="paragraph">
+<p>The <code>float</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-floattypes.html#fblangref50-datatypes-float" target="_blank" rel="noopener"><code>FLOAT</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>The default conversion parses the string using the rules described in <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Float.html#valueOf(java.lang.String)" target="_blank" rel="noopener"><code>Float.valueOf(String)</code></a>.
+Contrary to the <a href="#ref-xml-parsefloatingpointnumber"><code>parseFloatingPointNumber</code></a> converter, this converter can also parse strings in scientific notation.</p>
+</div>
+<div class="paragraph">
+<div class="title">Attributes</div>
+<p>None</p>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
 <h7 id="ref-xml-int128" class="float"><code>int128</code></h7>
 <div class="paragraph">
-<p>The <code>int128</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-int128" target="_blank" rel="noopener"><code>INT128</code></a>.</p>
+<p>The <code>int128</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes.html#fblangref50-datatypes-int128" target="_blank" rel="noopener"><code>INT128</code></a>.</p>
 </div>
 <div class="paragraph">
 <div class="title">Attributes</div>
@@ -2650,7 +2874,7 @@ For <code>DECIMAL</code>, that means:</p>
 </div>
 <h7 id="ref-xml-integer" class="float"><code>integer</code></h7>
 <div class="paragraph">
-<p>The <code>integer</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-int" target="_blank" rel="noopener"><code>INTEGER</code></a>.</p>
+<p>The <code>integer</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes.html#fblangref50-datatypes-int" target="_blank" rel="noopener"><code>INTEGER</code></a>.</p>
 </div>
 <div class="paragraph">
 <div class="title">Attributes</div>
@@ -2666,11 +2890,11 @@ For <code>DECIMAL</code>, that means:</p>
 </div>
 <h7 id="ref-xml-numeric" class="float"><code>numeric</code></h7>
 <div class="paragraph">
-<p>The <code>numeric</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-fixedtypes.html#fblangref40-datatypes-numeric" target="_blank" rel="noopener"><code>NUMERIC</code></a>.</p>
+<p>The <code>numeric</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-fixedtypes.html#fblangref50-datatypes-numeric" target="_blank" rel="noopener"><code>NUMERIC</code></a>.</p>
 </div>
 <div class="paragraph">
 <p>The default conversion parses the string using the rules described in the constructor <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html#%3Cinit%3E(java.lang.String)" target="_blank" rel="noopener"><code>BigDecimal(String)</code></a>.
-Contrary to the <code>parseBigDecimal</code> converter, this converter can also parse strings in scientific notation.</p>
+Contrary to the <a href="#ref-xml-parsebigdecimal"><code>parseBigDecimal</code></a> converter, this converter can also parse strings in scientific notation.</p>
 </div>
 <div class="hdlist">
 <div class="title">Attributes</div>
@@ -2681,7 +2905,7 @@ Contrary to the <code>parseBigDecimal</code> converter, this converter can also 
 </td>
 <td class="hdlist2">
 <p>Integer in the range [1, 38] for the precision in decimal digits (required).<br>
-Precision greater than 19 requires Firebird 4.0 and higher.</p>
+Precision greater than 18 requires Firebird 4.0 and higher.</p>
 </td>
 </tr>
 <tr>
@@ -2689,7 +2913,7 @@ Precision greater than 19 requires Firebird 4.0 and higher.</p>
 <code>scale</code>
 </td>
 <td class="hdlist2">
-<p>Integer in the range [0, <em>scale</em>] for the scale in decimal digits (required).<br>
+<p>Integer in the range [0, <em>precision</em>] for the scale in decimal digits (required).<br>
 The XSD does not enforce that <em>scale</em> must be less than or equal to <em>precision</em>.</p>
 </td>
 </tr>
@@ -2829,7 +3053,7 @@ For <code>NUMERIC</code>, that means:</p>
 </div>
 <h7 id="ref-xml-smallint" class="float"><code>smallint</code></h7>
 <div class="paragraph">
-<p>The <code>smallint</code> element represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes.html#fblangref40-datatypes-smallint" target="_blank" rel="noopener"><code>SMALLINT</code></a>.</p>
+<p>The <code>smallint</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes.html#fblangref50-datatypes-smallint" target="_blank" rel="noopener"><code>SMALLINT</code></a>.</p>
 </div>
 <div class="paragraph">
 <div class="title">Attributes</div>
@@ -2845,7 +3069,7 @@ For <code>NUMERIC</code>, that means:</p>
 </div>
 <h7 id="ref-xml-time" class="float"><code>time</code></h7>
 <div class="paragraph">
-<p>The <code>time</code> elements represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-time"><code>TIME [WITHOUT TIME ZONE</a></code>^].
+<p>The <code>time</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-datetime.html#fblangref50-datatypes-time" target="_blank" rel="noopener"><code>TIME [WITHOUT TIME ZONE]</code></a>.
 The Firebird <code>TIME</code> type only accepts values between 00:00:00.0000 and 23:59:59.9999.</p>
 </div>
 <div class="paragraph">
@@ -2862,7 +3086,7 @@ The Firebird <code>TIME</code> type only accepts values between 00:00:00.0000 an
 </div>
 <h7 id="ref-xml-timestamp" class="float"><code>timestamp</code></h7>
 <div class="paragraph">
-<p>The <code>timestamp</code> elements represents the Firebird datatype <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-datatypes-datetime.html#fblangref40-datatypes-timestamp"><code>TIMESTAMP [WITHOUT TIME ZONE</a></code>^].
+<p>The <code>timestamp</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-datetime.html#fblangref50-datatypes-timestamp" target="_blank" rel="noopener"><code>TIMESTAMP [WITHOUT TIME ZONE]</code></a>.
 See also the limitations of <a href="#ref-xml-date"><code>date</code></a> and <a href="#ref-xml-time"><code>time</code></a>.</p>
 </div>
 <div class="paragraph">
@@ -2881,13 +3105,58 @@ For example if you use a <code>parseDatetime</code> with a pattern which only pr
 </li>
 </ul>
 </div>
+<h7 id="ref-xml-varchar" class="float"><code>varchar</code></h7>
+<div class="paragraph">
+<p>The <code>varchar</code> element represents the Firebird datatype <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-chartypes.html#fblangref50-datatypes-chartypes-varchar" target="_blank" rel="noopener"><code>VARCHAR</code></a>.</p>
+</div>
+<div class="paragraph">
+<p>See also <a href="#ref-xml-char"><code>char</code></a> and <a href="#ref-xml-char-vs-varchar">Choosing between <code>char</code> and <code>varchar</code></a>.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>length</code>
+</td>
+<td class="hdlist2">
+<p>Integer in the range [1, 32765] with length in Unicode codepoints (required).</p>
+<div class="paragraph">
+<p>For simplicity, the XSD reuses the definition of <a href="#ref-xml-char"><code>char</code></a>.
+Unfortunately, this means that the XSD actually enforces the range [1, 32767] (not [1, 32765]).
+We may address this in the future.</p>
+</div>
+<div class="paragraph">
+<p>The XSD also does not validate maximum length for multibyte character sets (e.g. for <code>encoding="UTF8"</code> the actual maximum length would be 8191, but this is not enforced).</p>
+</div>
+</td>
+</tr>
+<tr>
+<td class="hdlist1">
+<code>encoding</code>
+</td>
+<td class="hdlist2">
+<p>Encoding (character set) of the column, using Firebird character set names (required).<br>
+The XSD uses an enum-type, <code>encoding</code>, with supported names.</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="ulist">
+<div class="title">Elements</div>
+<ul>
+<li>
+<p><a href="#ref-xml-converter"><code>converter</code></a>&#8201;&#8212;&#8201;optional</p>
+</li>
+</ul>
+</div>
 </div>
 </div>
 <div class="sect5">
 <h6 id="ref-xml-converter"><a class="anchor" href="#ref-xml-converter"></a><code>converter</code></h6>
 <div class="paragraph">
-<p>The <code>converter</code> element&#8201;&#8212;&#8201;if present&#8201;&#8212;&#8201;defines a conversion from the CSV string value to a Firebird data type value.
-If absent, a default conversion will be applied, specific to the column data type.</p>
+<p>The <code>converter</code> element&#8201;&#8212;&#8201;if present&#8201;&#8212;&#8201;defines a conversion from the CSV string value to a Firebird datatype value.
+If absent, a default conversion will be applied, specific to the column datatype.</p>
 </div>
 <div class="paragraph">
 <div class="title">Attributes</div>
@@ -2938,8 +3207,9 @@ That is currently not supported, but it is something that may be introduced in a
 <p>Parses a string using the Java <code>NumberFormat</code> instance for the specified locale to a <code>BigDecimal</code>.</p>
 </div>
 <div class="paragraph">
-<p>This converter step is only valid in <a href="#ref-xml-decimal"><code>decimal</code></a> and <a href="#ref-xml-numeric"><code>numeric</code></a>.
-Contrary to the default converter of <code>numeric</code> and <code>decimal</code>, this converter does not parse strings in scientific notation.</p>
+<p>This converter step is only valid in <a href="#ref-xml-decfloat"><code>decfloat</code></a>, <a href="#ref-xml-decimal"><code>decimal</code></a>, and <a href="#ref-xml-numeric"><code>numeric</code></a>.
+Contrary to the default converter of <code>decimal</code>, and <code>numeric</code>, this converter does not parse strings in scientific notation.
+Contrary to the default converter of <code>decfloat</code>, this converter does not parse strings in scientific notation nor the special values (&#43;/-Infinity, &#43;/-NaN, &#43;/-sNaN).</p>
 </div>
 <div class="hdlist">
 <div class="title">Attributes</div>
@@ -3011,6 +3281,31 @@ The pre-defined formatter names are the constants listed under <em>Field Summary
 <div class="title">Elements</div>
 <p>None</p>
 </div>
+<h7 id="ref-xml-parsefloatingpointnumber" class="float"><code>parseFloatingPointNumber</code></h7>
+<div class="paragraph">
+<p>Parses a string using the Java <code>NumberFormat</code> instance for the specified locale to a <code>double</code>.</p>
+</div>
+<div class="paragraph">
+<p>This converter step is only valid in <a href="#ref-xml-doublePrecision"><code>doublePrecision</code></a> and <a href="#ref-xml-float"><code>float</code></a>.
+Contrary to the default converter of <code>doublePrecision</code> and <code>float</code>, this converter does not parse strings in scientific notation.</p>
+</div>
+<div class="hdlist">
+<div class="title">Attributes</div>
+<table>
+<tr>
+<td class="hdlist1">
+<code>locale</code>
+</td>
+<td class="hdlist2">
+<p>Locale as a <a href="https://www.ietf.org/rfc/bcp/bcp47.txt" target="_blank" rel="noopener">BCP 47</a> language tag (required)</p>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<div class="title">Elements</div>
+<p>None</p>
+</div>
 <h7 id="ref-xml-parseintegralnumber" class="float"><code>parseIntegralNumber</code></h7>
 <div class="paragraph">
 <p>Parses a string using a specified radix to an integral number of the type of the enclosing datatype.</p>
@@ -3041,7 +3336,7 @@ Default <code>10</code>, range [2, 36].</p>
 <div class="sect4">
 <h5 id="ref-xml-endcolumn"><a class="anchor" href="#ref-xml-endcolumn"></a><code>endColumn</code></h5>
 <div class="paragraph">
-<p>The <code>endColumn</code> elements represents an extra column which is added to the external table to introduce a linebreak after each row in the external table file.
+<p>The <code>endColumn</code> element represents an extra column which is added to the external table to introduce a linebreak after each row in the external table file.
 This linebreak is primarily intended to make the file more &#8220;human-readable&#8221;, and is not needed for Firebird itself.</p>
 </div>
 <div class="hdlist">
@@ -3384,7 +3679,7 @@ See <a href="#usage-config-regen">Regenerating the configuration file</a> on how
 <div class="sect4">
 <h5 id="ref-xml-ddl"><a class="anchor" href="#ref-xml-ddl"></a><code>ddl</code></h5>
 <div class="paragraph">
-<p>The <code>ddl</code> element contains the Firebird <a href="https://www.firebirdsql.org/file/documentation/chunk/en/refdocs/fblangref40/fblangref40-ddl-table.html#fblangref40-ddl-tbl-create" target="_blank" rel="noopener"><code>CREATE TABLE</code></a> statement derived from <a href="#ref-xml-externaltable"><code>externalTable</code></a>.</p>
+<p>The <code>ddl</code> element contains the Firebird <a href="https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-ddl-table.html#fblangref50-ddl-tbl-create" target="_blank" rel="noopener"><code>CREATE TABLE</code></a> statement derived from <a href="#ref-xml-externaltable"><code>externalTable</code></a>.</p>
 </div>
 <div class="paragraph">
 <div class="title">Attributes</div>
@@ -3476,7 +3771,7 @@ They can be used for characters that are unprintable (e.g. the tab character) or
 <div class="sect3">
 <h4 id="ref-common-unicode-escape"><a class="anchor" href="#ref-common-unicode-escape"></a>4.3.2. Unicode Escape</h4>
 <div class="paragraph">
-<p>The Unicode escape can be used to represent any Unicode character supported by UTF-16<sup class="footnote">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>.</p>
+<p>The Unicode escape can be used to represent any Unicode character supported by UTF-16<sup class="footnote">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>.</p>
 </div>
 <div class="paragraph">
 <p>Its format is:</p>
@@ -3514,7 +3809,7 @@ They can be used for characters that are unprintable (e.g. the tab character) or
 <div class="listingblock">
 <div class="content">
 <pre class="prettyprint highlight"><code data-lang="xml">&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;
-&lt;!-- SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel --&gt;
+&lt;!-- SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel --&gt;
 &lt;!-- SPDX-License-Identifier: Apache-2.0 --&gt;
 &lt;!-- NOTE: Updates to /xs:schema[@version] also need to be reflected in ConfigMapper.CURRENT_SCHEMA_VERSION --&gt;
 &lt;xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
@@ -3523,7 +3818,7 @@ They can be used for characters that are unprintable (e.g. the tab character) or
            elementFormDefault="qualified"
            xmlns:jaxb="https://jakarta.ee/xml/ns/jaxb"
            jaxb:version="3.0"
-           version="2.0"&gt;
+           version="3.0"&gt;
 
     &lt;xs:element name="extTableGenConfig"&gt;
         &lt;xs:complexType&gt;
@@ -3576,6 +3871,15 @@ They can be used for characters that are unprintable (e.g. the tab character) or
 
     &lt;xs:element name="datatype" type="DatatypeType" abstract="true"/&gt;
     &lt;xs:element name="char" type="CharType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="varchar" type="CharType" substitutionGroup="datatype"&gt;
+        &lt;xs:annotation&gt;
+            &lt;xs:documentation&gt;
+                Given we reuse CharType and did not add a specialization for varchar, the maximum length is 2 characters
+                too high (assuming single byte character sets). As mentioned on CharType, the effects of multibyte
+                character sets is not taken into account either.
+            &lt;/xs:documentation&gt;
+        &lt;/xs:annotation&gt;
+    &lt;/xs:element&gt;
     &lt;xs:element name="smallint" type="DatatypeType" substitutionGroup="datatype"/&gt;
     &lt;xs:element name="integer" type="DatatypeType" substitutionGroup="datatype"/&gt;
     &lt;xs:element name="bigint" type="DatatypeType" substitutionGroup="datatype"/&gt;
@@ -3585,6 +3889,9 @@ They can be used for characters that are unprintable (e.g. the tab character) or
     &lt;xs:element name="timestamp" type="DatatypeType" substitutionGroup="datatype"/&gt;
     &lt;xs:element name="numeric" type="FixedPointType" substitutionGroup="datatype"/&gt;
     &lt;xs:element name="decimal" type="FixedPointType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="float" type="DatatypeType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="doublePrecision" type="DatatypeType" substitutionGroup="datatype"/&gt;
+    &lt;xs:element name="decfloat" type="DecfloatType" substitutionGroup="datatype"/&gt;
 
     &lt;xs:complexType name="DatatypeType"&gt;
         &lt;xs:sequence&gt;
@@ -3596,6 +3903,12 @@ They can be used for characters that are unprintable (e.g. the tab character) or
         &lt;xs:complexContent&gt;
             &lt;xs:extension base="DatatypeType"&gt;
                 &lt;xs:attribute name="length" use="required"&gt;
+                    &lt;xs:annotation&gt;
+                        &lt;xs:documentation&gt;
+                            The maximum length is only valid for single-byte character sets. It does not take into
+                            account multibyte character sets.
+                        &lt;/xs:documentation&gt;
+                    &lt;/xs:annotation&gt;
                     &lt;xs:simpleType&gt;
                         &lt;xs:restriction base="xs:int"&gt;
                             &lt;xs:minInclusive value="1"/&gt;
@@ -3712,6 +4025,34 @@ They can be used for characters that are unprintable (e.g. the tab character) or
         &lt;/xs:restriction&gt;
     &lt;/xs:simpleType&gt;
 
+    &lt;xs:complexType name="DecfloatType"&gt;
+        &lt;xs:complexContent&gt;
+            &lt;xs:extension base="DatatypeType"&gt;
+                &lt;xs:attribute name="precision" use="required"&gt;
+                    &lt;xs:simpleType&gt;
+                        &lt;xs:restriction base="xs:int"&gt;
+                            &lt;xs:enumeration value="16"/&gt;
+                            &lt;xs:enumeration value="34"/&gt;
+                        &lt;/xs:restriction&gt;
+                    &lt;/xs:simpleType&gt;
+                &lt;/xs:attribute&gt;
+                &lt;xs:attribute name="onOverflow" type="overflowHandling" default="ROUND_TO_INFINITY"/&gt;
+            &lt;/xs:extension&gt;
+        &lt;/xs:complexContent&gt;
+    &lt;/xs:complexType&gt;
+
+    &lt;xs:simpleType name="overflowHandling"&gt;
+        &lt;xs:annotation&gt;
+            &lt;xs:appinfo&gt;
+                &lt;jaxb:typesafeEnumClass map="false"/&gt;
+            &lt;/xs:appinfo&gt;
+        &lt;/xs:annotation&gt;
+        &lt;xs:restriction base="xs:string"&gt;
+            &lt;xs:enumeration value="ROUND_TO_INFINITY"/&gt;
+            &lt;xs:enumeration value="THROW_EXCEPTION"/&gt;
+        &lt;/xs:restriction&gt;
+    &lt;/xs:simpleType&gt;
+
     &lt;xs:complexType name="ConverterType"&gt;
         &lt;xs:sequence&gt;
             &lt;xs:element ref="converterStep"/&gt;
@@ -3722,6 +4063,7 @@ They can be used for characters that are unprintable (e.g. the tab character) or
     &lt;xs:element name="parseIntegralNumber" type="ParseIntegralType" substitutionGroup="converterStep"/&gt;
     &lt;xs:element name="parseDatetime" type="ParseDatetimeType" substitutionGroup="converterStep"/&gt;
     &lt;xs:element name="parseBigDecimal" type="ParseBigDecimalType" substitutionGroup="converterStep"/&gt;
+    &lt;xs:element name="parseFloatingPointNumber" type="ParseFloatingPointNumberType" substitutionGroup="converterStep"/&gt;
 
     &lt;xs:complexType name="ConverterStepType" abstract="true"/&gt;
 
@@ -3750,6 +4092,14 @@ They can be used for characters that are unprintable (e.g. the tab character) or
     &lt;/xs:complexType&gt;
 
     &lt;xs:complexType name="ParseBigDecimalType"&gt;
+        &lt;xs:complexContent&gt;
+            &lt;xs:extension base="ConverterStepType"&gt;
+                &lt;xs:attribute name="locale" type="xs:language" use="required"/&gt;
+            &lt;/xs:extension&gt;
+        &lt;/xs:complexContent&gt;
+    &lt;/xs:complexType&gt;
+
+    &lt;xs:complexType name="ParseFloatingPointNumberType"&gt;
         &lt;xs:complexContent&gt;
             &lt;xs:extension base="ConverterStepType"&gt;
                 &lt;xs:attribute name="locale" type="xs:language" use="required"/&gt;
@@ -3862,12 +4212,15 @@ They can be used for characters that are unprintable (e.g. the tab character) or
 <a href="#_footnoteref_4">4</a>. This is default behaviour of Java when encoding characters which don&#8217;t exist in an encoding
 </div>
 <div class="footnote" id="_footnotedef_5">
-<a href="#_footnoteref_5">5</a>. this limitation is in place because the escape character must be a Java <code>char</code>
+<a href="#_footnoteref_5">5</a>. Remaining bytes not used for the actual value are filled with 0x00 (NUL) as external tables are a fixed width binary format
+</div>
+<div class="footnote" id="_footnotedef_6">
+<a href="#_footnoteref_6">6</a>. this limitation is in place because the escape character must be a Java <code>char</code>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2023-09-01 13:33:02 UTC
+Last updated 2026-05-15 09:03:02 UTC
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/run_prettify.min.js"></script>

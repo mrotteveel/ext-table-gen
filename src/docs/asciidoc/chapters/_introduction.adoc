@@ -28,9 +28,15 @@ _ext-table-gen_ supports the following types of columns:
 ** `integer`
 ** `bigint`
 ** `int128`
-* Exact numeric types (fixed point):
-** `numeric`
-** `decimal`
+* Exact numeric types:
+** Fixed point types:
+*** `numeric`
+*** `decimal`
+** Decimal floating point type:
+*** `decfloat`
+* Approximate numeric types (binary floating point)
+** `float`
+** `doublePrecision`
 * Datetime types:
 ** `date`
 ** `time` (without time zone)

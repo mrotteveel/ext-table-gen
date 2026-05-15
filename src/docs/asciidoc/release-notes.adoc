@@ -149,4 +149,3 @@ For example:
 ==== _ext-table-gen_ 1.0
 
 Initial release
-

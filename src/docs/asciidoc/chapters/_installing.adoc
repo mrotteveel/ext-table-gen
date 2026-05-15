@@ -8,8 +8,8 @@
 == Requirements
 
 The "`Firebird External Table Generator`" or _ext-table-gen_ 3.0 requires Java 21.
-We have not tested it on higher versions, but expect it to work on higher versions as well.
-We will only fix issues reported against Java versions which are in support according to the OpenJDK project, at the time of writing this -- October 2024, that means Java 21 and Java 23.
+We will only fix issues reported and reproducible against Java versions which are in support according to the OpenJDK project.
+At the time of writing this -- May 2026 -- that means Java 21, Java 25, and Java 26.
 
 The previous versions of _ext-table-gen_ -- 1.0 and 2.0 -- require Java 17.
 

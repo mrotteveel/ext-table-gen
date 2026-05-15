@@ -13,7 +13,7 @@ This chapter illustrates how to use _ext-table-gen_ by showing basic usage examp
 
 [NOTE]
 ====
-The author primarily uses Windows, so most examples are based on Windows.
+These examples are based on Windows.
 In most cases, the only relevant differences are file paths.
 
 Examples may use the Windows Command Prompt line continuation `^`.

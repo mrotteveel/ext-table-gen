@@ -41,6 +41,7 @@ _ext-table-gen_ supports the following types of columns:
 
 * String types:
 ** `char`
+** `varchar`
 * Integral number types:
 ** `smallint`
 ** `integer`
@@ -73,6 +74,8 @@ This version introduces the following new features:
 *** `doublePrecision`
 ** Decimal floating point type:
 *** `decfloat`
+** String types
+*** `varchar`
 
 This application is licensed under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
 
@@ -95,6 +98,7 @@ The following changes were made in _ext-table-gen_ 3.0:
 * Java 21 is now the minimum supported version (https://github.com/mrotteveel/ext-table-gen/issues/23[#23^])
 * Fixed compilation issue (static reference to a local class) under Java 24 and higher (https://github.com/mrotteveel/ext-table-gen/issues/24[#24^])
 * Add support for decimal floating point types (`DECFLOAT`) (https://github.com/mrotteveel/ext-table-gen/issues/21[#21^])
+* Add support for variable length string type (`VARCHAR`) (https://github.com/mrotteveel/ext-table-gen/issues/27[#27^])
 
 ==== _ext-table-gen_ 2.0
 

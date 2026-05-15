@@ -53,6 +53,35 @@ final class ColumnFixtures {
         return new Column(name, new FbChar(length, encoding));
     }
 
+    /**
+     * Creates a column with {@code name} and datatype {@code FbVarchar} with {@code length} and encoding
+     * {@code ISO8859_1}.
+     *
+     * @param name
+     *         name of the column
+     * @param length
+     *         length in Unicode code points
+     * @return column
+     */
+    static Column varchar(String name, int length) {
+        return varchar(name, length, ISO8859_1);
+    }
+
+    /**
+     * Creates a column with {@code name} and datatype {@code FbVarchar} with {@code length} and {@code encoding}.
+     *
+     * @param name
+     *         name of the column
+     * @param length
+     *         length in Unicode code points
+     * @param encoding
+     *         encoding of the column
+     * @return column
+     */
+    static Column varchar(String name, int length, FbEncoding encoding) {
+        return new Column(name, new FbVarchar(length, encoding));
+    }
+
     static Column integralNumber(String name, String typeName) {
         return integralNumber(name, typeName, null);
     }

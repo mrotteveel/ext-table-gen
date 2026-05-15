@@ -433,6 +433,7 @@ At this time, _ext-table-gen_ supports the following column datatypes:
 * <<ref-xml-smallint>>
 * <<ref-xml-time>>
 * <<ref-xml-timestamp>>
+* <<ref-xml-varchar>>
 
 [float#ref-xml-bigint]
 ====== `bigint`
@@ -450,6 +451,8 @@ None
 
 The `char` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-chartypes.html#fblangref50-datatypes-chartypes-char[`CHAR`^].
 
+See also <<ref-xml-varchar>>.
+
 .Attributes
 [horizontal]
 `length`::
@@ -461,6 +464,21 @@ The XSD uses an enum-type, `encoding`, with supported names.
 
 .Elements
 * <<ref-xml-converter>> -- optional
+
+[TIP#ref-xml-char-vs-varchar]
+.Choosing between `char` and `varchar`
+====
+When in doubt, use `char`, not `varchar`.
+
+Given how its stored, using `varchar` will make the external table file a truly binary format.
+A `VARCHAR` takes 2-3 bytes more than a `CHAR` column (2 bytes for actual length, 0-1 bytes for alignment)footnote:[Remaining bytes not used for the actual value are filled with 0x00 (NUL) as external tables are a fixed width binary format].
+
+The benefit of using `VARCHAR` is that the resulting value (when queried) preserves its original length;
+unlike `CHAR`, it is not padded with spaces to the declared length.
+
+So, if you want or need values to preserve their original length, use `varchar`.
+We think that is the only reason to choose `varchar` over `char`.
+====
 
 [float#ref-xml-date]
 ====== `date`
@@ -708,6 +726,30 @@ For example if you use a `parseDatetime` with a pattern which only provides date
 
 .Attributes
 None
+
+.Elements
+* <<ref-xml-converter>> -- optional
+
+[float#ref-xml-varchar]
+====== `varchar`
+
+The `varchar` element represents the Firebird datatype https://firebirdsql.org/docs/chunk/en/refdocs/fblangref50/fblangref50-datatypes-chartypes.html#fblangref50-datatypes-chartypes-varchar[`VARCHAR`^].
+
+See also <<ref-xml-char>> and <<ref-xml-char-vs-varchar>>.
+
+.Attributes
+[horizontal]
+`length`::
+Integer in the range [1, 32765] with length in Unicode codepoints (required).
++
+For simplicity, the XSD reuses the definition of <<ref-xml-char>>.
+Unfortunately, this means that the XSD actually enforces the range [1, 32767] (not [1, 32765]).
+We may address this in the future.
++
+The XSD also does not validate maximum length for multibyte character sets (e.g. for `encoding="UTF8"` the actual maximum length would be 8191, but this is not enforced).
+`encoding`::
+Encoding (character set) of the column, using Firebird character set names (required). +
+The XSD uses an enum-type, `encoding`, with supported names.
 
 .Elements
 * <<ref-xml-converter>> -- optional

@@ -1,10 +1,10 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import com.opencsv.exceptions.CsvValidationException;
 import com.opencsv.validators.RowValidator;
-import nl.lawinegevaar.exttablegen.type.FbChar;
+import nl.lawinegevaar.exttablegen.type.FbCharacterDataType;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -48,8 +48,8 @@ final class ColumnSizeValidator implements RowValidator {
     }
 
     private static int expectedSize(Column column) {
-        if (column.datatype() instanceof FbChar fbChar) {
-            return fbChar.length();
+        if (column.datatype() instanceof FbCharacterDataType<?> fbCharacterDataType) {
+            return fbCharacterDataType.length();
         }
         // TODO Check max length for integer types (i.e. sign + maximum number of digits)?
         //  Doing so might limit or complicate future changes with parsing

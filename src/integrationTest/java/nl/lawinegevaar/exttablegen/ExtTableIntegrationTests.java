@@ -17,6 +17,7 @@ import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.function.ThrowingConsumer;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -45,6 +46,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,7 +60,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @NullUnmarked
+@Timeout(value = 500, unit = TimeUnit.MILLISECONDS, threadMode = Timeout.ThreadMode.SEPARATE_THREAD)
 class ExtTableIntegrationTests {
+
+    // Test timeouts are usually an indication of wrong alignment, though possibly the test runner is slow.
 
     private static final String TEST_DATA_RESOURCE_ROOT = "/integration-testdata/";
     private static final String CUSTOMERS_1000_PREFIX = "customers-1000";
@@ -202,6 +207,7 @@ class ExtTableIntegrationTests {
             customers-1000-index-numeric_9_0.xml, 1,             NUMERIC,
             customers-1000-index-float.xml,       1,             FLOAT,
             customers-1000-index-date.xml,        11,            DATE,
+            customers-1000-index-varchar.xml,     2,             VARCHAR,
             # DECFLOAT JDBCType only available in Java 26+, so using code
             customers-1000-index-decfloat16.xml,  1,             ,                 2015
             customers-1000-index-decfloat34.xml,  1,             ,                 2015
@@ -636,7 +642,7 @@ class ExtTableIntegrationTests {
 
     private static Column createColumn(String name, String columnType) {
         class Holder {
-            static final Pattern LENGTH_PARAM_PATTERN = Pattern.compile("(char|decfloat)_(\\d+)");
+            static final Pattern LENGTH_PARAM_PATTERN = Pattern.compile("(char|varchar|decfloat)_(\\d+)");
             static final Pattern FIXED_POINT_PATTERN = Pattern.compile("(decimal|numeric)_(\\d+)_(\\d+)");
         }
         Matcher lengthParamMatcher = Holder.LENGTH_PARAM_PATTERN.matcher(columnType);
@@ -645,6 +651,7 @@ class ExtTableIntegrationTests {
             int length = Integer.parseInt(lengthParamMatcher.group(2));
             return switch (type) {
                 case "char" -> col(name, length);
+                case "varchar" -> varchar(name, length);
                 case "decfloat" -> decfloat(name, length);
                 default -> throw new AssertionError("invalid type: " + type);
             };
@@ -697,9 +704,9 @@ class ExtTableIntegrationTests {
     }
 
     private static String generateColumnData(int row, int colIdx, FbDatatype<?> datatype) {
-        if (datatype instanceof FbChar fbChar) {
+        if (datatype instanceof FbCharacterDataType<?> fbCharacterDataType) {
             String stringValue = Integer.toString(row * colIdx, 36);
-            int requiredLength = fbChar.length();
+            int requiredLength = fbCharacterDataType.length();
             int actualLength = stringValue.length();
             if (actualLength > requiredLength) {
                 stringValue = stringValue.substring(actualLength - requiredLength);

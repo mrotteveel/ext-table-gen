@@ -61,6 +61,15 @@
 
     <xs:element name="datatype" type="DatatypeType" abstract="true"/>
     <xs:element name="char" type="CharType" substitutionGroup="datatype"/>
+    <xs:element name="varchar" type="CharType" substitutionGroup="datatype">
+        <xs:annotation>
+            <xs:documentation>
+                Given we reuse CharType and did not add a specialization for varchar, the maximum length is 2 characters
+                too high (assuming single byte character sets). As mentioned on CharType, the effects of multibyte
+                character sets is not taken into account either.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
     <xs:element name="smallint" type="DatatypeType" substitutionGroup="datatype"/>
     <xs:element name="integer" type="DatatypeType" substitutionGroup="datatype"/>
     <xs:element name="bigint" type="DatatypeType" substitutionGroup="datatype"/>
@@ -84,6 +93,12 @@
         <xs:complexContent>
             <xs:extension base="DatatypeType">
                 <xs:attribute name="length" use="required">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The maximum length is only valid for single-byte character sets. It does not take into
+                            account multibyte character sets.
+                        </xs:documentation>
+                    </xs:annotation>
                     <xs:simpleType>
                         <xs:restriction base="xs:int">
                             <xs:minInclusive value="1"/>

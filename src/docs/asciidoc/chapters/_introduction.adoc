@@ -22,6 +22,7 @@ _ext-table-gen_ supports the following types of columns:
 
 * String types:
 ** `char`
+** `varchar`
 * Integral number types:
 ** `smallint`
 ** `integer`

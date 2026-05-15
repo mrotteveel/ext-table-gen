@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.type.FbChar;
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
+import nl.lawinegevaar.exttablegen.type.FbVarchar;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -15,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ColumnSizeValidatorTest {
 
-    @SuppressWarnings("DataFlowIssue")
     @Test
     void validate_happyPath() {
         var validator = new ColumnSizeValidator(new int[] { 3, 4, 5 });
@@ -58,12 +58,28 @@ class ColumnSizeValidatorTest {
     }
 
     @Test
-    void ofExternalTable() {
+    void ofExternalTable_char() {
         var externalTable = new ExternalTable(
                 "TEST",
                 List.of(
                         new Column("COL1", new FbChar(5, FbEncoding.ASCII)),
                         new Column("COL2", new FbChar(11, FbEncoding.ASCII)),
+                        EndColumn.require(EndColumn.Type.CRLF)),
+                OutputResource.nullOutputResource(),
+                ByteOrderType.AUTO);
+
+        var validator = ColumnSizeValidator.of(externalTable);
+
+        assertArrayEquals(new int[] { 5, 11 }, validator.sizes());
+    }
+
+    @Test
+    void ofExternalTable_varchar() {
+        var externalTable = new ExternalTable(
+                "TEST",
+                List.of(
+                        new Column("COL1", new FbVarchar(5, FbEncoding.ASCII)),
+                        new Column("COL2", new FbVarchar(11, FbEncoding.ASCII)),
                         EndColumn.require(EndColumn.Type.CRLF)),
                 OutputResource.nullOutputResource(),
                 ByteOrderType.AUTO);

@@ -357,3 +357,16 @@ char_1,       char_1,       decfloat_34, 3
 decfloat_34,  char_1,       decfloat_34, 33
 char_1,       decfloat_34,  bigint,      33
 char_1,       char_1,       decfloat_34, 33
+# cases for VARCHAR
+varchar_1,    char_1,       varchar_1,   3
+char_1,       varchar_1,    bigint,      3
+char_2,       varchar_1,    bigint,      3
+char_3,       varchar_1,    bigint,      3
+char_1,       char_1,       varchar_1,   3
+varchar_1,    varchar_1,    varchar_1,   3
+varchar_1,    char_1,       varchar_1,   33
+char_1,       varchar_1,    bigint,      33
+char_2,       varchar_1,    bigint,      33
+char_3,       varchar_1,    bigint,      33
+char_1,       char_1,       varchar_1,   33
+varchar_1,    varchar_1,    varchar_1,   33

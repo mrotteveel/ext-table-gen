@@ -9,6 +9,7 @@ import nl.lawinegevaar.exttablegen.convert.ParseInt128;
 import nl.lawinegevaar.exttablegen.convert.ParseInteger;
 import nl.lawinegevaar.exttablegen.convert.ParseSmallint;
 import nl.lawinegevaar.exttablegen.type.DecfloatOnOverflow;
+import nl.lawinegevaar.exttablegen.type.FbEncoding;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -128,35 +129,40 @@ class ConfigMapperTest {
     }
 
     static Stream<Column> testRoundTripWithColumn() {
+        String name = "COLUMN_IN";
         return Stream.of(
-                smallint("COLUMN_IN", null),
-                smallint("COLUMN_IN", ParseSmallint.ofRadix(16)),
-                integer("COLUMN_IN", null),
-                integer("COLUMN_IN", ParseInteger.ofRadix(16)),
-                bigint("COLUMN_IN", null),
-                bigint("COLUMN_IN", ParseBigint.ofRadix(16)),
-                int128("COLUMN_IN", null),
-                int128("COLUMN_IN", ParseInt128.ofRadix(16)),
-                date("COLUMN_IN", null),
-                date("COLUMN_IN", Converter.parseDatetime("dd-MM-yyyy", "nl-NL")),
-                time("COLUMN_IN", null),
-                time("COLUMN_IN", Converter.parseDatetime("h:mm:ss a", "en-US")),
-                timestamp("COLUMN_IN", null),
-                timestamp("COLUMN_IN", Converter.parseDatetime("MM-dd-yyyy h:mm:ss a", "en-US")),
-                numeric("COLUMN_IN", 4, 1),
-                numeric("COLUMN_IN", 9, 1, RoundingMode.CEILING, null),
-                numeric("COLUMN_IN", 18, 1, null, Converter.parseBigDecimal("nl-NL")),
-                decimal("COLUMN_IN", 9, 1),
-                decimal("COLUMN_IN", 18, 1, RoundingMode.CEILING, null),
-                decimal("COLUMN_IN", 38, 1, null, Converter.parseBigDecimal("nl-NL")),
-                doublePrecision("COLUMN_IN", null),
-                doublePrecision("COLUMN_IN", Converter.parseFloatingPointNumber("doublePrecision", "nl-NL")),
-                floatCol("COLUMN_IN", null),
-                floatCol("COLUMN_IN", Converter.parseFloatingPointNumber("float", "nl-NL")),
-                decfloat("COLUMN_IN", 16, DecfloatOnOverflow.THROW_EXCEPTION, null),
-                decfloat("COLUMN_IN", 16, DecfloatOnOverflow.ROUND_TO_INFINITY, Converter.parseBigDecimal("en-US")),
-                decfloat("COLUMN_IN", 34, DecfloatOnOverflow.THROW_EXCEPTION, null),
-                decfloat("COLUMN_IN", 34, DecfloatOnOverflow.ROUND_TO_INFINITY, Converter.parseBigDecimal("en-US")));
+                col(name, 10),
+                col(name, 15, FbEncoding.UTF8),
+                varchar(name, 25),
+                varchar(name, 31, FbEncoding.ASCII),
+                smallint(name, null),
+                smallint(name, ParseSmallint.ofRadix(16)),
+                integer(name, null),
+                integer(name, ParseInteger.ofRadix(16)),
+                bigint(name, null),
+                bigint(name, ParseBigint.ofRadix(16)),
+                int128(name, null),
+                int128(name, ParseInt128.ofRadix(16)),
+                date(name, null),
+                date(name, Converter.parseDatetime("dd-MM-yyyy", "nl-NL")),
+                time(name, null),
+                time(name, Converter.parseDatetime("h:mm:ss a", "en-US")),
+                timestamp(name, null),
+                timestamp(name, Converter.parseDatetime("MM-dd-yyyy h:mm:ss a", "en-US")),
+                numeric(name, 4, 1),
+                numeric(name, 9, 1, RoundingMode.CEILING, null),
+                numeric(name, 18, 1, null, Converter.parseBigDecimal("nl-NL")),
+                decimal(name, 9, 1),
+                decimal(name, 18, 1, RoundingMode.CEILING, null),
+                decimal(name, 38, 1, null, Converter.parseBigDecimal("nl-NL")),
+                doublePrecision(name, null),
+                doublePrecision(name, Converter.parseFloatingPointNumber("doublePrecision", "nl-NL")),
+                floatCol(name, null),
+                floatCol(name, Converter.parseFloatingPointNumber("float", "nl-NL")),
+                decfloat(name, 16, DecfloatOnOverflow.THROW_EXCEPTION, null),
+                decfloat(name, 16, DecfloatOnOverflow.ROUND_TO_INFINITY, Converter.parseBigDecimal("en-US")),
+                decfloat(name, 34, DecfloatOnOverflow.THROW_EXCEPTION, null),
+                decfloat(name, 34, DecfloatOnOverflow.ROUND_TO_INFINITY, Converter.parseBigDecimal("en-US")));
     }
 
     @Test

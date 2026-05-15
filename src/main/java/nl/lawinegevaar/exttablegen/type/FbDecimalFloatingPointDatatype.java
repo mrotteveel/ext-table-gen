@@ -10,7 +10,7 @@ import org.firebirdsql.decimal.Decimal;
  * The current API is based on use of {@code DECFLOAT} and {@link Decimal}.
  * </p>
  *
- * @param <T>
+ * @since 3
  */
 public sealed interface FbDecimalFloatingPointDatatype<T extends Decimal<T>> extends FbFloatingPointDatatype<T>
         permits AbstractFbDecimalFloatingPointDatatype {

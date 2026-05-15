@@ -174,11 +174,14 @@ final class ConfigMapper {
 
     private JAXBElement<? extends DatatypeType> createXmlDataTypeElement(FbDatatype<?> datatype) {
         return switch (datatype) {
-            case FbChar fbChar -> {
+            case AbstractFbStringDataType stringDataType -> {
                 CharType charType = factory.createCharType();
-                charType.setLength(fbChar.length());
-                charType.setEncoding(fbChar.encoding().firebirdName());
-                yield factory.createChar(charType);
+                charType.setLength(stringDataType.length());
+                charType.setEncoding(stringDataType.encoding().firebirdName());
+                yield switch (stringDataType) {
+                    case FbChar ignored -> factory.createChar(charType);
+                    case FbVarchar ignored -> factory.createVarchar(charType);
+                };
             }
             case FbInteger ignored -> factory.createInteger(factory.createDatatypeType());
             case FbBigint ignored -> factory.createBigint(factory.createDatatypeType());
@@ -370,6 +373,10 @@ final class ConfigMapper {
             case "char" -> {
                 CharType charType = (CharType) datatype.getValue();
                 yield new FbChar(charType.getLength(), FbEncoding.forName(charType.getEncoding()));
+            }
+            case "varchar" -> {
+                CharType charType = (CharType) datatype.getValue();
+                yield new FbVarchar(charType.getLength(), FbEncoding.forName(charType.getEncoding()));
             }
             case "integer" -> new FbInteger();
             case "bigint" -> new FbBigint();

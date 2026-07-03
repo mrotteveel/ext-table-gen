@@ -769,6 +769,7 @@ None
 .Available converter steps
 * <<ref-xml-parsebigdecimal>>
 * <<ref-xml-parsedatetime>>
+* <<ref-xml-parsefloatingpointnumber>>
 * <<ref-xml-parseintegralnumber>>
 
 [NOTE]

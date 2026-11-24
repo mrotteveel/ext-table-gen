@@ -20,8 +20,11 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache-jdk: true
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
       - name: Assemble with Gradle
         run: ./gradlew assemble
       - name: Pages artifact

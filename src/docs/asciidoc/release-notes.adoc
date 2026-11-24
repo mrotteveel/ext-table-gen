@@ -79,7 +79,8 @@ This version introduces the following new features:
 
 This application is licensed under the https://www.apache.org/licenses/LICENSE-2.0[Apache 2.0 license^].
 
-Version 3.0 requires Java 21.
+Version 4.0 requires Java 25. +
+Version 3.0 requires Java 21. +
 Versions 1.0 and 2.0 require Java 17.
 
 Consult the xref:ext-table-gen-user-manual.adoc[User Manual] for installation, usage examples and reference documentation.
@@ -88,6 +89,12 @@ For more information, or to report issues or submit pull requests, go to https:/
 
 [#version-history]
 === Version history
+
+==== _ext-table-gen_ 4.0
+
+The following changes were made in _ext-table-gen_ 3.0:
+
+* Java 25 is now the minimum supported version (https://github.com/mrotteveel/ext-table-gen/issues/29[#29^])
 
 ==== _ext-table-gen_ 3.0
 

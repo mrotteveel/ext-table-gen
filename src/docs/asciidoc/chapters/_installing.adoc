@@ -7,11 +7,9 @@
 [#install-req]
 == Requirements
 
-The "`Firebird External Table Generator`" or _ext-table-gen_ 3.0 requires Java 21.
+The "`Firebird External Table Generator`" or _ext-table-gen_ 4.0 requires Java 25.
 We will only fix issues reported and reproducible against Java versions which are in support according to the OpenJDK project.
-At the time of writing this -- May 2026 -- that means Java 21, Java 25, and Java 26.
-
-The previous versions of _ext-table-gen_ -- 1.0 and 2.0 -- require Java 17.
+At the time of writing this -- November 2026 -- that means Java 25, and Java 27.
 
 [#install-dist]
 == Distribution package
@@ -51,7 +49,7 @@ It may be necessary to make `bin/ext-table-gen` explicitly executable with `chmo
 [#install-paths]
 === Setting environment variables
 
-To be able to call _ext-table-gen_, Java 21 or higher must be on the `PATH` (the `bin` directory of the Java installation), or alternatively, you need to set `JAVA_HOME` to point to the Java 21 installation directory (not its `bin` directory, but the directory which contains the `bin` directory).
+To be able to call _ext-table-gen_, Java 25 or higher must be on the `PATH` (the `bin` directory of the Java installation), or alternatively, you need to set `JAVA_HOME` to point to the Java 25 installation directory (not its `bin` directory, but the directory which contains the `bin` directory).
 
 If you don't have Java installed, install it using your package manager, https://sdkman.io/[sdkman^] (Linux/macOS), or download it, for example from https://adoptium.net/[Eclipse Adoptium^].
 

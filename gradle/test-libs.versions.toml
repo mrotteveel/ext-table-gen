@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: Copyright 2026 Mark Rotteveel
 # SPDX-License-Identifier: Apache-2.0
 [versions]
-junit = "6.0.3"
+junit = "6.1.3"
 hamcrest = "3.0"
 hamcrest-optional = "1.3.2"
-jaybird = "6.0.5"
+jaybird = "6.0.7"
 testcontainers = "2.0.5"
-firebird-testcontainers-java = "2.0.0"
+firebird-testcontainers-java = "2.0.1"
 
 [libraries]
 junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }

@@ -1,12 +1,14 @@
-= jdp-2024-03: Java 21 minimum version
+= 2024-03: Java 21 minimum version
 
-// SPDX-FileCopyrightText: 2024 Mark Rotteveel
+// SPDX-FileCopyrightText: 2024-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 
 == Status
 
 * Published: 2024-10-01
+* Updated: 2026-11-24
 * Implemented in: 3.0
+* Replaced by: 2026-03
 
 == Type
 

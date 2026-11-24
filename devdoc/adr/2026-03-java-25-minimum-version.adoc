@@ -1,0 +1,30 @@
+= 2026-03: Java 25 minimum version
+
+// SPDX-FileCopyrightText: 2024-2026 Mark Rotteveel
+// SPDX-License-Identifier: Apache-2.0
+
+== Status
+
+* Published: 2026-11-24
+* Implemented in: 4.0
+
+== Type
+
+* Feature-Specification
+
+== Context
+
+At time of writing, 2026-11-24, Java 25 is the latest LTS of Java.
+
+As _ext-table_gen_ is a commandline tool, and not a library, it doesn't really need to support a wide-range of versions.
+
+== Decision
+
+Starting with _ext-table-gen_ 4.0, Java 25 is the minimum supported version.
+
+If _ext-table-gen_ 4.0 is delayed until after the next Java LTS release, we may update change this ADR to require that higher LTS.
+
+== Consequences
+
+Starting with _ext-table-gen_ 4.0, support for version before Java 25 will no longer be available.
+Users who cannot upgrade to Java 25 will need to continue to use _ext-table-gen_ 3.0 (which supports Java 21 or higher) or  _ext-table-gen_ 2.0 (which supports Java 17 or higher).

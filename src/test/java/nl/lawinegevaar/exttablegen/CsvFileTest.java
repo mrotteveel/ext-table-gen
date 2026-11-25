@@ -1,10 +1,11 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import com.opencsv.CSVReaderBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 import com.opencsv.validators.RowFunctionValidator;
+import org.jspecify.annotations.NullMarked;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -229,6 +230,7 @@ class CsvFileTest {
      * Should not be reused, create a new instance when needed.
      * </p>
      */
+    @NullMarked
     private static final class TestConsumer implements RowProcessor {
 
         static final Row NOT_SET = new Row(0, List.of());

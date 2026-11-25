@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -11,7 +11,7 @@ interface RowProcessor {
      * Receives the header of a data file.
      * <p>
      * If a file has no header, this method is called with a {@code Header} which has {@code line == -1} and
-     * {@link Row#data()} ()} empty (i.e. {@link Row#noHeader()}). For simplicity, implementations are allowed to assume
+     * {@link Row#data()} empty (i.e. {@link Row#noHeader()}). For simplicity, implementations are allowed to assume
      * that an empty header ({@link Row#isEmpty()}) signals no header, so there is no need to check {@code line}.
      * </p>
      *

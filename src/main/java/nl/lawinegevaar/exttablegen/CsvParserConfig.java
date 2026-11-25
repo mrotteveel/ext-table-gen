@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -7,13 +7,12 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.ICSVParser;
 import com.opencsv.RFC4180Parser;
 import com.opencsv.RFC4180ParserBuilder;
-import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
 /**
- * Configration for the CSV parser.
+ * Configuration for the CSV parser.
  *
  * @param type
  *         CSV type, if {@code null}, {@link CsvType#RFC_4180} is used
@@ -45,7 +44,7 @@ record CsvParserConfig(@Nullable CsvType type, @Nullable CharValue quoteChar, @N
 
     @SuppressWarnings("DataFlowIssue")
     @Override
-    public @NonNull CsvType type() {
+    public CsvType type() {
         return type;
     }
 

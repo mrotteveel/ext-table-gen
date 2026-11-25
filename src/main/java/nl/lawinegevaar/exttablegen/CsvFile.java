@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -259,7 +259,7 @@ final class CsvFile {
     record Config(Charset charset, int skipLines, boolean headerRow, CsvParserConfig parserConfig,
             Consumer<CSVReaderBuilder> builderCustomizer) {
 
-        private static final Consumer<CSVReaderBuilder> VOID_CUSTOMIZER = i -> {
+        private static final Consumer<CSVReaderBuilder> VOID_CUSTOMIZER = _ -> {
         };
 
         Config {

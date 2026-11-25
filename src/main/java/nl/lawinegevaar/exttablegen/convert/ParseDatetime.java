@@ -191,7 +191,7 @@ public final class ParseDatetime implements Converter<TemporalAccessor> {
                 if (field.getType() != DateTimeFormatter.class) continue;
                 try {
                     formatters.put(field.getName(), (DateTimeFormatter) field.get(null));
-                } catch (IllegalAccessException ignored) {
+                } catch (IllegalAccessException _) {
                 }
             }
             STANDARD_FORMATTERS = Map.copyOf(formatters);

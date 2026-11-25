@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -43,7 +43,7 @@ final class ExtTableGenMain implements Runnable {
         if (System.getProperty("java.util.logging.config.file") == null) {
             try (var in = ExtTableGenMain.class.getResourceAsStream("default-logging.properties")) {
                 LogManager.getLogManager().readConfiguration(in);
-            } catch (IOException ignored) {
+            } catch (IOException _) {
                 // fallback to Java default
             }
         }

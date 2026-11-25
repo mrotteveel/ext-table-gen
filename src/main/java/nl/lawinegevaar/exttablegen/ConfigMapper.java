@@ -179,29 +179,29 @@ final class ConfigMapper {
                 charType.setLength(stringDataType.length());
                 charType.setEncoding(stringDataType.encoding().firebirdName());
                 yield switch (stringDataType) {
-                    case FbChar ignored -> factory.createChar(charType);
-                    case FbVarchar ignored -> factory.createVarchar(charType);
+                    case FbChar _ -> factory.createChar(charType);
+                    case FbVarchar _ -> factory.createVarchar(charType);
                 };
             }
-            case FbInteger ignored -> factory.createInteger(factory.createDatatypeType());
-            case FbBigint ignored -> factory.createBigint(factory.createDatatypeType());
-            case FbSmallint ignored -> factory.createSmallint(factory.createDatatypeType());
-            case FbInt128 ignored -> factory.createInt128(factory.createDatatypeType());
-            case FbDate ignored -> factory.createDate(factory.createDatatypeType());
-            case FbTime ignored -> factory.createTime(factory.createDatatypeType());
-            case FbTimestamp ignored -> factory.createTimestamp(factory.createDatatypeType());
+            case FbInteger _ -> factory.createInteger(factory.createDatatypeType());
+            case FbBigint _ -> factory.createBigint(factory.createDatatypeType());
+            case FbSmallint _ -> factory.createSmallint(factory.createDatatypeType());
+            case FbInt128 _ -> factory.createInt128(factory.createDatatypeType());
+            case FbDate _ -> factory.createDate(factory.createDatatypeType());
+            case FbTime _ -> factory.createTime(factory.createDatatypeType());
+            case FbTimestamp _ -> factory.createTimestamp(factory.createDatatypeType());
             case FbFixedPointDatatype fbFixedPointDatatype -> {
                 FixedPointType fixedPointType = factory.createFixedPointType();
                 fixedPointType.setPrecision(fbFixedPointDatatype.precision());
                 fixedPointType.setScale(fbFixedPointDatatype.scale());
                 fixedPointType.setRoundingMode(fbFixedPointDatatype.roundingMode().name());
                 yield switch (fbFixedPointDatatype) {
-                    case FbNumeric ignored -> factory.createNumeric(fixedPointType);
-                    case FbDecimal ignored -> factory.createDecimal(fixedPointType);
+                    case FbNumeric _ -> factory.createNumeric(fixedPointType);
+                    case FbDecimal _ -> factory.createDecimal(fixedPointType);
                 };
             }
-            case FbFloat ignored -> factory.createFloat(factory.createDatatypeType());
-            case FbDoublePrecision ignored -> factory.createDoublePrecision(factory.createDatatypeType());
+            case FbFloat _ -> factory.createFloat(factory.createDatatypeType());
+            case FbDoublePrecision _ -> factory.createDoublePrecision(factory.createDatatypeType());
             case FbDecimalFloatingPointDatatype<?> fbDecimalFloatingPointDatatype -> {
                 DecfloatType decfloatType = factory.createDecfloatType();
                 decfloatType.setPrecision(fbDecimalFloatingPointDatatype.precision());

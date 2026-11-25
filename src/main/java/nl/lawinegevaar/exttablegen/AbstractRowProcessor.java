@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -31,7 +31,7 @@ abstract class AbstractRowProcessor implements RowProcessor {
      * {@inheritDoc}
      * <p>
      * This implementation stores the last exception for retrieval with {@link #getLastException()}, and always
-     * returns {@code false} (continue with processing).
+     * returns {@code Continue}.
      * </p>
      * <p>
      * Subclasses can override {@link #onExceptionHandler(Exception)} for further actions on the exception and/or to

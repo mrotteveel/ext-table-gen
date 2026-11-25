@@ -68,7 +68,7 @@ public final class FbDecimal extends AbstractFbFixedPointDatatype {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) return true;
         return obj instanceof FbDecimal that
                && this.precision() == that.precision()

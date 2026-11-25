@@ -93,7 +93,7 @@ public final class FbDoublePrecision extends AbstractFbDatatype<Double, DoubleCo
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) return true;
         return obj instanceof FbDoublePrecision that
                && this.converter().equals(that.converter());

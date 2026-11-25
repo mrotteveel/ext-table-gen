@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024-2026 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.type;
 
@@ -68,7 +68,7 @@ public final class FbNumeric extends AbstractFbFixedPointDatatype {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) return true;
         return obj instanceof FbNumeric that
                && this.precision() == that.precision()

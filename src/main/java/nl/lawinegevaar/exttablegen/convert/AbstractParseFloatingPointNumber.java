@@ -1,6 +1,8 @@
-// SPDX-FileCopyrightText: Copyright 2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2024-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
+
+import org.jspecify.annotations.Nullable;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -79,7 +81,7 @@ public abstract sealed class AbstractParseFloatingPointNumber<U extends Number> 
      * </p>
      */
     @Override
-    public final boolean equals(Object obj) {
+    public final boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
         return obj instanceof Converter<?> converter
                && converter.unwrap() instanceof AbstractParseFloatingPointNumber<?> that

@@ -1,8 +1,9 @@
-// SPDX-FileCopyrightText: Copyright 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen.convert;
 
 import nl.lawinegevaar.exttablegen.util.RangeChecks;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Abstract class for integral number converters which parse strings using a radix.
@@ -55,7 +56,7 @@ public abstract sealed class AbstractParseIntegralNumber<U extends Number> imple
      * </p>
      */
     @Override
-    public final boolean equals(Object obj) {
+    public final boolean equals(@Nullable Object obj) {
         if (this == obj) return true;
         return obj instanceof Converter<?> converter
                && converter.unwrap() instanceof AbstractParseIntegralNumber<?> that

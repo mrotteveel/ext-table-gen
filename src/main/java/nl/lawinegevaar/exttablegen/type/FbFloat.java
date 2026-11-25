@@ -93,7 +93,7 @@ public final class FbFloat extends AbstractFbDatatype<Float, FloatConverter>
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) return true;
         return obj instanceof FbFloat that
                && this.converter().equals(that.converter());

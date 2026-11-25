@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: Copyright 2023-2024 Mark Rotteveel
+// SPDX-FileCopyrightText: Copyright 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
@@ -151,7 +151,7 @@ final class CharMnemonic implements CharValue {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) return true;
         return obj instanceof CharMnemonic that
                && this.mnemonic.equals(that.mnemonic)
@@ -209,7 +209,7 @@ final class UnicodeEscape implements CharValue {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (obj == this) return true;
         return obj instanceof UnicodeEscape that
                && Objects.equals(this.unicodeEscape, that.unicodeEscape)

@@ -1,9 +1,10 @@
-// SPDX-FileCopyrightText: 2023 Mark Rotteveel
+// SPDX-FileCopyrightText: 2023-2026 Mark Rotteveel
 // SPDX-License-Identifier: Apache-2.0
 package nl.lawinegevaar.exttablegen;
 
 import nl.lawinegevaar.exttablegen.type.FbChar;
 import nl.lawinegevaar.exttablegen.type.FbEncoding;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.HexFormat;
@@ -78,7 +79,7 @@ final class EndColumn extends Column {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         // Works correctly because of factory method always returning the same instances
         return this == obj;
     }
